@@ -136,7 +136,7 @@ wss.on('connection', ws => {
           broadcast(room);
         }
         break;
-      case 'timer': if (isHost && !room.state) { room.timer = !!m.on; broadcast(room); } break;
+      case 'timer': break; // el límite de 2 minutos ahora es fijo
       case 'start':
         if (isHost && !room.state && room.seats.length >= 2) {
           room.state = G.newGame({ players: room.seats.map(x => ({ name: x.name, bot: x.bot, token: x.look })), seed: crypto.randomInt(1, 2 ** 31), timer: 120 });

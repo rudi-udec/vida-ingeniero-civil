@@ -442,8 +442,10 @@ function continueTurn(s, p) {
     }
     if (p.stuck) {
       const st = p.stuck;
-      if (st.kind === 'defensa' && act(s, 'congreso') && s.ev.act.congreso.prof === p.guia) {
-        fx(s, { kind: 'card', pid: p.id, title: 'Tu profe guía está en un congreso', text: `${p.guia} vuelve en unas rondas. No puedes defender todavía.`, eff: '' });
+      const fuera = st.kind === 'defensa' && (act(s, 'congreso') && s.ev.act.congreso.prof === p.guia ? 'en un congreso' : act(s, 'sabatico') && s.ev.act.sabatico.prof === p.guia ? 'de año sabático' : null);
+      if (fuera) {
+        apply(s, p, { k: 1 }, 'avanzas la ' + (p.titulo === 'magister' ? 'tesis' : 'memoria') + ' sola');
+        fx(s, { kind: 'card', pid: p.id, title: `Tu profe guía está ${fuera}`, text: `${p.guia} vuelve en unas rondas. Mientras, no puedes defender: sigues escribiendo solo.` });
         return endTurn(s);
       }
       if (st.kind === 'defensa' && st.wait > 0) {
@@ -476,7 +478,7 @@ function ask(s, kind, ctx) {
     const becados = s.players.filter(o => o.fin === 'beca').length;
     const opts = [{ id: 'trabajando', label: 'Trabajando', sub: `${fmt(CFG.pagoEstudio.trabajando)} por pago y ${Math.round(CFG.sueldoRonda * 100)}% de eso en cada ronda, pero los filtros te cuestan +1.` }];
     if (!ctx || !ctx.noBeca) opts.push(becados < CFG.becaCupos
-      ? { id: 'beca', label: 'Postular a beca', sub: `Gira: necesitas ${CFG.becaMin}+. ${fmt(CFG.pagoEstudio.beca)} por pago. Se pierde con ${CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${CFG.becaPierde.total} en total. Cupos: ${CFG.becaCupos - becados} de ${CFG.becaCupos}.` }
+      ? { id: 'beca', label: 'Postular a beca', sub: `Gira: necesitas ${CFG.becaMin}+. ${fmt(CFG.pagoEstudio.beca)} por pago y ${fmt(CFG.pagoEstudio.beca * CFG.sueldoRonda)} por ronda. Se pierde con ${CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${CFG.becaPierde.total} en total. Cupos: ${CFG.becaCupos - becados} de ${CFG.becaCupos}.` }
       : { id: 'sinCupo', label: 'Beca: sin cupos', sub: `Ya hay ${CFG.becaCupos} becados en la partida.`, disabled: true });
     opts.push({ id: 'familia', label: 'Familia', sub: `Partes con ${fmt(CFG.familiaExtra)} extra y recibes ${fmt(CFG.pagoEstudio.familia)} por pago.` });
     Object.assign(P, { title: 'Financiamiento', text: ctx && ctx.noBeca ? 'No alcanzaste la beca. Elige otra forma de pagar la carrera.' : '¿Cómo vas a pagar la carrera? Cobras al caer en "Fin de semestre".', options: opts.filter(o => !o.disabled), shown: opts });
@@ -577,7 +579,7 @@ function doSpin(s, p) {
     return move(s, p, steps);
   }
   if (P.reason === 'beca') {
-    if (n >= CFG.becaMin) { p.fin = 'beca'; log(s, `${p.name} ganó la beca con ${n}.`, p.id); fx(s, { kind: 'card', pid: p.id, title: '¡Ganaste la beca!', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}.`, eff: `${fmt(CFG.pagoEstudio.beca)} en cada fin de semestre`, good: true }); s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return; }
+    if (n >= CFG.becaMin) { p.fin = 'beca'; log(s, `${p.name} ganó la beca con ${n}.`, p.id); fx(s, { kind: 'card', pid: p.id, title: '¡Ganaste la beca!', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}.`, eff: `${fmt(CFG.pagoEstudio.beca)} en cada fin de semestre y ${fmt(CFG.pagoEstudio.beca * CFG.sueldoRonda)} cada ronda mientras la mantengas`, good: true }); s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return; }
     log(s, `${p.name} no alcanzó la beca (sacó ${n}).`, p.id); fx(s, { kind: 'card', pid: p.id, title: 'Sin beca', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}. Elige otra forma de financiar la carrera.` });
     return ask(s, 'fin', { noBeca: true });
   }
@@ -916,6 +918,7 @@ const EVENTOS = {
   pandemia: { name: 'Pandemia: clases online', tipo: 'rapido' },
   estallido: { name: 'Estallido social', tipo: 'lento' },
   congreso: { name: 'Profe en congreso', tipo: 'rapido' },
+  sabatico: { name: 'Profe guía de sabático', tipo: 'lento' },
   terremoto: { name: 'Terremoto', tipo: 'lento' },
   aniversario: { name: 'Aniversario de la UdeC', tipo: 'rapido' },
   toma: { name: 'Toma de la Facultad', tipo: 'lento' },
@@ -937,6 +940,22 @@ const DIST = (() => {
 const progreso = p => p.finished ? 1 : 1 - DIST[p.pos] / DIST[BOARD.start];
 const estudiantes = s => s.players.filter(p => !p.finished && !p.pega);
 
+// ¿Qué profes de exigencia alta les importan hoy a los jugadores? (filtros cercanos o profe guía)
+function profesRelevantes(s) {
+  const set = new Set();
+  for (const p of estudiantes(s)) {
+    if (p.guia && PROFES_ALTA_TODOS.includes(p.guia)) set.add(p.guia);
+    let front = [p.pos], seen = new Set();
+    for (let d = 0; d < 10 && front.length; d++) {
+      const nx = [];
+      for (const id of front) { if (seen.has(id)) continue; seen.add(id); const n = NODE(id); if (n.type === 'filtro' && !p.passed[id] && n.profe) for (const pr of PROFES_ALTA_TODOS) if (n.profe.includes(pr)) set.add(pr); nx.push(...n.next); }
+      front = nx;
+    }
+  }
+  return [...set];
+}
+const tesistas = s => s.players.filter(p => !p.finished && !p.pega && p.guia && ['memoria', 'magister'].includes(NODE(p.pos).lane));
+const enFiltro = s => s.players.some(p => p.stuck && p.stuck.kind === 'filtro');
 function roundStart(s) {
   // ingresos por trabajar: 10% del pago asignado
   for (const p of s.players) {
@@ -944,6 +963,7 @@ function roundStart(s) {
     let base = 0, why = '';
     if (p.pega) { base = p.pega === 'emprende' ? 1600 * CFG.sueldoMult * CFG.nivelSueldo[p.nivel] : sueldo(p, p.pega, p.nivel); why = 'sueldo de la ronda'; }
     else if (p.fin === 'trabajando') { base = CFG.pagoEstudio.trabajando; why = 'pega de estudiante'; }
+    else if (p.fin === 'beca' && !p.becaLost) { base = CFG.pagoEstudio.beca; why = 'beca (mensualidad)'; }
     if (base) apply(s, p, { m: Math.round(base * CFG.sueldoRonda * s.ev.gob.mult / 10) * 10 }, why);
     if (act(s, 'estallido')) apply(s, p, { v: 1 }, 'asambleas y cabildos', true);
     if (act(s, 'pandemia') && p.pega) apply(s, p, { v: 1 }, 'teletrabajo', true);
@@ -972,10 +992,17 @@ function roundStart(s) {
       if (usados === 0 && mitad) { if (estudiantes(s).length) for (let i = 0; i < 6; i++) pool.push(k); continue; } // el primer cambio es más probable a mitad de carrera
     }
     if (lento && E.tipo === 'lento') continue;
-    if (['cambioJefe', 'paro', 'pandemia', 'estallido', 'congreso', 'becaEx'].includes(k) && !estudiantes(s).length) continue;
+    if (['cambioJefe', 'paro', 'pandemia', 'estallido', 'congreso', 'becaEx', 'tarea', 'toma'].includes(k) && !estudiantes(s).length) continue;
+    // solo eventos que afecten a alguien según dónde está en el tablero
+    if (k === 'congreso' && !profesRelevantes(s).length) continue;
+    if (k === 'sabatico' && !tesistas(s).length) continue;
+    if (k === 'becaEx' && estudiantes(s).length < 2) continue;
+    if (k === 'terremoto' && !s.players.some(p => !p.finished && (p.mencion === 'est' || p.mencion === 'geo' || !p.pega))) continue;
+    if (k === 'temporal' && s.players.filter(p => !p.finished).length < 2) continue;
+    if ((k === 'paro' || k === 'pandemia') && !enFiltro(s) && !profesRelevantes(s).length && estudiantes(s).length < 2) continue;
     if (k === 'inflacion' && !s.players.some(p => !p.finished && p.pega)) continue;
     if (k === 'toma' && !s.players.some(p => !p.finished && !p.pega && NODE(p.pos).zone === 'facultad')) continue;
-    const w = rapido && E.tipo === 'lento' ? 2 : 1;
+    const w = (rapido && E.tipo === 'lento' ? 2 : 1) * (k === 'sabatico' ? 5 : 1); // el sabático solo puede pasar en una ventana corta
     for (let i = 0; i < w; i++) pool.push(k);
   }
   if (!pool.length) return;
@@ -997,11 +1024,11 @@ function startEvent(s, k) {
         : `${s.ev.jefe} reemplaza a ${antes}: los filtros suben 1 de dificultad y los profes de exigencia baja pasan a media por el resto de la partida. Además cambia el gobierno: ${s.ev.gob.name}, los pagos ${up ? 'suben' : 'bajan'} ${CFG.gobierno * 100}%.`;
       break;
     }
-    case 'tarea': s.ev.tarea = { r0: r, in: s.players.filter(p => !p.finished).map(p => p.id), best: null }; text = 'Todos quedan atrapados modelando. Para salir hay que sacar más de 8 esta ronda, más de 6 la siguiente y más de 4 la última. Quien sale avanza lo que sacó. El número más alto gana +3 Conocimiento.'; break;
+    case 'tarea': s.ev.tarea = { r0: r, in: estudiantes(s).map(p => p.id), best: null }; text = 'Todos los que estudian quedan atrapados modelando. Para salir hay que sacar más de 8 esta ronda, más de 6 la siguiente y más de 4 la última. Quien sale avanza lo que sacó. El número más alto gana +3 Conocimiento.'; break;
     case 'gta': case 'mundial': s.ev.buy = { kind: k, left: s.players.filter(p => !p.finished).map(p => p.id) }; text = k === 'gta' ? 'En su próximo turno, cada jugador decide si compra el juego por $300.000: +2 Vida Social y −1 Conocimiento.' : 'En su próximo turno, cada jugador decide si ve el partido: +2 Vida Social y −1 Conocimiento.'; break;
     case 'pandemia': s.ev.act.pandemia = { end: r + 2 }; text = 'Por 2 rondas: pruebas en casa (filtros −1), no se gana Vida Social en las casillas y los que trabajan ganan +1 Vida Social por ronda con el teletrabajo.'; break;
     case 'estallido': d = 1 + pickI(s, 2); s.ev.act.estallido = { end: r + d }; text = `Por ${d} ronda${d > 1 ? 's' : ''}: se suspende el semestre y los que estudian avanzan la mitad de lo que sacan. Todos ganan +1 Vida Social por ronda.`; break;
-    case 'congreso': { const prof = PROFES_ALTA_TODOS[pickI(s, PROFES_ALTA_TODOS.length)]; s.ev.act.congreso = { end: r + 2, prof }; text = `${prof} se va 2 rondas a un congreso: sus filtros bajan 2 de dificultad, pero sus tesistas no pueden defender hasta que vuelva.`; break; }
+    case 'congreso': { const rel = profesRelevantes(s); const prof = rel[pickI(s, rel.length)]; s.ev.act.congreso = { end: r + 2, prof }; text = `${prof} se va 2 rondas a un congreso: sus filtros bajan 2 de dificultad, pero sus tesistas no pueden defender hasta que vuelva.`; break; }
     case 'terremoto': {
       s.ev.act.terremoto = { end: r + 1 };
       for (const p of s.players) if (!p.finished) { if (['est', 'geo'].includes(p.mencion)) apply(s, p, { m: 500, k: 2 }, 'peritajes'); else apply(s, p, { m: -100 }, 'arreglos'); if (!p.pega) apply(s, p, { skip: 1 }, 'universidad cerrada'); }
@@ -1010,6 +1037,13 @@ function startEvent(s, k) {
     case 'aniversario': s.ev.act.aniversario = { end: r + 1 }; for (const p of s.players) if (!p.finished) apply(s, p, { v: 1 }, 'aniversario', true); text = 'Todos ganan +1 Vida Social y, durante esta ronda, la Vida Social de las casillas se duplica.'; break;
     case 'toma': for (const p of s.players) if (!p.finished && !p.pega && NODE(p.pos).zone === 'facultad') apply(s, p, { skip: 1, v: 1 }, 'toma'); text = 'Quienes están en la Facultad pierden su próximo turno, pero ganan +1 Vida Social.'; break;
     case 'feria': { const res = []; for (const p of s.players) if (!p.finished) { const n = spinN(s); if (n >= 6) apply(s, p, { c: 1 }, `feria laboral (${n})`); res.push(`${p.name}: ${n}${n >= 6 ? ' ✓' : ''}`); } text = 'Todos giran: con 6 o más consiguen un contacto. ' + res.join(' · '); break; }
+    case 'sabatico': {
+      const t = tesistas(s); const v = t[pickI(s, t.length)]; const prof = v.guia;
+      const afect = s.players.filter(p => p.guia === prof && tesistas(s).includes(p));
+      s.ev.act.sabatico = { end: r + 2, prof };
+      text = `Justo ahora ${prof} se fue de año sabático. ${afect.map(p => p.name).join(' y ')} ${afect.length > 1 ? 'tienen' : 'tiene'} que esperar 2 rondas para poder defender (mientras, siguen escribiendo y ganan +1 Conocimiento por turno de espera).`;
+      break;
+    }
     case 'temporal': s.ev.act.temporal = { end: r + 1 }; for (const p of s.players) if (!p.finished && p.mencion === 'hid') apply(s, p, { k: 1 }, 'medición de caudales'); text = 'Esta ronda todos avanzan 1 casilla menos. Los de Hidráulica ganan +1 Conocimiento midiendo caudales.'; break;
     case 'inflacion': {
       const t = s.players.filter(p => !p.finished && p.pega);

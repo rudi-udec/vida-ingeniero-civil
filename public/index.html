@@ -32,6 +32,20 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; letter-spacing: .01e
 .screen { min-height: 100%; display: grid; place-items: start center; padding: 24px 16px 40px; background: radial-gradient(circle at 20% 10%, rgba(255,194,60,.22), transparent 40%), var(--noche); }
 .lobby-card { width: min(560px, 100%); background: var(--papel); border-radius: 22px; border: 3px solid var(--tinta); box-shadow: 0 8px 0 #0a1a2c; padding: 20px; display: grid; gap: 14px; }
 .lobby-card + .lobby-card { margin-top: 16px; }
+.step { display: grid; gap: 12px; } .step.hidden { display: none; }
+.bigq { font-family: var(--display); font-size: 20px; }
+.field.big { font-size: 20px; padding: 12px 14px; }
+.btn.big { font-size: 18px; padding: 14px; }
+.hello { font-family: var(--display); font-size: 22px; text-align: center; }
+.modeBtn { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; align-items: center; text-align: left; background: #fff; border: 3px solid var(--tinta); border-radius: 18px; box-shadow: 0 5px 0 var(--tinta); padding: 14px; cursor: pointer; font: inherit; color: var(--tinta); }
+.modeBtn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--tinta); }
+.modeBtn:disabled { opacity: .55; cursor: default; }
+.modeBtn .mi { font-size: 38px; text-align: center; } .modeBtn b { display: block; font-size: 18px; } .modeBtn small { color: var(--gris); font-size: 13.5px; }
+.linkbtn { background: none; border: 0; color: var(--gris); font-weight: 700; cursor: pointer; padding: 4px; justify-self: start; font: inherit; }
+.orline { text-align: center; color: var(--gris); font-size: 13px; font-weight: 600; }
+.joinrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+#joinCode { text-transform: uppercase; letter-spacing: .2em; font-weight: 800; font-size: 20px; text-align: center; }
+@media (max-width: 480px) { .lobby-card { padding: 14px; } .brand svg { width: 48px; height: 40px; } .prow { grid-template-columns: 26px minmax(0, 1fr) auto; row-gap: 6px; } .prow > svg { grid-row: 1 / 3; align-self: center; } .prow > div { grid-column: 2; grid-row: 1; } .prow .iconbtn { grid-column: 3; grid-row: 1; align-self: start; } .prow .seg { grid-column: 2 / 4; grid-row: 2; justify-self: start; } }
 .brand { display: flex; gap: 14px; align-items: center; }
 .brand svg { flex: none; }
 .brand h1 { font-size: clamp(22px, 5.6vw, 32px); line-height: 1.05; }
@@ -226,27 +240,41 @@ input[type=range] { width: 100%; accent-color: #1d2430; }
         <svg width="64" height="54" viewBox="0 0 64 54" aria-hidden="true"><path d="M6 40 Q6 8 32 6 Q58 8 58 40 Z" fill="#ffc23c" stroke="#1d2430" stroke-width="3"/><rect x="2" y="38" width="60" height="9" rx="4" fill="#ffc23c" stroke="#1d2430" stroke-width="3"/><path d="M26 8 L28 38 M38 8 L36 38" stroke="#1d2430" stroke-width="3"/></svg>
         <div><h1>La vida de un Ingeniero Civil</h1><p>Del Arco a Ing. Senior. Gana quien junte más Plata, Conocimiento y Vida Social.</p></div>
       </div>
-      <div id="onlineBox" class="hidden" style="display:grid;gap:10px">
-        <h3 style="font-size:16px">Jugar online</h3>
-        <input class="field" id="onName" placeholder="Tu nombre" maxlength="16" aria-label="Tu nombre">
-        <div class="row" style="justify-content:flex-start">
-          <button class="btn primary" type="button" id="createBtn">Crear sala</button>
-          <input class="field" id="joinCode" placeholder="CÓDIGO" maxlength="4" aria-label="Código de sala" style="width:110px;text-transform:uppercase;letter-spacing:.1em;font-weight:700">
-          <button class="btn" type="button" id="joinBtn">Unirse</button>
-        </div>
-        <div class="err" id="onErr"></div>
+      <!-- Paso 1: nombre -->
+      <div id="stepName" class="step">
+        <div id="welcomeHost"></div>
+        <label class="bigq" for="myNameIn">¿Cómo te llamas?</label>
+        <input class="field big" id="myNameIn" placeholder="Tu nombre" maxlength="16" autocomplete="nickname">
+        <button class="btn primary big" type="button" id="nameGo">¡A matricularse! ▶</button>
+        <div class="err" id="nameErr"></div>
       </div>
-    </div>
-    <div class="lobby-card">
-      <div class="row"><h3 style="font-size:16px">Jugar en este dispositivo</h3><button class="btn" id="addP" type="button" style="padding:6px 12px;font-size:14px">+ Agregar</button></div>
-      <div class="plist" id="plist"></div>
-      <div class="row">
-        <label class="check"><input type="checkbox" id="optTimer" checked> 2 minutos por turno</label>
+      <!-- Paso 2: modo -->
+      <div id="stepMode" class="step hidden">
+        <div class="hello" id="helloTxt"></div>
+        <button class="modeBtn" type="button" id="modeLocal"><span class="mi">📱</span><span><b>Jugar en este dispositivo</b><small>Se pasan el celular o compu en cada turno. Pueden sumar bots.</small></span></button>
+        <button class="modeBtn" type="button" id="modeOnline"><span class="mi">🌐</span><span><b>Jugar online</b><small id="onlineSub">Crea una sala y comparte el código con tus amigos.</small></span></button>
+        <div class="row"><button class="linkbtn" type="button" id="backName">← Cambiar nombre</button><button class="btn" id="setBtn2" type="button">🔊 Sonido</button></div>
+      </div>
+      <!-- Paso 3a: local -->
+      <div id="stepLocal" class="step hidden">
+        <div class="row"><h3 style="font-size:17px">Jugadores (2 a 6)</h3><button class="btn" id="addP" type="button" style="padding:6px 12px;font-size:14px">+ Agregar</button></div>
+        <div class="plist" id="plist"></div>
         <label class="check"><input type="checkbox" id="optFast"> Bots rápidos (sus tarjetas se cierran solas)</label>
+        <button class="btn primary big" id="startBtn" type="button">Empezar partida 🎓</button>
+        <div class="note" id="localNote">Cada turno dura máximo 2 minutos; si se acaba, juega el automático.</div>
+        <button class="linkbtn" type="button" data-back="mode">← Volver</button>
       </div>
-      <button class="btn primary" id="startBtn" type="button">Empezar partida local</button>
-      <button class="btn" id="setBtn2" type="button">🔊 Sonido y música</button>
-      <div class="note" id="localNote">Todos juegan en este dispositivo, pasándolo en su turno, y se puede completar con bots.</div>
+      <!-- Paso 3b: online -->
+      <div id="stepOnline" class="step hidden">
+        <div id="onlineBox" style="display:grid;gap:12px">
+          <button class="btn primary big" type="button" id="createBtn">Crear sala nueva</button>
+          <div class="orline"><span>o únete con un código</span></div>
+          <div class="joinrow"><input class="field" id="joinCode" placeholder="CÓDIGO" maxlength="4" aria-label="Código de sala" autocapitalize="characters"><button class="btn" type="button" id="joinBtn">Unirse</button></div>
+          <input type="hidden" id="onName">
+          <div class="err" id="onErr"></div>
+        </div>
+        <button class="linkbtn" type="button" data-back="mode">← Volver</button>
+      </div>
     </div>
   </div>
 </section>
@@ -258,7 +286,7 @@ input[type=range] { width: 100%; accent-color: #1d2430; }
     <p class="lead" style="margin:0;color:var(--gris)">Comparte este código: tus compañeros entran a esta misma página, escriben su nombre y el código.</p>
     <div class="plist" id="roomSeats"></div>
     <div id="hostCtl" class="hidden" style="display:grid;gap:10px">
-      <div class="row"><button class="btn" type="button" id="addBotBtn">+ Agregar bot</button><label class="check"><input type="checkbox" id="roomTimer" checked> 2 minutos por turno</label></div>
+      <div class="row"><button class="btn" type="button" id="addBotBtn">+ Agregar bot</button><span class="note" style="margin:0">⏱ 2 minutos por turno</span></div>
       <button class="btn primary" type="button" id="roomStart">Empezar partida</button>
     </div>
     <p id="waitHost" class="note hidden">Esperando a que quien creó la sala empiece la partida.</p>
@@ -762,8 +790,10 @@ function continueTurn(s, p) {
     }
     if (p.stuck) {
       const st = p.stuck;
-      if (st.kind === 'defensa' && act(s, 'congreso') && s.ev.act.congreso.prof === p.guia) {
-        fx(s, { kind: 'card', pid: p.id, title: 'Tu profe guía está en un congreso', text: `${p.guia} vuelve en unas rondas. No puedes defender todavía.`, eff: '' });
+      const fuera = st.kind === 'defensa' && (act(s, 'congreso') && s.ev.act.congreso.prof === p.guia ? 'en un congreso' : act(s, 'sabatico') && s.ev.act.sabatico.prof === p.guia ? 'de año sabático' : null);
+      if (fuera) {
+        apply(s, p, { k: 1 }, 'avanzas la ' + (p.titulo === 'magister' ? 'tesis' : 'memoria') + ' sola');
+        fx(s, { kind: 'card', pid: p.id, title: `Tu profe guía está ${fuera}`, text: `${p.guia} vuelve en unas rondas. Mientras, no puedes defender: sigues escribiendo solo.` });
         return endTurn(s);
       }
       if (st.kind === 'defensa' && st.wait > 0) {
@@ -796,7 +826,7 @@ function ask(s, kind, ctx) {
     const becados = s.players.filter(o => o.fin === 'beca').length;
     const opts = [{ id: 'trabajando', label: 'Trabajando', sub: `${fmt(CFG.pagoEstudio.trabajando)} por pago y ${Math.round(CFG.sueldoRonda * 100)}% de eso en cada ronda, pero los filtros te cuestan +1.` }];
     if (!ctx || !ctx.noBeca) opts.push(becados < CFG.becaCupos
-      ? { id: 'beca', label: 'Postular a beca', sub: `Gira: necesitas ${CFG.becaMin}+. ${fmt(CFG.pagoEstudio.beca)} por pago. Se pierde con ${CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${CFG.becaPierde.total} en total. Cupos: ${CFG.becaCupos - becados} de ${CFG.becaCupos}.` }
+      ? { id: 'beca', label: 'Postular a beca', sub: `Gira: necesitas ${CFG.becaMin}+. ${fmt(CFG.pagoEstudio.beca)} por pago y ${fmt(CFG.pagoEstudio.beca * CFG.sueldoRonda)} por ronda. Se pierde con ${CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${CFG.becaPierde.total} en total. Cupos: ${CFG.becaCupos - becados} de ${CFG.becaCupos}.` }
       : { id: 'sinCupo', label: 'Beca: sin cupos', sub: `Ya hay ${CFG.becaCupos} becados en la partida.`, disabled: true });
     opts.push({ id: 'familia', label: 'Familia', sub: `Partes con ${fmt(CFG.familiaExtra)} extra y recibes ${fmt(CFG.pagoEstudio.familia)} por pago.` });
     Object.assign(P, { title: 'Financiamiento', text: ctx && ctx.noBeca ? 'No alcanzaste la beca. Elige otra forma de pagar la carrera.' : '¿Cómo vas a pagar la carrera? Cobras al caer en "Fin de semestre".', options: opts.filter(o => !o.disabled), shown: opts });
@@ -897,7 +927,7 @@ function doSpin(s, p) {
     return move(s, p, steps);
   }
   if (P.reason === 'beca') {
-    if (n >= CFG.becaMin) { p.fin = 'beca'; log(s, `${p.name} ganó la beca con ${n}.`, p.id); fx(s, { kind: 'card', pid: p.id, title: '¡Ganaste la beca!', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}.`, eff: `${fmt(CFG.pagoEstudio.beca)} en cada fin de semestre`, good: true }); s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return; }
+    if (n >= CFG.becaMin) { p.fin = 'beca'; log(s, `${p.name} ganó la beca con ${n}.`, p.id); fx(s, { kind: 'card', pid: p.id, title: '¡Ganaste la beca!', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}.`, eff: `${fmt(CFG.pagoEstudio.beca)} en cada fin de semestre y ${fmt(CFG.pagoEstudio.beca * CFG.sueldoRonda)} cada ronda mientras la mantengas`, good: true }); s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return; }
     log(s, `${p.name} no alcanzó la beca (sacó ${n}).`, p.id); fx(s, { kind: 'card', pid: p.id, title: 'Sin beca', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}. Elige otra forma de financiar la carrera.` });
     return ask(s, 'fin', { noBeca: true });
   }
@@ -1236,6 +1266,7 @@ const EVENTOS = {
   pandemia: { name: 'Pandemia: clases online', tipo: 'rapido' },
   estallido: { name: 'Estallido social', tipo: 'lento' },
   congreso: { name: 'Profe en congreso', tipo: 'rapido' },
+  sabatico: { name: 'Profe guía de sabático', tipo: 'lento' },
   terremoto: { name: 'Terremoto', tipo: 'lento' },
   aniversario: { name: 'Aniversario de la UdeC', tipo: 'rapido' },
   toma: { name: 'Toma de la Facultad', tipo: 'lento' },
@@ -1257,6 +1288,22 @@ const DIST = (() => {
 const progreso = p => p.finished ? 1 : 1 - DIST[p.pos] / DIST[BOARD.start];
 const estudiantes = s => s.players.filter(p => !p.finished && !p.pega);
 
+// ¿Qué profes de exigencia alta les importan hoy a los jugadores? (filtros cercanos o profe guía)
+function profesRelevantes(s) {
+  const set = new Set();
+  for (const p of estudiantes(s)) {
+    if (p.guia && PROFES_ALTA_TODOS.includes(p.guia)) set.add(p.guia);
+    let front = [p.pos], seen = new Set();
+    for (let d = 0; d < 10 && front.length; d++) {
+      const nx = [];
+      for (const id of front) { if (seen.has(id)) continue; seen.add(id); const n = NODE(id); if (n.type === 'filtro' && !p.passed[id] && n.profe) for (const pr of PROFES_ALTA_TODOS) if (n.profe.includes(pr)) set.add(pr); nx.push(...n.next); }
+      front = nx;
+    }
+  }
+  return [...set];
+}
+const tesistas = s => s.players.filter(p => !p.finished && !p.pega && p.guia && ['memoria', 'magister'].includes(NODE(p.pos).lane));
+const enFiltro = s => s.players.some(p => p.stuck && p.stuck.kind === 'filtro');
 function roundStart(s) {
   // ingresos por trabajar: 10% del pago asignado
   for (const p of s.players) {
@@ -1264,6 +1311,7 @@ function roundStart(s) {
     let base = 0, why = '';
     if (p.pega) { base = p.pega === 'emprende' ? 1600 * CFG.sueldoMult * CFG.nivelSueldo[p.nivel] : sueldo(p, p.pega, p.nivel); why = 'sueldo de la ronda'; }
     else if (p.fin === 'trabajando') { base = CFG.pagoEstudio.trabajando; why = 'pega de estudiante'; }
+    else if (p.fin === 'beca' && !p.becaLost) { base = CFG.pagoEstudio.beca; why = 'beca (mensualidad)'; }
     if (base) apply(s, p, { m: Math.round(base * CFG.sueldoRonda * s.ev.gob.mult / 10) * 10 }, why);
     if (act(s, 'estallido')) apply(s, p, { v: 1 }, 'asambleas y cabildos', true);
     if (act(s, 'pandemia') && p.pega) apply(s, p, { v: 1 }, 'teletrabajo', true);
@@ -1292,10 +1340,17 @@ function roundStart(s) {
       if (usados === 0 && mitad) { if (estudiantes(s).length) for (let i = 0; i < 6; i++) pool.push(k); continue; } // el primer cambio es más probable a mitad de carrera
     }
     if (lento && E.tipo === 'lento') continue;
-    if (['cambioJefe', 'paro', 'pandemia', 'estallido', 'congreso', 'becaEx'].includes(k) && !estudiantes(s).length) continue;
+    if (['cambioJefe', 'paro', 'pandemia', 'estallido', 'congreso', 'becaEx', 'tarea', 'toma'].includes(k) && !estudiantes(s).length) continue;
+    // solo eventos que afecten a alguien según dónde está en el tablero
+    if (k === 'congreso' && !profesRelevantes(s).length) continue;
+    if (k === 'sabatico' && !tesistas(s).length) continue;
+    if (k === 'becaEx' && estudiantes(s).length < 2) continue;
+    if (k === 'terremoto' && !s.players.some(p => !p.finished && (p.mencion === 'est' || p.mencion === 'geo' || !p.pega))) continue;
+    if (k === 'temporal' && s.players.filter(p => !p.finished).length < 2) continue;
+    if ((k === 'paro' || k === 'pandemia') && !enFiltro(s) && !profesRelevantes(s).length && estudiantes(s).length < 2) continue;
     if (k === 'inflacion' && !s.players.some(p => !p.finished && p.pega)) continue;
     if (k === 'toma' && !s.players.some(p => !p.finished && !p.pega && NODE(p.pos).zone === 'facultad')) continue;
-    const w = rapido && E.tipo === 'lento' ? 2 : 1;
+    const w = (rapido && E.tipo === 'lento' ? 2 : 1) * (k === 'sabatico' ? 5 : 1); // el sabático solo puede pasar en una ventana corta
     for (let i = 0; i < w; i++) pool.push(k);
   }
   if (!pool.length) return;
@@ -1317,11 +1372,11 @@ function startEvent(s, k) {
         : `${s.ev.jefe} reemplaza a ${antes}: los filtros suben 1 de dificultad y los profes de exigencia baja pasan a media por el resto de la partida. Además cambia el gobierno: ${s.ev.gob.name}, los pagos ${up ? 'suben' : 'bajan'} ${CFG.gobierno * 100}%.`;
       break;
     }
-    case 'tarea': s.ev.tarea = { r0: r, in: s.players.filter(p => !p.finished).map(p => p.id), best: null }; text = 'Todos quedan atrapados modelando. Para salir hay que sacar más de 8 esta ronda, más de 6 la siguiente y más de 4 la última. Quien sale avanza lo que sacó. El número más alto gana +3 Conocimiento.'; break;
+    case 'tarea': s.ev.tarea = { r0: r, in: estudiantes(s).map(p => p.id), best: null }; text = 'Todos los que estudian quedan atrapados modelando. Para salir hay que sacar más de 8 esta ronda, más de 6 la siguiente y más de 4 la última. Quien sale avanza lo que sacó. El número más alto gana +3 Conocimiento.'; break;
     case 'gta': case 'mundial': s.ev.buy = { kind: k, left: s.players.filter(p => !p.finished).map(p => p.id) }; text = k === 'gta' ? 'En su próximo turno, cada jugador decide si compra el juego por $300.000: +2 Vida Social y −1 Conocimiento.' : 'En su próximo turno, cada jugador decide si ve el partido: +2 Vida Social y −1 Conocimiento.'; break;
     case 'pandemia': s.ev.act.pandemia = { end: r + 2 }; text = 'Por 2 rondas: pruebas en casa (filtros −1), no se gana Vida Social en las casillas y los que trabajan ganan +1 Vida Social por ronda con el teletrabajo.'; break;
     case 'estallido': d = 1 + pickI(s, 2); s.ev.act.estallido = { end: r + d }; text = `Por ${d} ronda${d > 1 ? 's' : ''}: se suspende el semestre y los que estudian avanzan la mitad de lo que sacan. Todos ganan +1 Vida Social por ronda.`; break;
-    case 'congreso': { const prof = PROFES_ALTA_TODOS[pickI(s, PROFES_ALTA_TODOS.length)]; s.ev.act.congreso = { end: r + 2, prof }; text = `${prof} se va 2 rondas a un congreso: sus filtros bajan 2 de dificultad, pero sus tesistas no pueden defender hasta que vuelva.`; break; }
+    case 'congreso': { const rel = profesRelevantes(s); const prof = rel[pickI(s, rel.length)]; s.ev.act.congreso = { end: r + 2, prof }; text = `${prof} se va 2 rondas a un congreso: sus filtros bajan 2 de dificultad, pero sus tesistas no pueden defender hasta que vuelva.`; break; }
     case 'terremoto': {
       s.ev.act.terremoto = { end: r + 1 };
       for (const p of s.players) if (!p.finished) { if (['est', 'geo'].includes(p.mencion)) apply(s, p, { m: 500, k: 2 }, 'peritajes'); else apply(s, p, { m: -100 }, 'arreglos'); if (!p.pega) apply(s, p, { skip: 1 }, 'universidad cerrada'); }
@@ -1330,6 +1385,13 @@ function startEvent(s, k) {
     case 'aniversario': s.ev.act.aniversario = { end: r + 1 }; for (const p of s.players) if (!p.finished) apply(s, p, { v: 1 }, 'aniversario', true); text = 'Todos ganan +1 Vida Social y, durante esta ronda, la Vida Social de las casillas se duplica.'; break;
     case 'toma': for (const p of s.players) if (!p.finished && !p.pega && NODE(p.pos).zone === 'facultad') apply(s, p, { skip: 1, v: 1 }, 'toma'); text = 'Quienes están en la Facultad pierden su próximo turno, pero ganan +1 Vida Social.'; break;
     case 'feria': { const res = []; for (const p of s.players) if (!p.finished) { const n = spinN(s); if (n >= 6) apply(s, p, { c: 1 }, `feria laboral (${n})`); res.push(`${p.name}: ${n}${n >= 6 ? ' ✓' : ''}`); } text = 'Todos giran: con 6 o más consiguen un contacto. ' + res.join(' · '); break; }
+    case 'sabatico': {
+      const t = tesistas(s); const v = t[pickI(s, t.length)]; const prof = v.guia;
+      const afect = s.players.filter(p => p.guia === prof && tesistas(s).includes(p));
+      s.ev.act.sabatico = { end: r + 2, prof };
+      text = `Justo ahora ${prof} se fue de año sabático. ${afect.map(p => p.name).join(' y ')} ${afect.length > 1 ? 'tienen' : 'tiene'} que esperar 2 rondas para poder defender (mientras, siguen escribiendo y ganan +1 Conocimiento por turno de espera).`;
+      break;
+    }
     case 'temporal': s.ev.act.temporal = { end: r + 1 }; for (const p of s.players) if (!p.finished && p.mencion === 'hid') apply(s, p, { k: 1 }, 'medición de caudales'); text = 'Esta ronda todos avanzan 1 casilla menos. Los de Hidráulica ganan +1 Conocimiento midiendo caudales.'; break;
     case 'inflacion': {
       const t = s.players.filter(p => !p.finished && p.pega);
@@ -1642,7 +1704,7 @@ $('#plist').addEventListener('click', e => {
 $('#addP').addEventListener('click', () => { if (lobby.length < 6) { const used = new Set(lobby.map(x => x.token)); lobby.push({ name: 'Bot ' + (lobby.length + 1), bot: true, token: G.TOKENS.find(t => !used.has(t)) || 'casco' }); renderLobby(); } });
 $('#startBtn').addEventListener('click', () => {
   const players = lobby.map((p, i) => ({ name: (p.name || '').trim() || 'Jugador ' + (i + 1), bot: p.bot, token: p.token }));
-  opts.timer = $('#optTimer').checked; opts.fast = $('#optFast').checked; NET.on = false; lastPlayers = players;
+  opts.timer = true; opts.fast = $('#optFast').checked; NET.on = false; lastPlayers = players;
   start(G.newGame({ players, seed: (Date.now() ^ (Math.random() * 1e9)) >>> 0, timer: 120 }));
 });
 
@@ -1678,7 +1740,6 @@ $('#joinBtn').addEventListener('click', () => {
 });
 $('#addBotBtn').addEventListener('click', () => send({ t: 'addBot' }));
 $('#setBtn').addEventListener('click', () => busy ? toast('Espera a que termine la jugada', 1200) : openSettings()); $('#setBtn2').addEventListener('click', openSettings);
-$('#roomTimer').addEventListener('change', e => send({ t: 'timer', on: e.target.checked }));
 $('#roomStart').addEventListener('click', () => send({ t: 'start' }));
 $('#leaveRoom').addEventListener('click', () => { send({ t: 'leave' }); NET.code = null; store.del('vic-session'); if (NET.ws) NET.ws.close(); show('lobby'); });
 $('#roomSeats').addEventListener('click', e => { const b = e.target.closest('button[data-kick]'); if (b) send({ t: 'kick', i: +b.dataset.kick }); });
@@ -1711,7 +1772,7 @@ function renderRoom(m) {
   const sendLook = () => send({ t: 'look', name: $('#myName').value, token: $('#myTok').value });
   if ($('#myName')) { $('#myName').addEventListener('change', sendLook); $('#myTok').addEventListener('change', sendLook); }
   $('#hostCtl').classList.toggle('hidden', !m.host); $('#waitHost').classList.toggle('hidden', m.host);
-  $('#roomTimer').checked = m.timer; $('#roomStart').disabled = m.seats.length < 2; $('#addBotBtn').disabled = m.seats.length >= 6;
+  $('#roomStart').disabled = m.seats.length < 2; $('#addBotBtn').disabled = m.seats.length >= 6;
 }
 
 // ================= Tablero (SVG) =================
@@ -2297,7 +2358,7 @@ const EVFX = {
   _: { e: ['❗'] },
   paro: { e: ['✊', '📢', '🪧'], rain: 1 }, cambioJefe: { e: ['👔'] }, tarea: { e: ['💻', '📐', '☕'], rain: 1 },
   gta: { e: ['🎮', '🚗', '💥'], rain: 1 }, pandemia: { e: ['😷', '🦠', '💻'], rain: 1 }, estallido: { e: ['🔥', '📢', '🍳'], rain: 1, shake: 1 },
-  congreso: { e: ['✈️'], fly: 1 }, terremoto: { e: ['🌎', '🧱', '🏚️'], rain: 1, shake: 2 }, aniversario: { e: ['🎂', '🎉', '🎈'], rain: 1 },
+  congreso: { e: ['✈️'], fly: 1 }, sabatico: { e: ['🏖️', '🌴', '📄'], rain: 1 }, terremoto: { e: ['🌎', '🧱', '🏚️'], rain: 1, shake: 2 }, aniversario: { e: ['🎂', '🎉', '🎈'], rain: 1 },
   toma: { e: ['🪑', '🚧', '📢'], rain: 1 }, feria: { e: ['💼', '🤝', '📄'], rain: 1 }, mundial: { e: ['⚽', '🇨🇱', '📺'], rain: 1 },
   temporal: { e: ['🌧️', '☔', '💧'], rain: 2 }, becaEx: { e: ['🏅', '📚', '✨'], rain: 1 }, inflacion: { e: ['💸', '🛒', '📈'], up: 1 },
 };
@@ -2439,12 +2500,12 @@ $('#rulesBtn').addEventListener('click', () => { if (busy) return toast('Espera 
   ${hostBlock('Les explico lo esencial. Cualquier duda, me preguntan.')}
   <div style="display:grid;gap:6px;font-size:14px">
   <div><b>Orden y número de la suerte:</b> al inicio cada uno gira; el más alto parte. Cada vez que otro saque tu número, ganas ${G.fmt(G.CFG.suerte)}. Si sacas 10 eres Mechón de Oro.</div>
-  <div><b>Financiamiento:</b> trabajando cobras más y ganas el ${Math.round(G.CFG.sueldoRonda * 100)}% de tu pago en cada ronda, pero los filtros te cuestan +1. La beca se gana girando ${G.CFG.becaMin}+, hay ${G.CFG.becaCupos} cupos y se pierde con ${G.CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${G.CFG.becaPierde.total} en total.</div>
+  <div><b>Financiamiento:</b> trabajando cobras más y ganas el ${Math.round(G.CFG.sueldoRonda * 100)}% de tu pago en cada ronda (con beca también, mientras no la pierdas), pero los filtros te cuestan +1. La beca se gana girando ${G.CFG.becaMin}+, hay ${G.CFG.becaCupos} cupos y se pierde con ${G.CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${G.CFG.becaPierde.total} en total.</div>
   <div><b>★ Ramo filtro:</b> parada obligatoria. Apruebas con el umbral (fácil 3, media 5, alta 7) menos 1 por cada 4 de Conocimiento (máx. −3). Si repruebas 2 veces el mismo ramo, cada intento requiere carta. Si apruebas al llegar, sigues avanzando.</div>
   <div><b>$ Pagos:</b> solo cobras si caes en la casilla. Con pega, además ganas el ${Math.round(G.CFG.sueldoRonda * 100)}% de tu sueldo en cada ronda.</div>
   <div><b>⇄ Dilemas</b> con dos opciones y <b>⚔ duelos</b> contra otro jugador.</div>
   <div><b>Profe guía:</b> de tu mención. Silva, Cendoya y los part-time no guían magíster.</div>
-  <div><b>Eventos:</b> desde que alguien llega a los Laboratorios, cada ronda puede ocurrir uno (máximo ${G.CFG.ev.maxPorPartida}): paro, cambio de jefe y de gobierno, tarea de modelación, GTA 6, pandemia, estallido social, profe en congreso, terremoto, aniversario, toma, feria laboral, Mundial, temporal y beca de excelencia. Son más probables los que aceleran si la partida va lenta.</div>
+  <div><b>Eventos:</b> desde que alguien llega a los Laboratorios, cada ronda puede ocurrir uno (máximo ${G.CFG.ev.maxPorPartida}): paro, cambio de jefe y de gobierno, tarea de modelación, GTA 6, pandemia, estallido social, profe en congreso, profe guía de sabático, terremoto, aniversario, toma, feria laboral, Mundial, temporal y beca de excelencia. Son más probables los que aceleran si la partida va lenta.</div>
   <div><b>Puntaje:</b> Plata (1 punto por cada ${G.fmt(G.CFG.plataPorPunto)}) + Conocimiento + Vida Social. Quien lidera una categoría al final (sin empate y con más de 0) suma +${G.CFG.bonoLider}, y +${G.CFG.bonoMulti} extra si lidera dos o más. El primero en llegar a Ing. Senior suma +${G.CFG.bonoPrimero} y los demás tienen ${G.CFG.rondasFinales} turnos más.</div>
   </div><button class="btn primary" type="button" id="rulesOk">Entendido</button>`); $('#rulesOk').addEventListener('click', () => { closeModal(); if (S && !busy) loop(); }); });
 let toastT = 0;
@@ -2476,11 +2537,42 @@ function addChat(m, quiet) {
 }
 function placeChat(where) { const box = $('#chatBox'); (where === 'game' ? $('#chatSlot') : $('#roomChatSlot')).appendChild(box); $('#chatTab').classList.toggle('hidden', !NET.on); }
 
+let ONLINE_OK = false;
+// ===== Inicio en pasos: nombre → modo → local u online =====
+const WELCOME = [
+  '¡Bienvenido a Ingeniería Civil! Se entra por el Arco y, con suerte, se sale por la Consultora.',
+  'Cinco años nominales, siete reales. ¿Te la puedes en menos?',
+  'Dicen que el 4,0 es nota de Dios. Vamos a comprobarlo.',
+  'Café, calculadora y fe: es todo lo que vas a necesitar.',
+  'Aquí nadie se titula solo… pero alguien se titula primero.',
+];
+function lobbyStep(id) {
+  document.querySelectorAll('#lobby .step').forEach(x => x.classList.toggle('hidden', x.id !== id));
+  if (id === 'stepName') { $('#welcomeHost').innerHTML = hostBlock(WELCOME[Math.floor(Math.random() * WELCOME.length)] + ' Primero, tu nombre para la lista.', 'happy'); talk($('#welcomeHost')); setTimeout(() => $('#myNameIn').focus(), 50); }
+  if (id === 'stepLocal') renderLobby();
+}
+function nameGo() {
+  const name = $('#myNameIn').value.trim();
+  if (!name) { $('#nameErr').textContent = 'Escribe tu nombre para seguir.'; return; }
+  $('#nameErr').textContent = ''; store.set('vic-name', name); SND.unlock();
+  $('#onName').value = name;
+  if (!lobby[0].bot) lobby[0].name = name;
+  $('#helloTxt').textContent = `¡Hola, ${name}! ¿Cómo quieres jugar?`;
+  lobbyStep('stepMode');
+}
+$('#nameGo').addEventListener('click', nameGo);
+$('#myNameIn').addEventListener('keydown', e => { if (e.key === 'Enter') nameGo(); });
+$('#modeLocal').addEventListener('click', () => lobbyStep('stepLocal'));
+$('#modeOnline').addEventListener('click', () => { if (ONLINE_OK) lobbyStep('stepOnline'); });
+$('#backName').addEventListener('click', () => lobbyStep('stepName'));
+document.querySelectorAll('#lobby [data-back]').forEach(b => b.addEventListener('click', () => lobbyStep('stepMode')));
+$('#joinCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#joinBtn').click(); });
+$('#myNameIn').value = store.get('vic-name') || '';
+lobbyStep('stepName');
 renderLobby();
 (async () => {
-  if (!(await detectServer())) { $('#localNote').textContent += ' Para jugar online con código de sala, abre el juego desde su página del servidor.'; return; }
-  $('#onlineBox').classList.remove('hidden');
-  $('#onName').value = store.get('vic-name') || '';
+  if (!(await detectServer())) { $('#modeOnline').disabled = true; $('#onlineSub').textContent = 'Disponible al abrir el juego desde la página del servidor.'; return; }
+  ONLINE_OK = true; $('#onName').value = store.get('vic-name') || '';
   const sess = store.get('vic-session');
   if (sess && sess.code) { NET.code = sess.code; NET.token = sess.token; try { await wsConnect(); send({ t: 'rejoin', code: sess.code, token: sess.token }); } catch (e) {} }
 })();
