@@ -75,7 +75,7 @@ label.check { display: inline-flex; gap: 8px; align-items: center; font-weight: 
 #game { height: 100%; display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); }
 #exitLayer { z-index: 100; }
 #exitBtn { position: fixed; top: 8px; right: 10px; z-index: 95; }
-header.top { padding-right: 64px !important; }
+header.top { padding-right: calc(var(--exitW, 64px) + 20px) !important; }
 header.top { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: var(--tinta); background: var(--casco); border-bottom: 3px solid var(--tinta); }
 @media (max-width: 480px) { header.top h1 { display: none; } header.top { flex-wrap: wrap; justify-content: flex-end; } .topbtn .lbl { display: none; } header.top { gap: 5px; padding: 8px 8px; } .chip { padding: 3px 7px; } }
 header.top h1 { font-size: 16px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2559,6 +2559,9 @@ function addChat(m, quiet) {
 }
 function placeChat(where) { const box = $('#chatBox'); (where === 'game' ? $('#chatSlot') : $('#roomChatSlot')).appendChild(box); $('#chatTab').classList.toggle('hidden', !NET.on); }
 
+// El botón Salir flota sobre todo: se reserva su ancho real en la barra para que no tape nada
+function fitExit() { const b = $('#exitBtn'); if (b && b.offsetWidth) document.documentElement.style.setProperty('--exitW', b.offsetWidth + 'px'); }
+window.addEventListener('resize', fitExit); new ResizeObserver(fitExit).observe($('#exitBtn'));
 let ONLINE_OK = false;
 // Sonido en todos los botones (inicio y juego)
 document.addEventListener('pointerdown', e => {
