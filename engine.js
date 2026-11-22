@@ -20,15 +20,15 @@ const CFG = {
   umbral: { baja: 3, media: 5, alta: 7 },
   bonoCada: 4, bonoMax: 3,
   plataInicial: 200, familiaExtra: 400,
-  pagoEstudio: { trabajando: 1400, beca: 700, familia: 500, becaPerdida: 200 },
+  pagoEstudio: { trabajando: 1700, beca: 700, familia: 500, becaPerdida: 200 },
   ayudantePago: 300, ayudanteMinK: 8,
   pareja: -150, mascota: -80, hermanos: 200,
   carta: 150,
-  mechon: { plata: 500, k: 1 },
+  mechon: { plata: 500, k: 1 }, compTurno: 500,
   suerte: 150,
   sueldoMult: 2, nivelSueldo: [1, 1.4, 1.8], magister: 300, contacto: 100,
   ascenso: [6, 7],
-  plataPorPunto: 750, bonoPrimero: 5, bonoCorona: 2, bonoLider: 3, bonoMulti: 2,
+  plataPorPunto: 800, bonoPrimero: 5, bonoCorona: 1, bonoLider: 3, bonoMulti: 2,
   liderPlata: 150,
   conv: { m: 300, k: 2 },
   rondasFinales: 3,
@@ -52,8 +52,8 @@ const PROFES_MEN = {
 // Profes que no guían tesis de magíster (Silva, Cendoya y los part-time)
 const NO_MAG = ['Silva', 'Cendoya', 'M. Valenzuela', 'González', 'R. Valenzuela', 'Ávalos', 'Martínez', 'Ramírez', 'Veloso', 'Ramos', 'Morales', 'Dufeu', 'Tapia'];
 const GUIA = {
-  alta: { umbral: 7, dur: 3, k: 3, contacto: 1 },
-  media: { umbral: 5, dur: 2, k: 2, contacto: 0 },
+  alta: { umbral: 7, dur: 3, k: 4, contacto: 2 },
+  media: { umbral: 5, dur: 2, k: 3, contacto: 0 },
   baja: { umbral: 3, dur: 1, k: 1, contacto: 0 },
 };
 const tierOf = (men, name) => { const t = PROFES_MEN[men] || {}; return ['alta', 'media', 'baja'].find(k => (t[k] || []).includes(name)) || 'media'; };
@@ -158,13 +158,13 @@ const DECKS = {
 // Dilemas: casillas con dos opciones
 const DILEMAS = {
   estu: [
-    { q: '¿Estudiar para el certamen o ir a carretear?', a: ['Estudiar', { k: 2, v: -1 }], b: ['Carretear', { v: 2, k: -1 }] },
-    { q: '¿Dormir 5 minutos más o llegar con sueño?', a: ['Dormir 5 minutos más', { spin: { min: 5, ok: { v: 1 }, ko: { k: -1 } } }, 'Gira: con 5+ llegas igual (+1 Vida Social); si no, −1 Conocimiento'], b: ['Llegar con sueño', { k: 1, v: -1 }] },
+    { q: '¿Estudiar para el certamen o ir a carretear?', a: ['Estudiar', { k: 2, v: -2 }], b: ['Carretear', { v: 3, k: -1 }] },
+    { q: '¿Dormir 5 minutos más o llegar con sueño?', a: ['Dormir 5 minutos más', { spin: { min: 5, ok: { v: 2 }, ko: {} } }, 'Gira: con 5+ llegas igual (+2 Vida Social); si no, no pasa nada'], b: ['Llegar con sueño', { k: 1, v: -1 }] },
     { q: '¿Almorzar en Los Patos o traer colación?', a: ['Los Patos', { v: 1, m: -30 }], b: ['Colación', { m: 30 }] },
     { q: '¿Hacer el informe solo o con alguien?', a: ['Solo', { k: 2, v: -1 }], b: ['Con otro jugador', { otro: { yo: { k: 1, v: 1 }, otro: { k: 1, v: 1 } } }, 'Ambos +1 Conocimiento y +1 Vida Social'] },
     { q: '¿Ir a la ayudantía o al partido?', a: ['Ayudantía', { k: 1 }], b: ['Partido', { v: 2, m: -20 }] },
     { q: '¿Ramo de verano o vacaciones?', a: ['Ramo de verano', { k: 1, m: -100 }], b: ['Vacaciones', { v: 2, m: -150 }] },
-    { q: '¿Pega de verano o descansar?', a: ['Pega de verano', { m: 400, v: -1 }], b: ['Descansar', { v: 1 }] },
+    { q: '¿Pega de verano o descansar?', a: ['Pega de verano', { m: 800, k: 1, v: -1 }], b: ['Descansar', { v: 1 }] },
     { q: '¿Preguntar en clase o quedarte callado?', a: ['Preguntar', { spin: { min: 5, ok: { k: 2 }, ko: { v: -1 } } }, 'Gira: con 5+ +2 Conocimiento; si no, −1 Vida Social'], b: ['Quedarte callado', {}] },
     { q: '¿Hacer la tarea con IA o a mano?', a: ['Con IA', { spin: { min: 5, ok: { k: 1, v: 1 }, ko: { k: -1 } } }, 'Gira: con 5+ al profe le encanta; si no, te pillan'], b: ['A mano', { k: 1, v: -1 }] },
     { q: '¿Pedir los apuntes a alguien o hacerlos tú?', a: ['Pedirlos', { otro: { yo: { k: 1, m: -50 }, otro: { m: 50, v: 1 } } }, 'Le pagas $50.000 a otro jugador; tú +1 Conocimiento'], b: ['Hacerlos tú', { k: 1, v: -1 }] },
@@ -179,12 +179,15 @@ const DILEMAS = {
     { q: '¿Firmar el plano sin revisar o revisarlo de nuevo?', a: ['Firmar así nomás', { spin: { min: 5, ok: { m: 300 }, ko: { m: -500 } } }, 'Gira: con 5+ +$300.000; si no, −$500.000'], b: ['Revisarlo', { k: 1 }] },
     { q: '¿Subcontratar a otro jugador o hacerlo tú?', a: ['Subcontratar', { otro: { yo: { m: 300 }, otro: { m: 300 } } }, 'Ambos +$300.000'], b: ['Hacerlo tú', { k: 1, v: -1 }] },
     { q: '¿Postular a una licitación grande o a una chica?', a: ['Grande', { spin: { min: 7, ok: { m: 1000 }, ko: { m: -200 } } }, 'Gira: con 7+ +$1.000.000; si no, −$200.000'], b: ['Chica', { m: 300 }] },
-    { q: '¿Hacer clases en la U o descansar el fin de semana?', a: ['Hacer clases', { k: 1, m: 200, v: -1 }], b: ['Descansar', { v: 2 }] },
+    { q: '¿Hacer clases en la U o descansar el fin de semana?', a: ['Hacer clases', { k: 1, m: 500 }], b: ['Descansar', { v: 2 }] },
   ],
 };
 
 // ---------- Construcción del tablero ----------
 const TIER_EFF = { alta: { spin: { min: 6, ok: { k: 2, v: 1 }, ko: { v: -1 } } }, media: { k: 1 }, baja: { k: 1, v: 1 } };
+// Decisiones: efecto inmediato del sí y del no (el no también da algo, para que sea una elección real)
+const DSI = { pareja: { v: 3 }, mascota: { v: 2 }, hermanos: { v: 2 }, casa: { v: CFG.casa.v, m: CFG.casa.m } };
+const DNO = { pareja: [{ k: 1 }, 'Más tiempo para estudiar'], mascota: [{ m: 300 }, 'Ahorras'], hermanos: [{ v: 1 }, 'Vives con amigos'] };
 function R(name, profe, tier, text) { return { type: 'ramo', name, profe, tier, text, e: TIER_EFF[tier] }; }
 function G(name, text, e) { return { type: 'ramo', name, text, e: e || { k: 1 } }; }
 function F(name, profe, dif) { return { type: 'filtro', name, profe, dif }; }
@@ -506,7 +509,8 @@ function ask(s, kind, ctx) {
       pareja: ['¿Pololear?', `+3 Vida Social, pero gastas ${fmt(-CFG.pareja)} en cada pago.`],
       mascota: ['¿Adoptar una mascota?', `+2 Vida Social, gastas ${fmt(-CFG.mascota)} en cada pago.`],
       casa: ['¿Comprar una casa?', `Pagas el pie: ${fmt(-CFG.casa.m)}. Ganas +${CFG.casa.v} Vida Social y en cada día de pago te ahorras el arriendo (+${fmt(CFG.casa.ahorro)}).`] }[ctx.kind];
-    Object.assign(P, { title: D[0], text: D[1], options: [{ id: 'si', label: 'Sí' }, { id: 'no', label: 'No' }] });
+    const no = DNO[ctx.kind];
+    Object.assign(P, { title: D[0], text: D[1], options: [{ id: 'si', label: 'Sí', sub: effText(DSI[ctx.kind]) }, { id: 'no', label: 'No', sub: no ? no[1] + ': ' + effText(no[0]) : 'Sin efecto' }] });
   }
   if (kind === 'dilema') {
     const d = DILEMAS[ctx.deck][ctx.idx];
@@ -563,7 +567,9 @@ function doSpin(s, p) {
     if (s.players.every(o => o.lucky)) {
       s.players.sort((a, b) => b.lucky - a.lucky);
       s.phase = 'play'; s.turn = 0; s.round = 1;
-      fx(s, { kind: 'card', pid: s.players[0].id, title: 'Orden de juego', text: s.players.map((o, i) => `${i + 1}. ${o.name} (número ${o.lucky})`).join(' · '), eff: `Cuando otro jugador saque tu número, ganas ${fmt(CFG.suerte)}` });
+      // Compensación por partir después: el primero tiene ventaja de tempo
+      s.players.forEach((o, i) => { if (i) apply(s, o, { m: CFG.compTurno * i }, 'compensación por partir ' + (i + 1) + '.º'); });
+      fx(s, { kind: 'card', pid: s.players[0].id, title: 'Orden de juego', text: s.players.map((o, i) => `${i + 1}. ${o.name} (número ${o.lucky})`).join(' · '), eff: `Cuando otro jugador saque tu número, ganas ${fmt(CFG.suerte)}. Los que parten después reciben ${fmt(CFG.compTurno)} por cada puesto de diferencia.` });
       log(s, 'Orden: ' + s.players.map(o => o.name).join(', ') + '.');
       beginTurn(s);
     } else { s.turn++; s.pending = { kind: 'spin', reason: 'orden', label: 'Girar para el orden' }; }
@@ -885,7 +891,8 @@ function doChoose(s, p, val) {
     case 'pega': p.pega = val; log(s, `${p.name} entró a trabajar en ${PEGAS[val].name}.`, p.id); fx(s, { kind: 'card', pid: p.id, title: PEGAS[val].name, text: '¡Primera pega!', eff: PEGAS[val].perk || '', good: true }); return P.ctx.carry ? move(s, p, P.ctx.carry) : endTurn(s);
     case 'decision': {
       const k = P.ctx.kind;
-      if (val === 'si') { p[k] = true; const e = { pareja: { v: 3 }, mascota: { v: 2 }, hermanos: { v: 2 }, casa: { v: CFG.casa.v, m: CFG.casa.m } }[k]; const res = apply(s, p, e, { pareja: 'pololeando', mascota: 'nueva mascota', hermanos: 'roomies con tus hermanos', casa: 'casa propia' }[k]); fx(s, { kind: 'card', pid: p.id, title: P.title, text: 'Dijiste que sí.', eff: res, good: true }); }
+      if (val === 'no' && DNO[k]) { const res = apply(s, p, DNO[k][0], DNO[k][1].toLowerCase()); fx(s, { kind: 'card', pid: p.id, title: P.title, text: 'Dijiste que no.', eff: res }); return endTurn(s); }
+      if (val === 'si') { p[k] = true; const e = DSI[k]; const res = apply(s, p, e, { pareja: 'pololeando', mascota: 'nueva mascota', hermanos: 'roomies con tus hermanos', casa: 'casa propia' }[k]); fx(s, { kind: 'card', pid: p.id, title: P.title, text: 'Dijiste que sí.', eff: res, good: true }); }
       else log(s, `${p.name} dijo que no: ${P.title.replace(/[¿?]/g, '').toLowerCase()}.`, p.id);
       return endTurn(s);
     }
