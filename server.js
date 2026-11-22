@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 const INDEX = fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
 const BOT_NAMES = ['Bot Mechón', 'Bot Memorista', 'Bot Ayudante', 'Bot Magíster', 'Bot Carretero', 'Bot Senior'];
 const IDLE_MAX_MS = 25000;   // máximo que un bot espera a que los demás terminen de ver las tarjetas
-const BOT_DELAY_MS = 2200;
+const BOT_DELAY_MS = +process.env.BOT_DELAY_MS || 2200;
 const DISCONNECTED_MS = 20000; // un humano desconectado juega en automático tras este tiempo
 
 const server = http.createServer((req, res) => {
@@ -139,6 +139,13 @@ wss.on('connection', ws => {
       case 'timer': if (isHost && !room.state) { room.timer = !!m.on; broadcast(room); } break;
       case 'start':
         if (isHost && !room.state && room.seats.length >= 2) {
+          room.state = G.newGame({ players: room.seats.map(x => ({ name: x.name, bot: x.bot, token: x.look })), seed: crypto.randomInt(1, 2 ** 31), timer: 120 });
+          room.startedAt = Date.now(); schedule(room); broadcast(room);
+        }
+        break;
+      case 'again': // el anfitrión arma otra partida con los mismos asientos
+        if (isHost && room.state && room.state.phase === 'end') {
+          room.seats.forEach(x => { if (!x.bot && !x.ws) x.bot = true; }); // quien se fue juega como bot
           room.state = G.newGame({ players: room.seats.map(x => ({ name: x.name, bot: x.bot, token: x.look })), seed: crypto.randomInt(1, 2 ** 31), timer: 120 });
           room.startedAt = Date.now(); schedule(room); broadcast(room);
         }
