@@ -598,8 +598,8 @@ function doSpin(s, p) {
     if (n >= need) {
       p.stuck = null; const extra = p.titulo === 'magister' ? 2 : 0;
       apply(s, p, { k: g.k + extra, c: g.contacto }, 'defensa aprobada');
-      fx(s, { kind: 'card', pid: p.id, title: '¡Defensa aprobada!', text: `${p.guia} te aprueba: sacaste ${n}, necesitabas ${need}.`, eff: `+${g.k + extra} Conocimiento${g.contacto ? ', +1 contacto' : ''}` });
-    } else { log(s, `${p.name} sacó ${n} en la defensa (necesitaba ${need}). A corregir.`, p.id); fx(s, { kind: 'card', pid: p.id, title: 'Correcciones', text: `${p.guia} te pide correcciones. Sacaste ${n}, necesitabas ${need}.` }); }
+      fx(s, { kind: 'card', pid: p.id, title: '¡Defensa aprobada!', nota: nota(n, need), text: `${p.guia} te pone un ${nota(n, need)}.`, eff: `+${g.k + extra} Conocimiento${g.contacto ? ', +1 contacto' : ''}` });
+    } else { log(s, `${p.name} sacó un ${nota(n, need)} en la defensa. A corregir.`, p.id); fx(s, { kind: 'card', pid: p.id, title: 'Correcciones', nota: nota(n, need), text: `${p.guia} te pone un ${nota(n, need)} y te pide correcciones.` }); }
     return endTurn(s);
   }
   if (P.reason === 'efecto') {
@@ -612,9 +612,9 @@ function doSpin(s, p) {
     const other = s.players.find(o => o.id === P.ctx.partner); const node = NODE(P.ctx.node);
     const pop = 0; const nn = n;
     const alto = node.tier === 'alta';
-    if (nn >= 6) { const e = { k: alto ? 2 : 1 }; apply(s, p, e, node.name); apply(s, other, e, node.name); fx(s, { kind: 'card', pid: p.id, title: 'Proyecto aprobado', text: `${p.name} y ${other.name} sacaron ${n}${pop ? ' +1 (líder en Vida Social)' : ''}.`, eff: `Ambos +${e.k} Conocimiento`, good: true }); }
+    if (nn >= 6) { const e = { k: alto ? 2 : 1 }; apply(s, p, e, node.name); apply(s, other, e, node.name); fx(s, { kind: 'card', pid: p.id, title: 'Proyecto aprobado', nota: nota(n, 6), text: `${p.name} y ${other.name} se sacaron un ${nota(n, 6)}.`, eff: `Ambos +${e.k} Conocimiento`, good: true }); }
     else if (nn <= 2) { apply(s, p, { v: -1, k: 1 }, 'hiciste todo tú'); apply(s, other, { v: 1 }, 'no hizo nada'); fx(s, { kind: 'card', pid: p.id, title: 'El que no hizo nada', text: `${other.name} desapareció del grupo y tú hiciste todo.`, eff: `Tú +1 Conocimiento −1 Vida Social; ${other.name} +1 Vida Social` }); }
-    else { fx(s, { kind: 'card', pid: p.id, title: 'Proyecto con observaciones', text: `Sacaron ${n}. Pasaron raspando.`, eff: 'Sin efecto' }); log(s, `${node.name}: pasaron raspando.`, p.id); }
+    else { fx(s, { kind: 'card', pid: p.id, title: 'Proyecto con observaciones', nota: '4,0', text: 'Se sacaron un 4,0 raspando.', eff: 'Sin efecto' }); log(s, `${node.name}: pasaron raspando.`, p.id); }
     return endTurn(s);
   }
   if (P.reason === 'becaMag') {
@@ -769,15 +769,21 @@ function modsAscenso(s, p, node) {
   if (bono(p) > 1) mods.push({ i: '📚', v: -1, l: 'Conocimiento 8+' });
   return mods;
 }
+// Nota chilena (1,0 a 7,0) a partir del número de la ruleta: llegar al mínimo es un 4,0
+function nota(n, need) {
+  need = Math.min(10, Math.max(2, need || 6));
+  const v = n >= need ? 4 + (need >= 10 ? 3 : (n - need) / (10 - need) * 3) : 1 + (n - 1) / (need - 1) * 2.9;
+  return v.toFixed(1).replace('.', ',');
+}
 function rendir(s, p, n, carry) {
   const node = NODE(p.stuck.node); const u = umbralFiltro(s, p, node);
   if ((p.fails[node.id] || 0) >= 2) apply(s, p, { m: -CFG.carta, v: -1 }, 'carta');
   if (n >= u.need) {
     p.passed[node.id] = true; p.stuck = null;
-    log(s, `${p.name} aprobó ${node.name} con ${n} (necesitaba ${u.need}).`, p.id);
+    log(s, `${p.name} aprobó ${node.name} con un ${nota(n, u.need)}.`, p.id);
     apply(s, p, { v: 1 }, 'carrete post-certamen');
     if (u.helper) apply(s, u.helper, { m: 100, k: 1 }, `ayudantía a ${p.name}`);
-    fx(s, { kind: 'card', pid: p.id, title: `¡Aprobaste ${node.name}!`, text: `Sacaste ${n}, necesitabas ${u.need}.` + (carry ? ` Sigues avanzando ${carry} casilla${carry > 1 ? 's' : ''}.` : ''), eff: '+1 Vida Social (carrete post-certamen)' + (u.helper ? ` · ${u.helper.name} cobra la ayudantía: +$100.000 y +1 Conocimiento` : ''), good: true });
+    fx(s, { kind: 'card', pid: p.id, title: `¡Aprobaste ${node.name}!`, nota: nota(n, u.need), text: `Te sacaste un ${nota(n, u.need)} en el certamen.` + (carry ? ` Sigues avanzando ${carry} casilla${carry > 1 ? 's' : ''}.` : ''), eff: '+1 Vida Social (carrete post-certamen)' + (u.helper ? ` · ${u.helper.name} cobra la ayudantía: +$100.000 y +1 Conocimiento` : ''), good: true });
     if (carry) return move(s, p, carry);
   } else {
     p.fails[node.id] = (p.fails[node.id] || 0) + 1;
@@ -785,8 +791,8 @@ function rendir(s, p, n, carry) {
     const total = Object.values(p.fails).reduce((a, b) => a + b, 0);
     if (p.fin === 'beca' && !p.becaLost && (p.fails[node.id] >= CFG.becaPierde.mismo || total >= CFG.becaPierde.total)) { p.becaLost = true; extra = ' Perdiste la beca.'; }
     if (p.fails[node.id] === 2) extra += ' Quedaste en causal: desde ahora cada intento requiere carta.';
-    log(s, `${p.name} reprobó ${node.name} con ${n} (necesitaba ${u.need}).${extra}`, p.id);
-    fx(s, { kind: 'card', pid: p.id, title: `Reprobaste ${node.name}`, text: `Sacaste ${n}, necesitabas ${u.need}.${extra}`, eff: 'Lo intentas de nuevo el próximo turno' });
+    log(s, `${p.name} reprobó ${node.name} con un ${nota(n, u.need)}.${extra}`, p.id);
+    fx(s, { kind: 'card', pid: p.id, title: `Reprobaste ${node.name}`, nota: nota(n, u.need), text: `Te sacaste un ${nota(n, u.need)}: no alcanzó para el 4,0.${extra}`, eff: 'Lo intentas de nuevo el próximo turno' });
   }
   endTurn(s);
 }
@@ -827,7 +833,7 @@ function duelo(s, p, o, node) {
   const pa = a, pb = b;
   const work = node.work; const title = work ? 'Licitación' : 'Duelo de certamen';
   fx(s, { kind: 'duel', a: { pid: p.id, n: a }, b: { pid: o.id, n: b } });
-  let txt = `${p.name} sacó ${a}${pa > a ? ' +1' : ''}; ${o.name} sacó ${b}${pb > b ? ' +1' : ''}.`, eff;
+  let txt = work ? `${p.name} ofertó ${a}; ${o.name} ofertó ${b}.` : `${p.name} se sacó un ${nota(a, 5)}; ${o.name}, un ${nota(b, 5)}.`, eff;
   if (pa === pb) { apply(s, p, { k: 1 }, title); apply(s, o, { k: 1 }, title); eff = 'Empate: ambos +1 Conocimiento'; }
   else {
     const [w, l] = pa > pb ? [p, o] : [o, p];
