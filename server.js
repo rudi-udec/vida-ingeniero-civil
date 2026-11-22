@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 const INDEX = fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
 const BOT_NAMES = ['Bot Mechón', 'Bot Memorista', 'Bot Ayudante', 'Bot Magíster', 'Bot Carretero', 'Bot Senior'];
 const IDLE_MAX_MS = 25000;   // máximo que un bot espera a que los demás terminen de ver las tarjetas
-const BOT_DELAY_MS = 900;
+const BOT_DELAY_MS = 2200;
 const DISCONNECTED_MS = 20000; // un humano desconectado juega en automático tras este tiempo
 
 const server = http.createServer((req, res) => {
@@ -43,7 +43,7 @@ function broadcast(room) {
     send(seat.ws, {
       t: 'room', code: room.code, host: i === 0, you: pidOf(i), timer: room.timer,
       seats: room.seats.map((x, j) => ({ name: x.name, bot: x.bot, token: x.look, connected: !!x.ws, you: j === i })),
-      state: s, deadline: room.deadline || 0, deadlineIn: room.deadline ? room.deadline - Date.now() : 0,
+      state: s, elapsed: room.startedAt ? Date.now() - room.startedAt : null, deadline: room.deadline || 0, deadlineIn: room.deadline ? room.deadline - Date.now() : 0,
       turnOf: cur ? cur.id : null,
     });
   });
@@ -88,7 +88,7 @@ wss.on('connection', ws => {
     let m; try { m = JSON.parse(raw); } catch (e) { return; }
     if (m.t === 'create') {
       const name = String(m.name || '').trim().slice(0, 16) || 'Jugador';
-      room = { code: newCode(), seats: [{ name, bot: false, token: token(), ws, look: 'casco' }], state: null, timer: true, lastActive: Date.now() };
+      room = { code: newCode(), seats: [{ name, bot: false, token: token(), ws, look: 'casco' }], state: null, timer: true, lastActive: Date.now(), chat: [] };
       rooms.set(room.code, room); seatI = 0;
       send(ws, { t: 'joined', code: room.code, token: room.seats[0].token });
       return broadcast(room);
@@ -102,6 +102,7 @@ wss.on('connection', ws => {
       const usedL = new Set(r.seats.map(x => x.look)); r.seats.push({ name, bot: false, token: token(), ws, look: G.TOKENS.find(t => !usedL.has(t)) || 'casco' });
       room = r; seatI = r.seats.length - 1;
       send(ws, { t: 'joined', code: r.code, token: r.seats[seatI].token });
+      send(ws, { t: 'chatlog', list: r.chat });
       return broadcast(r);
     }
     if (m.t === 'rejoin') {
@@ -111,6 +112,7 @@ wss.on('connection', ws => {
       if (r.seats[i].ws && r.seats[i].ws !== ws) try { r.seats[i].ws.close(); } catch (e) {}
       r.seats[i].ws = ws; r.seats[i].idle = 0; room = r; seatI = i;
       send(ws, { t: 'joined', code: r.code, token: m.token });
+      send(ws, { t: 'chatlog', list: r.chat || [] });
       if (r.state) schedule(r);
       return broadcast(r);
     }
@@ -138,7 +140,7 @@ wss.on('connection', ws => {
       case 'start':
         if (isHost && !room.state && room.seats.length >= 2) {
           room.state = G.newGame({ players: room.seats.map(x => ({ name: x.name, bot: x.bot, token: x.look })), seed: crypto.randomInt(1, 2 ** 31), timer: 120 });
-          schedule(room); broadcast(room);
+          room.startedAt = Date.now(); schedule(room); broadcast(room);
         }
         break;
       case 'act': {
@@ -148,6 +150,18 @@ wss.on('connection', ws => {
         if (!act(room, Object.assign({}, m.a, { pid: cur.id }))) broadcast(room);
         break;
       }
+      case 'chat': {
+        const seat = room.seats[seatI]; if (!seat) break;
+        const now = Date.now(); if (now - (seat.lastChat || 0) < 700) break; seat.lastChat = now;
+        const text = String(m.text || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 200); if (!text) break;
+        const msg = { i: seatI, name: seat.name, text, t: now };
+        room.chat = room.chat || []; room.chat.push(msg); if (room.chat.length > 50) room.chat.shift();
+        room.seats.forEach(x => { if (x.ws) send(x.ws, { t: 'chat', msg }); });
+        break;
+      }
+      case 'step': // quien tiene el turno avanzó una tarjeta: avanza en todas las pantallas
+        room.seats.forEach((x, j) => { if (j !== seatI && x.ws) send(x.ws, { t: 'step', i: m.i }); });
+        break;
       case 'idle': room.seats[seatI] && (room.seats[seatI].idle = Math.max(room.seats[seatI].idle || 0, +m.seq || 0)); break;
       case 'leave':
         if (!room.state) { room.seats.splice(seatI, 1); if (!room.seats.some(x => !x.bot)) rooms.delete(room.code); else broadcast(room); }

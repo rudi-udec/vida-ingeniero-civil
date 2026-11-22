@@ -60,6 +60,7 @@ label.check { display: inline-flex; gap: 8px; align-items: center; font-weight: 
 /* ---------- Juego ---------- */
 #game { height: 100%; display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); }
 header.top { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: var(--tinta); background: var(--casco); border-bottom: 3px solid var(--tinta); }
+@media (max-width: 480px) { header.top h1 { visibility: hidden; } header.top { gap: 5px; padding: 8px 8px; } .chip { padding: 3px 7px; } }
 header.top h1 { font-size: 16px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #fff; border: 2px solid var(--tinta); white-space: nowrap; }
 .chip.warn { background: #ffb3a8; }
@@ -121,7 +122,52 @@ table.res { width: 100%; border-collapse: collapse; font-variant-numeric: tabula
 table.res th, table.res td { padding: 6px 4px; border-bottom: 2px solid #ddd3b8; text-align: right; }
 table.res th:first-child, table.res td:first-child { text-align: left; }
 .toast { position: fixed; left: 50%; top: 60px; transform: translateX(-50%); background: var(--casco); color: var(--tinta); border: 2px solid var(--tinta); padding: 8px 14px; border-radius: 999px; font-weight: 700; z-index: 30; animation: pop .2s; pointer-events: none; max-width: 92vw; text-align: center; }
-@media (prefers-reduced-motion: reduce) { #wheel { transition: none; } .modal, .toast { animation: none; } #boardWrap { scroll-behavior: auto; } }
+/* ---------- Ruleta grande, cartel de turno, anfitrión ---------- */
+.spinLayer { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(9, 22, 38, .45); pointer-events: none; padding: 16px; }
+.spinBox { display: grid; gap: 8px; justify-items: center; background: var(--papel); border: 3px solid var(--tinta); border-radius: 24px; box-shadow: 0 8px 0 var(--tinta); padding: 16px 20px 18px; animation: pop .25s; max-width: 100%; }
+.spinBox h3 { font-size: 20px; display: flex; gap: 8px; align-items: center; text-align: center; }
+#bigWheel svg { width: min(70vw, 300px); height: min(70vw, 300px); display: block; }
+#bigWheel .wg { transition: transform 2.6s cubic-bezier(.12, .8, .2, 1); }
+.bignum { font-family: var(--display); font-size: 64px; line-height: 1; min-height: 64px; }
+.bignum.pop { animation: numpop .55s ease-out; }
+@keyframes numpop { 0% { transform: scale(.3); opacity: 0; } 60% { transform: scale(1.35); } 100% { transform: none; opacity: 1; } }
+.banner { position: fixed; left: 0; right: 0; top: 36%; z-index: 26; display: flex; justify-content: center; pointer-events: none; padding: 0 12px; }
+.banner > div { background: var(--casco); border: 3px solid var(--tinta); border-radius: 18px; box-shadow: 0 6px 0 var(--tinta); padding: 12px 22px; font-family: var(--display); font-size: clamp(22px, 6vw, 34px); display: flex; gap: 12px; align-items: center; animation: slidein .45s ease-out; text-align: center; }
+@keyframes slidein { from { transform: translateX(-60vw); opacity: 0; } to { transform: none; opacity: 1; } }
+.host { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: end; text-align: left; }
+.duelBox { display: flex; gap: 10px; align-items: center; }
+.duelSide { display: grid; justify-items: center; gap: 6px; }
+.duelSide h3 { font-size: 16px; }
+.dw svg { width: min(36vw, 220px); height: min(36vw, 220px); display: block; }
+.dw .wg { transition: transform 2.8s cubic-bezier(.12, .8, .2, 1); }
+.vs { font-family: var(--display); font-size: 22px; }
+.histItem { background: #fffaf0; border: 2px solid var(--tinta); border-radius: 12px; padding: 8px 10px; font-size: 13.5px; }
+.histItem b { display: block; }
+.evchip { cursor: pointer; }
+.host svg .m-o, .host svg .lids { display: none; }
+.host.blink svg .lids { display: inline; }
+.host.open svg .m-o { display: inline; } .host.open svg .m-c { display: none; }
+.host.talking svg { animation: bob .3s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+.host svg.char { border-radius: 12px; background: #f4efe1; border: 2px solid var(--tinta); }
+@keyframes bob { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-3px) rotate(2deg); } }
+.host .bubble { cursor: pointer; min-height: 52px; }
+.bubble { background: #fff; border: 2px solid var(--tinta); border-radius: 14px 14px 14px 2px; padding: 8px 12px; font-size: 14px; }
+.bubble b { display: block; font-size: 12px; color: var(--gris); }
+.deltas { display: grid; gap: 6px; text-align: left; }
+.dgroup { background: #fff; border: 2px solid var(--tinta); border-radius: 12px; padding: 6px 10px; display: grid; gap: 3px; }
+.dgroup .who2 { font-weight: 700; display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--gris); }
+.dl { display: flex; gap: 8px; align-items: center; font-weight: 700; font-size: 16px; }
+.dl.up { color: #1e7a3d; } .dl.down { color: #b3261e; }
+.dl i { font-style: normal; width: 24px; text-align: center; }
+.float { font-family: var(--display); font-size: 13px; animation: floatup 1.8s ease-out forwards; pointer-events: none; }
+@keyframes floatup { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-40px); opacity: 0; } }
+.waitmsg { font-size: 13px; color: var(--gris); font-weight: 600; }
+.opt.chosen { background: var(--casco); }
+.opt:disabled { cursor: default; opacity: 1; }
+.evchip { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #ffe48a; border: 2px solid var(--tinta); }
+.evcard h2 { font-size: 26px; }
+input[type=range] { width: 100%; accent-color: #1d2430; }
+@media (prefers-reduced-motion: reduce) { #wheel, #bigWheel .wg { transition: none; } .modal, .toast, .banner > div, .bignum.pop, .spinBox { animation: none; } #boardWrap { scroll-behavior: auto; } }
 </style>
 </head>
 <body>
@@ -152,6 +198,7 @@ table.res th:first-child, table.res td:first-child { text-align: left; }
         <label class="check"><input type="checkbox" id="optFast"> Bots rápidos (sus tarjetas se cierran solas)</label>
       </div>
       <button class="btn primary" id="startBtn" type="button">Empezar partida local</button>
+      <button class="btn" id="setBtn2" type="button">🔊 Sonido y música</button>
       <div class="note" id="localNote">Todos juegan en este dispositivo, pasándolo en su turno, y se puede completar con bots.</div>
     </div>
   </div>
@@ -168,6 +215,11 @@ table.res th:first-child, table.res td:first-child { text-align: left; }
       <button class="btn primary" type="button" id="roomStart">Empezar partida</button>
     </div>
     <p id="waitHost" class="note hidden">Esperando a que quien creó la sala empiece la partida.</p>
+    <div id="roomChatSlot"><div id="chatBox" style="display:grid;gap:6px">
+      <div class="log" id="chatList" aria-live="polite" style="max-height:220px;min-height:60px"></div>
+      <form id="chatForm" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px"><input class="field" id="chatIn" maxlength="200" placeholder="Escribe un mensaje" aria-label="Mensaje" autocomplete="off"><button class="btn" type="submit" style="padding:8px 12px">Enviar</button></form>
+      <div class="row" id="quickChat" style="justify-content:flex-start;gap:6px"></div>
+    </div></div>
     <div class="err" id="roomErr"></div>
     <button class="btn" type="button" id="leaveRoom">Salir de la sala</button>
   </div>
@@ -178,12 +230,15 @@ table.res th:first-child, table.res td:first-child { text-align: left; }
     <h1>La vida de un Ingeniero Civil</h1>
     <span class="chip hidden" id="codeChip"></span>
     <span class="chip" id="roundChip">Ronda 1</span>
+    <span class="chip" id="clockChip" title="Tiempo de partida">⏱ 0:00</span>
     <span class="chip warn hidden" id="cdChip">Últimos turnos</span>
+    <button class="topbtn" id="setBtn" type="button" aria-label="Sonido y música">🔊</button>
     <button class="topbtn" id="rulesBtn" type="button">Reglas</button>
   </header>
   <div class="main">
     <div id="boardWrap"><svg id="board" xmlns="http://www.w3.org/2000/svg"></svg><div id="spaceInfo" class="hidden"></div></div>
     <aside id="panel">
+      <div id="evBar" class="row hidden" style="justify-content:flex-start;gap:6px"></div>
       <div class="turnbox">
         <div id="wheelBox" aria-hidden="true"></div>
         <div class="turninfo">
@@ -196,14 +251,21 @@ table.res th:first-child, table.res td:first-child { text-align: left; }
       <div class="tabs" role="tablist">
         <button role="tab" aria-selected="true" data-tab="players" type="button">Jugadores</button>
         <button role="tab" aria-selected="false" data-tab="log" type="button">Bitácora</button>
+        <button role="tab" aria-selected="false" data-tab="events" type="button" id="evTab">Eventos</button>
+        <button role="tab" aria-selected="false" data-tab="chat" type="button" id="chatTab" class="hidden">Chat <span id="chatBadge" class="tag lider hidden"></span></button>
       </div>
       <div class="players" id="players"></div>
       <div class="log hidden" id="log"></div>
+      <div id="chatSlot" class="hidden"></div>
+      <div id="evList" class="log hidden" style="max-height:none"></div>
     </aside>
   </div>
 </section>
 
 <div id="overlay" class="overlay hidden"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div id="spinLayer" class="spinLayer hidden" aria-live="polite"><div class="spinBox"><h3 id="spinWho"></h3><div class="waitmsg" id="spinWhy"></div><div id="bigWheel"></div><div class="bignum" id="bigNum"></div></div></div>
+<div id="banner" class="banner hidden" aria-live="polite"></div>
+<div id="duelLayer" class="spinLayer hidden" aria-live="polite"><div class="spinBox"><h3>Duelo</h3><div id="duelBox" class="duelBox"></div></div></div>
 
 <script>
 // ===== Motor de reglas: "La vida de un Ingeniero Civil" (v0.2) =====
@@ -236,20 +298,27 @@ const CFG = {
   suerte: 150,
   sueldoMult: 2, nivelSueldo: [1, 1.4, 1.8], magister: 300, contacto: 100,
   ascenso: [6, 7],
-  plataPorPunto: 400, bonoPrimero: 5, bonoCorona: 2, bonoLider: 3, bonoMulti: 2,
+  plataPorPunto: 600, bonoPrimero: 5, bonoCorona: 2, bonoLider: 3, bonoMulti: 2,
   liderPlata: 150,
   conv: { m: 300, k: 2 },
   rondasFinales: 3,
+  sueldoRonda: 0.10,          // los que trabajan ganan el 10% de su pago en cada ronda
+  becaMin: 6, becaCupos: 2,   // para la beca hay que sacar 6+ y hay 2 cupos por partida
+  becaPierde: { mismo: 2, total: 3 },
+  gobierno: 0.2,              // un cambio de gobierno sube o baja los pagos en 20%
+  ev: { maxPorPartida: 4, prob: 0.2, probLenta: 0.15, probRapida: 0.3, rondasEsperadas: 24 },
 };
 
 // ---------- Profes guía por mención ----------
 const PROFES_MEN = {
   geo: { alta: ['Montalva'], media: ['M. Valenzuela', 'Escribano'], baja: ['Martínez'] },
-  est: { alta: ['Cendoya'], media: ['Aguilar', 'Calderón', 'Opazo'], baja: ['Silva', 'Ramírez'] },
+  est: { alta: ['Cendoya', 'Calderón'], media: ['Aguilar', 'Opazo'], baja: ['Silva', 'Ramírez'] },
   hid: { alta: ['Link'], media: ['Stehr', 'Schwarz'], baja: ['Guerra', 'Veloso', 'Ramos', 'Morales'] },
   tra: { alta: ['Tudela', 'Echaveguren'], media: ['Victoriano'], baja: ['Carrasco', 'Dufeu', 'Tapia'] },
   con: { alta: ['Echaveguren', 'Merino'], media: [], baja: ['Orellana', 'R. Valenzuela', 'Ávalos'] },
 };
+// Profes que no guían tesis de magíster (Silva, Cendoya y los part-time)
+const NO_MAG = ['Silva', 'Cendoya', 'M. Valenzuela', 'González', 'R. Valenzuela', 'Ávalos', 'Martínez', 'Ramírez', 'Veloso', 'Ramos', 'Morales', 'Dufeu', 'Tapia'];
 const GUIA = {
   alta: { umbral: 7, dur: 3, k: 3, contacto: 1 },
   media: { umbral: 5, dur: 2, k: 2, contacto: 0 },
@@ -389,7 +458,7 @@ const SEG = {
     D('hermanos'),
     G('Física I', 'Plano inclinado sin roce, como tu semestre'),
     E('campanil'),
-    Q(),
+    E('general'),
     G('Cálculo I', 'Derivaste hasta en sueños'),
     G('Química General I', 'El lab olía a huevo podrido', { v: 1 }),
     R('Intro a la Ing. Civil', 'Escribano y Aguilar', 'media', 'Primera clase: te muestran todo lo que viene'),
@@ -412,11 +481,11 @@ const SEG = {
     D('pareja'),
     P(),
     S('atrasado', { name: 'Ramo atrasado', dif: 'baja' }),
-    R('Estática', 'Calderón', 'media', 'Calderón pide las reacciones de la viga'),
+    R('Estática', 'Calderón', 'alta', 'Calderón pide las reacciones de la viga'),
     DU(),
     F('Complemento de Cálculo', null, 'media'),
     R('Geomática', 'Orellana', 'baja', 'Nivelación topográfica con Orellana'),
-    Q(),
+    E('general'),
     E('tm'),
     P(),
   ],
@@ -437,10 +506,10 @@ const SEG = {
     E('campanil'),
     P(),
     G('Innovación', 'Te quedaste dormido en Innovación', { k: -1, v: 1 }),
-    Q(),
+    E('general'),
     R('Sistemas de Transporte', 'Tudela y Victoriano', 'alta', 'Tudela pregunta el modelo de 4 etapas'),
     F('Ingeniería de Suelos', 'Escribano', 'alta'),
-    R('Hormigón Armado', 'Calderón', 'media', 'Calderón revisa tu cuantía'),
+    R('Hormigón Armado', 'Calderón', 'alta', 'Calderón revisa tu cuantía'),
     E('matadero'),
     P(),
     R('Ingeniería Antisísmica', 'Cendoya', 'alta', 'Cendoya pide el espectro de diseño'),
@@ -452,7 +521,7 @@ const SEG = {
   ],
   mencion: {
     geo: [R('Estructuras de Retención', 'M. Valenzuela', 'media', 'Muro de contención con M. Valenzuela'), R('Mec. de Suelos en Ing. Vial', 'M. Valenzuela', 'media', 'Ensayo de suelos para un camino'), Q(), F('Ing. Geotécnica-Sísmica', 'Montalva', 'alta'), R('Modelamiento Numérico Geotécnico', 'Martínez', 'baja', 'El modelo de Martínez por fin corre'), R('Mec. de Suelos Avanzada', 'Escribano', 'media', 'Escribano pide el triaxial completo'), R('Geoingeniería en Terreno', 'Montalva y Escribano', 'alta', 'Terreno con Montalva y Escribano'), P()],
-    est: [R('Hormigón Armado Avanzado', 'Aguilar', 'media', 'Aguilar revisa tu armadura'), R('Estructuras de Acero', 'Silva', 'baja', 'Conexiones de acero con Silva'), Q(), F('Elementos Finitos', 'Cendoya', 'alta'), R('Diseño Sismorresistente', 'Calderón', 'media', 'Calderón pide la tarea en Python con la API de SAP2000'), R('Diseño de Edificios de HA', 'Opazo', 'media', 'Opazo revisa tu modelo en ETABS'), R('Ingeniería de Puentes', 'Aguilar, Montalva y Link', 'alta', 'Puente diseñado con Aguilar, Montalva y Link'), P()],
+    est: [R('Hormigón Armado Avanzado', 'Aguilar', 'media', 'Aguilar revisa tu armadura'), R('Estructuras de Acero', 'Silva', 'baja', 'Conexiones de acero con Silva'), Q(), F('Elementos Finitos', 'Cendoya', 'alta'), R('Diseño Sismorresistente', 'Calderón', 'alta', 'Calderón pide la tarea en Python con la API de SAP2000'), R('Diseño de Edificios de HA', 'Opazo', 'media', 'Opazo revisa tu modelo en ETABS'), R('Ingeniería de Puentes', 'Aguilar, Montalva y Link', 'alta', 'Puente diseñado con Aguilar, Montalva y Link'), P()],
     hid: [R('Hidráulica Urbana', 'Ramos', 'baja', 'Ramos diseña un colector contigo'), R('Ingeniería Sanitaria', 'Schwarz', 'media', 'Planta de tratamiento con Schwarz'), Q(), F('Hidrología Distribuida', 'Stehr', 'alta'), R('Ingeniería de Costas', 'Guerra', 'baja', 'Terreno en la playa con Guerra'), R('Ingeniería de Ríos', 'Link', 'alta', 'Link te explica el transporte de sedimentos'), R('Obras Hidráulicas', 'Morales', 'baja', 'Bocatoma diseñada con Morales'), P()],
     tra: [R('Demanda de Transportes', 'Carrasco', 'baja', 'Carrasco te hace una encuesta origen-destino'), R('Ingeniería de Tráfico', 'Dufeu', 'baja', 'Conteo vehicular con Dufeu'), Q(), F('Seguridad Vial', 'Echaveguren', 'alta'), R('Redes de Transporte', 'Tapia', 'baja', 'Tapia te pide la ruta mínima'), R('Ciudad y Transporte', 'Carrasco', 'baja', 'Clase de Ciudad y Transporte con Carrasco'), R('Planificación y Economía de Transporte', 'Tudela', 'alta', 'Tudela evalúa tu proyecto vial'), P()],
     con: [R('Diseño de Pavimentos', 'Echaveguren', 'alta', 'Echaveguren te pide recalcular el espesor del pavimento'), R('Materiales Avanzados', 'Merino', 'alta', 'Merino trae un material innovador y sustentable a clase'), Q(), F('Gestión de Infraestructura de Transporte', 'Echaveguren', 'alta'), R('Planificación y Control de Proyectos', 'Orellana', 'baja', 'Carta Gantt entregada a tiempo con Orellana'), R('Edificación', 'R. Valenzuela', 'baja', 'Clase de Edificación con R. Valenzuela'), R('Inspección Técnica de Obras', 'Ávalos', 'baja', 'Ávalos te manda a inspeccionar una obra'), P()],
@@ -526,14 +595,15 @@ function newGame({ players, seed, timer }) {
       stuck: null, skip: 0, finished: false, finishRank: 0, turnsLeft: null,
     })),
     pending: { kind: 'spin', reason: 'orden', label: 'Girar para el orden' },
-    log: [], seq: 0, fx: [], firstSenior: null, finishCount: 0, leaders: { m: null, k: null, v: null },
+    log: [], seq: 0, fx: [], acc: [], firstSenior: null, finishCount: 0, leaders: { m: null, k: null, v: null },
+    ev: { on: false, count: 0, used: [], hist: [], lastJefe: -99, jefe: 'Silva', gob: { mult: 1, name: null }, act: {}, tarea: null, buy: null },
   };
   log(s, 'Cada jugador gira para definir el orden. Ese número queda como su número de la suerte.');
   return s;
 }
 const cur = s => s.players[s.turn];
 function log(s, txt, pid) { s.log.push({ i: ++s.seq, t: txt, p: pid ?? null }); if (s.log.length > 80) s.log.shift(); }
-function fx(s, f) { f.i = ++s.seq; s.fx.push(f); }
+function fx(s, f) { f.i = ++s.seq; if (f.kind === 'card' || f.kind === 'event' || f.kind === 'income') { f.deltas = s.acc; s.acc = []; f.host = s.ev.jefe; } s.fx.push(f); }
 const bono = p => Math.min(CFG.bonoMax, Math.floor(Math.max(0, p.k) / CFG.bonoCada));
 const estudiando = p => !p.pega;
 
@@ -558,14 +628,20 @@ const LIDER = {
 };
 const isL = (s, p, key) => s.leaders && s.leaders[key] === p.id;
 
-function apply(s, p, e, src) {
+const act = (s, k) => !!(s.ev && s.ev.act[k] && s.round < s.ev.act[k].end);
+function apply(s, p, e, src, raw) {
   if (!e) return '';
-  const parts = [];
-  if (e.m) { p.m += e.m; parts.push((e.m > 0 ? '+' : '') + fmt(e.m)); }
-  if (e.k) { p.k += e.k; parts.push((e.k > 0 ? '+' : '−') + Math.abs(e.k) + ' Conocimiento'); }
-  if (e.v) { p.v += e.v; parts.push((e.v > 0 ? '+' : '−') + Math.abs(e.v) + ' Vida Social'); }
-  if (e.c) { p.c += e.c; parts.push('+' + e.c + ' contacto'); }
-  if (e.skip) { p.skip += e.skip; parts.push('pierdes un turno'); }
+  const parts = []; e = Object.assign({}, e);
+  if (!raw && e.v > 0) {
+    if (act(s, 'pandemia')) e.v = 0;
+    else if (act(s, 'paro') || act(s, 'aniversario')) e.v *= 2;
+  }
+  const d = (key, val) => { if (val) s.acc.push({ pid: p.id, key, val }); };
+  if (e.m) { p.m += e.m; parts.push((e.m > 0 ? '+' : '') + fmt(e.m)); d('m', e.m); }
+  if (e.k) { p.k += e.k; parts.push((e.k > 0 ? '+' : '−') + Math.abs(e.k) + ' Conocimiento'); d('k', e.k); }
+  if (e.v) { p.v += e.v; parts.push((e.v > 0 ? '+' : '−') + Math.abs(e.v) + ' Vida Social'); d('v', e.v); }
+  if (e.c) { p.c += e.c; parts.push('+' + e.c + ' contacto'); d('c', e.c); }
+  if (e.skip) { p.skip += e.skip; parts.push('pierdes un turno'); d('skip', e.skip); }
   if (parts.length) log(s, `${p.name}: ${parts.join(', ')}${src ? ' (' + src + ')' : ''}`, p.id);
   return parts.join(', ');
 }
@@ -578,12 +654,28 @@ function beginTurn(s) {
     const p = cur(s);
     if (p.finished || (p.turnsLeft !== null && p.turnsLeft <= 0)) { advance(s); continue; }
     if (p.turnsLeft !== null) p.turnsLeft--;
-    if (p.skip > 0) { p.skip--; log(s, `${p.name} pierde este turno.`, p.id); advance(s); continue; }
+    if (p.skip > 0) { p.skip--; log(s, `${p.name} pierde este turno.`, p.id); fx(s, { kind: 'skip', pid: p.id }); advance(s); continue; }
     s.pending = null;
     if (!p.via) return ask(s, 'via');
     if (!p.fin) return ask(s, 'fin');
+    if (s.ev.buy && s.ev.buy.left.includes(p.id)) { s.ev.buy.left = s.ev.buy.left.filter(x => x !== p.id); return ask(s, 'compra', { kind: s.ev.buy.kind }); }
+    return continueTurn(s, p);
+  }
+}
+function continueTurn(s, p) {
+  {
+    const T = s.ev.tarea;
+    if (T && T.in.includes(p.id)) {
+      const x = tareaX(s);
+      s.pending = { kind: 'spin', reason: 'tarea', label: `Salir de la tarea (más de ${x})` };
+      return;
+    }
     if (p.stuck) {
       const st = p.stuck;
+      if (st.kind === 'defensa' && act(s, 'congreso') && s.ev.act.congreso.prof === p.guia) {
+        fx(s, { kind: 'card', pid: p.id, title: 'Tu profe guía está en un congreso', text: `${p.guia} vuelve en unas rondas. No puedes defender todavía.`, eff: '' });
+        return endTurn(s);
+      }
       if (st.kind === 'defensa' && st.wait > 0) {
         st.wait--; apply(s, p, { k: 1 }, 'trabajando en la ' + (p.titulo === 'magister' ? 'tesis' : 'memoria'));
         fx(s, { kind: 'card', pid: p.id, title: 'Trabajando en la ' + (p.titulo === 'magister' ? 'tesis' : 'memoria'), text: st.wait > 0 ? `Te quedan ${st.wait} turno${st.wait > 1 ? 's' : ''} antes de defender.` : 'El próximo turno defiendes.', eff: '+1 Conocimiento' });
@@ -598,7 +690,7 @@ function beginTurn(s) {
 }
 function advance(s) {
   s.turn = (s.turn + 1) % s.players.length;
-  if (s.turn === 0) s.round++;
+  if (s.turn === 0) { s.round++; roundStart(s); }
 }
 function endTurn(s) { computeLeaders(s); s.pending = null; advance(s); beginTurn(s); }
 function gameOver(s) { return s.players.every(p => p.finished || (p.turnsLeft !== null && p.turnsLeft <= 0)); }
@@ -610,10 +702,15 @@ function ask(s, kind, ctx) {
   if (kind === 'via') Object.assign(P, { title: 'Ingreso a la carrera', text: '¿Cómo entras a Ingeniería Civil?', options: [
     { id: 'paes', label: 'PAES', sub: 'Haces toda la nivelación. Partes con +2 Conocimiento.' },
     { id: 'conv', label: 'Convalidación', sub: `Te saltas el primer semestre, partes con +${CFG.conv.k} Conocimiento y ${fmt(CFG.conv.m)}, pero te espera un ramo atrasado en Los Cubos.` }] });
-  if (kind === 'fin') Object.assign(P, { title: 'Financiamiento', text: '¿Cómo vas a pagar la carrera? Cobras al caer en "Fin de semestre".', options: [
-    { id: 'trabajando', label: 'Trabajando', sub: `${fmt(CFG.pagoEstudio.trabajando)} por pago, pero los filtros te cuestan +1.` },
-    { id: 'beca', label: 'Beca', sub: `${fmt(CFG.pagoEstudio.beca)} por pago. Si repruebas un filtro, la pierdes.` },
-    { id: 'familia', label: 'Familia', sub: `Partes con ${fmt(CFG.familiaExtra)} extra y recibes ${fmt(CFG.pagoEstudio.familia)} por pago.` }] });
+  if (kind === 'fin') {
+    const becados = s.players.filter(o => o.fin === 'beca').length;
+    const opts = [{ id: 'trabajando', label: 'Trabajando', sub: `${fmt(CFG.pagoEstudio.trabajando)} por pago y ${Math.round(CFG.sueldoRonda * 100)}% de eso en cada ronda, pero los filtros te cuestan +1.` }];
+    if (!ctx || !ctx.noBeca) opts.push(becados < CFG.becaCupos
+      ? { id: 'beca', label: 'Postular a beca', sub: `Gira: necesitas ${CFG.becaMin}+. ${fmt(CFG.pagoEstudio.beca)} por pago. Se pierde con ${CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${CFG.becaPierde.total} en total. Cupos: ${CFG.becaCupos - becados} de ${CFG.becaCupos}.` }
+      : { id: 'sinCupo', label: 'Beca: sin cupos', sub: `Ya hay ${CFG.becaCupos} becados en la partida.`, disabled: true });
+    opts.push({ id: 'familia', label: 'Familia', sub: `Partes con ${fmt(CFG.familiaExtra)} extra y recibes ${fmt(CFG.pagoEstudio.familia)} por pago.` });
+    Object.assign(P, { title: 'Financiamiento', text: ctx && ctx.noBeca ? 'No alcanzaste la beca. Elige otra forma de pagar la carrera.' : '¿Cómo vas a pagar la carrera? Cobras al caer en "Fin de semestre".', options: opts.filter(o => !o.disabled), shown: opts });
+  }
   if (kind === 'forkM') Object.assign(P, { title: 'Elegir mención', text: 'Terreno u Oficina: elige tu mención. Tu profe guía será de esta mención.', options: Object.entries(MENCIONES).map(([id, m]) => {
     const others = s.players.filter(o => o !== p && o.mencion === id).map(o => o.name);
     return { id, label: m.name, group: m.rama, sub: (others.length ? `Grupo de estudio con ${others.join(', ')} · ` : '') + `Pegas: ${PEGAS_POR[id].map(x => PEGAS[x].name).join(', ')}` };
@@ -622,10 +719,10 @@ function ask(s, kind, ctx) {
     { id: 'memoria', label: 'Memoria', sub: 'Camino corto: sales antes a trabajar.' },
     { id: 'magister', label: 'Magíster', sub: `Camino largo: más Conocimiento, +${fmt(CFG.magister)} de sueldo y acceso a Academia.` }] });
   if (kind === 'guia') {
-    const T = PROFES_MEN[p.mencion];
-    Object.assign(P, { title: 'Elegir profe guía', text: `Profes de ${MENCIONES[p.mencion].name}. Más exigente = más difícil y más largo, pero mejor recompensa.`, options: [].concat(
-      ...['alta', 'media', 'baja'].map(t => T[t].map(name => ({ id: name, label: name, group: { alta: 'Exigencia alta', media: 'Exigencia media', baja: 'Exigencia baja' }[t],
-        sub: `Defiendes con ${GUIA[t].umbral}+ · ${GUIA[t].dur} turno${GUIA[t].dur > 1 ? 's' : ''} de trabajo · +${GUIA[t].k} Conocimiento${GUIA[t].contacto ? ' y un contacto' : ''}` })))) });
+    const T = PROFES_MEN[p.mencion]; const mag = p.titulo === 'magister';
+    Object.assign(P, { title: 'Elegir profe guía', text: `Profes de ${MENCIONES[p.mencion].name}${mag ? ' que guían tesis de magíster' : ''}. Más exigente = más difícil y más largo, pero mejor recompensa.`, options: [].concat(
+      ...['alta', 'media', 'baja'].map(t0 => T[t0].filter(name => !mag || !NO_MAG.includes(name)).map(name => { const t = guiaTier(s, p.mencion, name); return { id: name, label: name, group: { alta: 'Exigencia alta', media: 'Exigencia media', baja: 'Exigencia baja' }[t0],
+        sub: `Defiendes con ${GUIA[t].umbral}+ · ${GUIA[t].dur} turno${GUIA[t].dur > 1 ? 's' : ''} de trabajo · +${GUIA[t].k} Conocimiento${GUIA[t].contacto ? ' y un contacto' : ''}` }; }))) });
   }
   if (kind === 'pega') {
     let ids = [...PEGAS_POR[p.mencion]]; if (p.titulo === 'magister' && !ids.includes('academia')) ids.push('academia');
@@ -643,6 +740,10 @@ function ask(s, kind, ctx) {
     Object.assign(P, { title: d.q, text: 'Elige una opción.', options: [
       { id: 'a', label: d.a[0], sub: d.a[2] || effText(d.a[1]) }, { id: 'b', label: d.b[0], sub: d.b[2] || effText(d.b[1]) }] });
   }
+  if (kind === 'compra') {
+    const E = EVENTOS[ctx.kind];
+    Object.assign(P, { title: E.compra.q, text: E.compra.text, options: [{ id: 'si', label: E.compra.si, sub: effText(E.compra.e) }, { id: 'no', label: E.compra.no, sub: 'Sin efecto' }] });
+  }
   if (kind === 'otro') Object.assign(P, { title: ctx.title, text: ctx.text, options: s.players.filter(o => o !== p).map(o => ({ id: o.id, label: o.name, sub: `${fmt(o.m)} · ${o.k} Conocimiento · ${o.v} Vida Social` })) });
   s.pending = P;
 }
@@ -658,13 +759,14 @@ function effText(e) {
 // ---------- Acciones ----------
 function reduce(s0, a) {
   const s = structuredClone(s0);
-  s.fx = [];
+  s.fx = []; s.acc = [];
   if (!['play', 'order'].includes(s.phase) || !s.pending) return s0;
   const p = cur(s);
   if (a.pid && a.pid !== p.id) return s0;
   if (a.type === 'spin' && s.pending.kind === 'spin') doSpin(s, p);
   else if (a.type === 'choose' && s.pending.kind === 'choice' && s.pending.options.some(o => o.id === a.value)) doChoose(s, p, a.value);
   else return s0;
+  if (s.acc.length) fx(s, { kind: 'income', silent: true }); // cambios sin tarjeta: se muestran flotando
   return s;
 }
 
@@ -696,7 +798,19 @@ function doSpin(s, p) {
   }
   fx(s, { kind: 'spin', pid: p.id, n, reason: P.reason });
   lucky(s, p, n);
-  if (P.reason === 'move') { log(s, `${p.name} giró un ${n}.`, p.id); return move(s, p, n); }
+  if (P.reason === 'move') {
+    let steps = n; const why = [];
+    if (act(s, 'estallido') && !p.pega) { steps = Math.ceil(n / 2); why.push('estallido: la mitad'); }
+    if (act(s, 'temporal')) { steps = Math.max(1, steps - 1); why.push('temporal: −1'); }
+    log(s, `${p.name} giró un ${n}${why.length ? ` y avanza ${steps} (${why.join(', ')})` : ''}.`, p.id);
+    return move(s, p, steps);
+  }
+  if (P.reason === 'beca') {
+    if (n >= CFG.becaMin) { p.fin = 'beca'; log(s, `${p.name} ganó la beca con ${n}.`, p.id); fx(s, { kind: 'card', pid: p.id, title: '¡Ganaste la beca!', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}.`, eff: `${fmt(CFG.pagoEstudio.beca)} en cada fin de semestre`, good: true }); s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return; }
+    log(s, `${p.name} no alcanzó la beca (sacó ${n}).`, p.id); fx(s, { kind: 'card', pid: p.id, title: 'Sin beca', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}. Elige otra forma de financiar la carrera.` });
+    return ask(s, 'fin', { noBeca: true });
+  }
+  if (P.reason === 'tarea') return tareaSpin(s, p, n);
   if (P.reason === 'filtro') return rendir(s, p, n, (P.ctx && P.ctx.carry) || 0);
   if (P.reason === 'ascenso') {
     const node = NODE(p.stuck.node); const need = needAscenso(s, p, node);
@@ -709,7 +823,7 @@ function doSpin(s, p) {
     return endTurn(s);
   }
   if (P.reason === 'defensa') {
-    const t = tierOf(p.mencion, p.guia); const g = GUIA[t]; const need = needDefensa(s, p);
+    const t = guiaTier(s, p.mencion, p.guia); const g = GUIA[t]; const need = needDefensa(s, p);
     if (n >= need) {
       p.stuck = null; const extra = p.titulo === 'magister' ? 2 : 0;
       apply(s, p, { k: g.k + extra, c: g.contacto }, 'defensa aprobada');
@@ -772,20 +886,21 @@ function pago(s, p, n) {
   if (n.work) {
     if (!p.pega) return endTurn(s);
     let m = p.pega === 'emprende' ? Math.round((800 + pickI(s, 50) * 100 + (p.titulo === 'magister' ? CFG.magister : 0) + p.c * CFG.contacto) * CFG.nivelSueldo[p.nivel] / 10) * 10 : sueldo(p, p.pega, p.nivel);
+    m = Math.round(m * s.ev.gob.mult / 10) * 10;
     m += lp + (p.pareja ? CFG.pareja : 0) + (p.mascota ? CFG.mascota : 0);
     e = { m, v: 1 };
     if (['publico', 'ito', 'constructora'].includes(p.pega)) e.v = 2;
     if (p.pega === 'academia') e.k = 1;
     title = 'Día de pago';
   } else {
-    let m = p.fin === 'beca' && p.becaLost ? CFG.pagoEstudio.becaPerdida : CFG.pagoEstudio[p.fin];
+    let m = Math.round((p.fin === 'beca' && p.becaLost ? CFG.pagoEstudio.becaPerdida : CFG.pagoEstudio[p.fin]) * s.ev.gob.mult / 10) * 10;
     if (p.ayudante) m += CFG.ayudantePago;
     m += lp + (p.pareja ? CFG.pareja : 0) + (p.mascota ? CFG.mascota : 0) + (p.hermanos ? CFG.hermanos : 0);
     if (!p.ayudante && n.zone !== 'plato' && p.k >= CFG.ayudanteMinK) { p.ayudante = true; m += CFG.ayudantePago; log(s, `${p.name} ahora es ayudante: cobra más y ayuda en filtros que ya aprobó.`, p.id); }
     e = { m, v: 2 }; title = 'Fin de semestre y vacaciones';
   }
   const res = apply(s, p, e, title.toLowerCase());
-  fx(s, { kind: 'card', pid: p.id, title, text: lp ? 'Incluye el bono de líder en Plata.' : (p.ayudante && !n.work ? 'Incluye tu sueldo de ayudante.' : ''), eff: res, good: true });
+  fx(s, { kind: 'card', pid: p.id, title, text: [p.ayudante && !n.work ? 'Incluye tu sueldo de ayudante.' : '', s.ev.gob.mult !== 1 ? `${s.ev.gob.name}: pagos ${s.ev.gob.mult > 1 ? '+' : '−'}${Math.round(Math.abs(s.ev.gob.mult - 1) * 100)}%.` : ''].filter(Boolean).join(' '), eff: res, good: true });
   endTurn(s);
 }
 
@@ -794,6 +909,7 @@ function land(s, p, n, carry) {
   switch (n.type) {
     case 'pago': return pago(s, p, n);
     case 'ramo': {
+      if (n.tier === 'baja' && hard(s)) { const res = apply(s, p, TIER_EFF.media, n.name); fx(s, { kind: 'card', pid: p.id, title: n.name, text: n.text + ` (con el jefe ${s.ev.jefe}, este profe exige más)`, eff: res }); return endTurn(s); }
       if (n.e && n.e.spin) { s.pending = { kind: 'spin', reason: 'efecto', label: `Girar: ${n.name}`, ctx: { spin: n.e.spin, src: n.name } }; fx(s, { kind: 'card', pid: p.id, title: n.name, text: n.text, eff: `Gira: con ${n.e.spin.min} o más, +2 Conocimiento y +1 Vida Social; si no, −1 Vida Social`, wait: true }); return; }
       const res = apply(s, p, n.e, n.name);
       fx(s, { kind: 'card', pid: p.id, title: n.name, text: n.text, eff: res || 'Sin efecto' });
@@ -824,7 +940,7 @@ function land(s, p, n, carry) {
     }
     case 'guia': return ask(s, 'guia', { carry });
     case 'defensa': {
-      const g = GUIA[tierOf(p.mencion, p.guia)];
+      const g = GUIA[guiaTier(s, p.mencion, p.guia)];
       p.stuck = { kind: 'defensa', node: n.id, wait: g.dur - 1 };
       fx(s, { kind: 'card', pid: p.id, title: n.name, text: `${p.guia} es tu profe guía: ${g.dur} turno${g.dur > 1 ? 's' : ''} de trabajo y luego defiendes con ${needDefensa(s, p)}+.`, wait: p.stuck.wait <= 0 });
       if (p.stuck.wait <= 0) { s.pending = { kind: 'spin', reason: 'defensa', label: 'Girar por la defensa', ctx: {} }; return; }
@@ -858,11 +974,17 @@ function land(s, p, n, carry) {
 }
 
 function needAscenso(s, p, node) { return Math.max(2, CFG.ascenso[node.nivel - 1] - Math.min(2, p.c) - (bono(p) > 1 ? 1 : 0)); }
-function needDefensa(s, p) { return Math.max(2, GUIA[tierOf(p.mencion, p.guia)].umbral - bono(p)); }
+function needDefensa(s, p) { return Math.max(2, GUIA[guiaTier(s, p.mencion, p.guia)].umbral - bono(p)); }
+const hard = s => s.ev && s.ev.jefe !== 'Silva';
+function guiaTier(s, men, name) { const t = tierOf(men, name); return t === 'baja' && hard(s) ? 'media' : t; }
 function umbralFiltro(s, p, n) {
   let need = CFG.umbral[n.dif]; const parts = [`base ${need}`];
   const b = bono(p); if (b) { need -= b; parts.push(`−${b} por Conocimiento`); }
   if (p.fin === 'trabajando' && estudiando(p)) { need += 1; parts.push('+1 por trabajar'); }
+  if (hard(s)) { need += 1; parts.push(`+1 jefe ${s.ev.jefe}`); }
+  if (act(s, 'paro')) { need -= 1; parts.push('−1 paro'); }
+  if (act(s, 'pandemia')) { need -= 1; parts.push('−1 pruebas online'); }
+  if (act(s, 'congreso') && n.profe && n.profe.includes(s.ev.act.congreso.prof)) { need -= 2; parts.push(`−2 ${s.ev.act.congreso.prof} en congreso`); }
   const helper = s.players.find(o => o !== p && o.ayudante && o.passed[n.id]);
   if (helper) { need -= 1; parts.push(`−1 ayudante ${helper.name}`); }
   if ((p.fails[n.id] || 0) >= 2) parts.push(`carta: cuesta ${fmt(CFG.carta)} y 1 Vida Social`);
@@ -881,7 +1003,8 @@ function rendir(s, p, n, carry) {
   } else {
     p.fails[node.id] = (p.fails[node.id] || 0) + 1;
     let extra = '';
-    if (p.fin === 'beca' && !p.becaLost) { p.becaLost = true; extra = ' Perdiste la beca.'; }
+    const total = Object.values(p.fails).reduce((a, b) => a + b, 0);
+    if (p.fin === 'beca' && !p.becaLost && (p.fails[node.id] >= CFG.becaPierde.mismo || total >= CFG.becaPierde.total)) { p.becaLost = true; extra = ' Perdiste la beca.'; }
     if (p.fails[node.id] === 2) extra += ' Quedaste en causal: desde ahora cada intento requiere carta.';
     log(s, `${p.name} reprobó ${node.name} con ${n} (necesitaba ${u.need}).${extra}`, p.id);
     fx(s, { kind: 'card', pid: p.id, title: `Reprobaste ${node.name}`, text: `Sacaste ${n}, necesitabas ${u.need}.${extra}`, eff: 'Lo intentas de nuevo el próximo turno' });
@@ -924,7 +1047,7 @@ function duelo(s, p, o, node) {
   const a = spinN(s), b = spinN(s); lucky(s, p, a); lucky(s, o, b);
   const pa = a, pb = b;
   const work = node.work; const title = work ? 'Licitación' : 'Duelo de certamen';
-  fx(s, { kind: 'spin', pid: p.id, n: a, reason: 'duelo' });
+  fx(s, { kind: 'duel', a: { pid: p.id, n: a }, b: { pid: o.id, n: b } });
   let txt = `${p.name} sacó ${a}${pa > a ? ' +1' : ''}; ${o.name} sacó ${b}${pb > b ? ' +1' : ''}.`, eff;
   if (pa === pb) { apply(s, p, { k: 1 }, title); apply(s, o, { k: 1 }, title); eff = 'Empate: ambos +1 Conocimiento'; }
   else {
@@ -939,13 +1062,22 @@ function duelo(s, p, o, node) {
 
 function doChoose(s, p, val) {
   const P = s.pending; s.pending = null;
+  const opt = P.options.find(o => o.id === val);
+  fx(s, { kind: 'chose', pid: p.id, title: P.title, label: opt ? opt.label : val });
   switch (P.choice) {
+    case 'compra': {
+      const E = EVENTOS[P.ctx.kind];
+      if (val === 'si') { const res = apply(s, p, E.compra.e, E.name); fx(s, { kind: 'card', pid: p.id, title: E.compra.si, text: E.name, eff: res }); }
+      else log(s, `${p.name}: ${E.compra.no.toLowerCase()}.`, p.id);
+      return continueTurn(s, p);
+    }
     case 'via':
       p.via = val;
       if (val === 'paes') apply(s, p, { k: 2 }, 'PAES');
       else { p.pos = BOARD.conv; apply(s, p, { m: CFG.conv.m, k: CFG.conv.k }, 'convalidación'); log(s, `${p.name} entra por convalidación y parte en el segundo semestre.`, p.id); fx(s, { kind: 'move', pid: p.id, path: [BOARD.start, BOARD.conv] }); }
       return ask(s, 'fin');
     case 'fin':
+      if (val === 'beca') { s.pending = { kind: 'spin', reason: 'beca', label: `Postular a la beca (${CFG.becaMin}+)` }; return; }
       p.fin = val; if (val === 'familia') apply(s, p, { m: CFG.familiaExtra }, 'familia');
       log(s, `${p.name} financia la carrera: ${{ trabajando: 'trabajando', beca: 'con beca', familia: 'con su familia' }[val]}.`, p.id);
       s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return;
@@ -987,6 +1119,144 @@ function doChoose(s, p, val) {
   endTurn(s);
 }
 
+
+// ---------- Eventos espontáneos ----------
+// Se activan la primera vez que alguien llega a los Laboratorios (3.er año).
+// "lento" = retrasa la partida; "rapido" = la acelera o no la afecta.
+const EVENTOS = {
+  paro: { name: 'Paro en la carrera', tipo: 'rapido' },
+  cambioJefe: { name: 'Cambio de jefe de carrera', tipo: 'lento', max: 3 },
+  tarea: { name: 'Tarea de modelación', tipo: 'lento' },
+  gta: { name: 'Salió el GTA 6', tipo: 'rapido', compra: { q: '¿Comprar el GTA 6?', text: 'Cuesta $300.000. Ganas Vida Social, pero pierdes Conocimiento.', si: 'Comprarlo', no: 'No comprarlo', e: { m: -300, v: 2, k: -1 } } },
+  pandemia: { name: 'Pandemia: clases online', tipo: 'rapido' },
+  estallido: { name: 'Estallido social', tipo: 'lento' },
+  congreso: { name: 'Profe en congreso', tipo: 'rapido' },
+  terremoto: { name: 'Terremoto', tipo: 'lento' },
+  aniversario: { name: 'Aniversario de la UdeC', tipo: 'rapido' },
+  toma: { name: 'Toma de la Facultad', tipo: 'lento' },
+  feria: { name: 'Feria laboral', tipo: 'rapido' },
+  mundial: { name: 'Mundial', tipo: 'rapido', compra: { q: '¿Ver el partido en vez de estudiar?', text: 'Juega Chile. Ganas Vida Social, pero pierdes Conocimiento.', si: 'Ver el partido', no: 'Estudiar', e: { v: 2, k: -1 } } },
+  temporal: { name: 'Temporal penquista', tipo: 'lento' },
+  becaEx: { name: 'Beca de excelencia', tipo: 'rapido' },
+};
+const PROFES_ALTA_TODOS = ['Montalva', 'Cendoya', 'Calderón', 'Echaveguren', 'Merino', 'Link', 'Tudela'];
+
+// distancia de cada casilla a la meta (para medir el avance)
+const DIST = (() => {
+  const d = {}; const N = BOARD.nodes; const fin = Object.keys(N).find(id => N[id].type === 'fin');
+  d[fin] = 0; let changed = true;
+  while (changed) { changed = false; for (const id in N) for (const nx of N[id].next) if (d[nx] !== undefined && (d[id] === undefined || d[nx] + 1 < d[id])) { d[id] = d[nx] + 1; changed = true; } }
+  return d;
+})();
+const progreso = p => p.finished ? 1 : 1 - DIST[p.pos] / DIST[BOARD.start];
+const estudiantes = s => s.players.filter(p => !p.finished && !p.pega);
+
+function roundStart(s) {
+  // ingresos por trabajar: 10% del pago asignado
+  for (const p of s.players) {
+    if (p.finished) continue;
+    let base = 0, why = '';
+    if (p.pega) { base = p.pega === 'emprende' ? 1600 * CFG.sueldoMult * CFG.nivelSueldo[p.nivel] : sueldo(p, p.pega, p.nivel); why = 'sueldo de la ronda'; }
+    else if (p.fin === 'trabajando') { base = CFG.pagoEstudio.trabajando; why = 'pega de estudiante'; }
+    if (base) apply(s, p, { m: Math.round(base * CFG.sueldoRonda * s.ev.gob.mult / 10) * 10 }, why);
+    if (act(s, 'estallido')) apply(s, p, { v: 1 }, 'asambleas y cabildos', true);
+    if (act(s, 'pandemia') && p.pega) apply(s, p, { v: 1 }, 'teletrabajo', true);
+  }
+  if (s.acc.length) fx(s, { kind: 'income', round: s.round });
+  // fin de eventos con duración
+  for (const k of Object.keys(s.ev.act)) if (s.round === s.ev.act[k].end) { fx(s, { kind: 'event', key: k, ended: true, title: `Terminó: ${EVENTOS[k].name}`, text: 'Todo vuelve a la normalidad.' }); s.ev.hist.push({ round: s.round, title: `Terminó: ${EVENTOS[k].name}`, text: 'Todo vuelve a la normalidad.' }); delete s.ev.act[k]; }
+  if (s.ev.tarea && s.round - s.ev.tarea.r0 >= 3) tareaEnd(s);
+  // activación y sorteo
+  if (!s.ev.on && s.players.some(p => p.finished || ['labs', 'facultad', 'consultora'].includes(NODE(p.pos).zone))) { s.ev.on = true; log(s, 'Desde ahora pueden ocurrir eventos espontáneos.'); }
+  if (!s.ev.on || s.ev.tarea || s.phase !== 'play') return;
+  const avg = s.players.reduce((a, p) => a + progreso(p), 0) / s.players.length;
+  const ritmo = avg / Math.min(1, s.round / CFG.ev.rondasEsperadas);
+  const lento = ritmo < 0.9, rapido = ritmo > 1.1;
+  const prob = lento ? CFG.ev.probLenta : rapido ? CFG.ev.probRapida : CFG.ev.prob;
+  if (rngNext(s) >= prob) return;
+  const pool = [];
+  const lleno = s.ev.count >= CFG.ev.maxPorPartida; // tope de 4 eventos distintos (el cambio de jefe va aparte)
+  const mitad = avg >= 0.35 && avg <= 0.65;
+  for (const [k, E] of Object.entries(EVENTOS)) {
+    const usados = s.ev.used.filter(x => x === k).length;
+    if (usados >= (E.max || 1) || s.ev.act[k]) continue;
+    if (k !== 'cambioJefe' && lleno) continue;
+    if (k === 'cambioJefe') {
+      if (s.round - s.ev.lastJefe < 4) continue; // al menos 4 rondas entre cambios
+      if (usados === 0 && mitad) { if (estudiantes(s).length) for (let i = 0; i < 6; i++) pool.push(k); continue; } // el primer cambio es más probable a mitad de carrera
+    }
+    if (lento && E.tipo === 'lento') continue;
+    if (['cambioJefe', 'paro', 'pandemia', 'estallido', 'congreso', 'becaEx'].includes(k) && !estudiantes(s).length) continue;
+    if (k === 'toma' && !s.players.some(p => !p.finished && !p.pega && NODE(p.pos).zone === 'facultad')) continue;
+    const w = rapido && E.tipo === 'lento' ? 2 : 1;
+    for (let i = 0; i < w; i++) pool.push(k);
+  }
+  if (!pool.length) return;
+  startEvent(s, pool[pickI(s, pool.length)]);
+}
+
+function startEvent(s, k) {
+  if (k !== 'cambioJefe') s.ev.count++; else s.ev.lastJefe = s.round;
+  s.ev.used.push(k);
+  const E = EVENTOS[k]; const r = s.round; let text = '', d;
+  switch (k) {
+    case 'paro': d = 1 + pickI(s, 3); s.ev.act.paro = { end: r + d }; text = `Por ${d} ronda${d > 1 ? 's' : ''}: los filtros bajan 1 de dificultad y la Vida Social de las casillas se duplica.`; break;
+    case 'cambioJefe': {
+      const antes = s.ev.jefe;
+      s.ev.jefe = antes === 'Silva' ? (pickI(s, 2) ? 'Cendoya' : 'Merino') : 'Silva';
+      const up = pickI(s, 2) === 1; s.ev.gob = { mult: up ? 1 + CFG.gobierno : 1 - CFG.gobierno, name: up ? 'Gobierno expansivo' : 'Gobierno austero' };
+      text = s.ev.jefe === 'Silva'
+        ? `Vuelve Silva como jefe de carrera: la dificultad vuelve a la normalidad. Además cambia el gobierno: ${s.ev.gob.name}, los pagos ${up ? 'suben' : 'bajan'} ${CFG.gobierno * 100}%.`
+        : `${s.ev.jefe} reemplaza a ${antes}: los filtros suben 1 de dificultad y los profes de exigencia baja pasan a media por el resto de la partida. Además cambia el gobierno: ${s.ev.gob.name}, los pagos ${up ? 'suben' : 'bajan'} ${CFG.gobierno * 100}%.`;
+      break;
+    }
+    case 'tarea': s.ev.tarea = { r0: r, in: s.players.filter(p => !p.finished).map(p => p.id), best: null }; text = 'Todos quedan atrapados modelando. Para salir hay que sacar más de 8 esta ronda, más de 6 la siguiente y más de 4 la última. Quien sale avanza lo que sacó. El número más alto gana +3 Conocimiento.'; break;
+    case 'gta': case 'mundial': s.ev.buy = { kind: k, left: s.players.filter(p => !p.finished).map(p => p.id) }; text = k === 'gta' ? 'En su próximo turno, cada jugador decide si compra el juego por $300.000: +2 Vida Social y −1 Conocimiento.' : 'En su próximo turno, cada jugador decide si ve el partido: +2 Vida Social y −1 Conocimiento.'; break;
+    case 'pandemia': s.ev.act.pandemia = { end: r + 2 }; text = 'Por 2 rondas: pruebas en casa (filtros −1), no se gana Vida Social en las casillas y los que trabajan ganan +1 Vida Social por ronda con el teletrabajo.'; break;
+    case 'estallido': d = 1 + pickI(s, 2); s.ev.act.estallido = { end: r + d }; text = `Por ${d} ronda${d > 1 ? 's' : ''}: se suspende el semestre y los que estudian avanzan la mitad de lo que sacan. Todos ganan +1 Vida Social por ronda.`; break;
+    case 'congreso': { const prof = PROFES_ALTA_TODOS[pickI(s, PROFES_ALTA_TODOS.length)]; s.ev.act.congreso = { end: r + 2, prof }; text = `${prof} se va 2 rondas a un congreso: sus filtros bajan 2 de dificultad, pero sus tesistas no pueden defender hasta que vuelva.`; break; }
+    case 'terremoto': {
+      s.ev.act.terremoto = { end: r + 1 };
+      for (const p of s.players) if (!p.finished) { if (['est', 'geo'].includes(p.mencion)) apply(s, p, { m: 500, k: 2 }, 'peritajes'); else apply(s, p, { m: -100 }, 'arreglos'); if (!p.pega) apply(s, p, { skip: 1 }, 'universidad cerrada'); }
+      text = 'Los de Estructuras y Geotecnia hacen peritajes: +$500.000 y +2 Conocimiento. Los demás pagan $100.000 en arreglos. La universidad cierra: los que estudian pierden un turno.'; break;
+    }
+    case 'aniversario': s.ev.act.aniversario = { end: r + 1 }; for (const p of s.players) if (!p.finished) apply(s, p, { v: 1 }, 'aniversario', true); text = 'Todos ganan +1 Vida Social y, durante esta ronda, la Vida Social de las casillas se duplica.'; break;
+    case 'toma': for (const p of s.players) if (!p.finished && !p.pega && NODE(p.pos).zone === 'facultad') apply(s, p, { skip: 1, v: 1 }, 'toma'); text = 'Quienes están en la Facultad pierden su próximo turno, pero ganan +1 Vida Social.'; break;
+    case 'feria': { const res = []; for (const p of s.players) if (!p.finished) { const n = spinN(s); if (n >= 6) apply(s, p, { c: 1 }, `feria laboral (${n})`); res.push(`${p.name}: ${n}${n >= 6 ? ' ✓' : ''}`); } text = 'Todos giran: con 6 o más consiguen un contacto. ' + res.join(' · '); break; }
+    case 'temporal': s.ev.act.temporal = { end: r + 1 }; for (const p of s.players) if (!p.finished && p.mencion === 'hid') apply(s, p, { k: 1 }, 'medición de caudales'); text = 'Esta ronda todos avanzan 1 casilla menos. Los de Hidráulica ganan +1 Conocimiento midiendo caudales.'; break;
+    case 'becaEx': {
+      const st = estudiantes(s); const max = Math.max(...st.map(p => p.k)); const top = st.filter(p => p.k === max);
+      if (top.length === 1) { apply(s, top[0], { m: 500 }, 'beca de excelencia'); text = `${top[0].name} tiene más Conocimiento entre los que estudian y gana $500.000.`; }
+      else text = `Hay empate en Conocimiento (${top.map(p => p.name).join(', ')}): la beca queda desierta.`;
+      break;
+    }
+  }
+  log(s, `Evento: ${E.name}. ${text}`);
+  s.ev.hist.push({ round: s.round, title: E.name, text });
+  fx(s, { kind: 'event', key: k, title: E.name, text });
+}
+
+const tareaX = s => [8, 6, 4][Math.min(2, s.round - s.ev.tarea.r0)];
+function tareaSpin(s, p, n) {
+  const T = s.ev.tarea; const x = tareaX(s);
+  if (!T.best || n > T.best.n) T.best = { pid: p.id, n };
+  if (n > x) {
+    T.in = T.in.filter(id => id !== p.id);
+    log(s, `${p.name} sacó ${n} y terminó la tarea de modelación.`, p.id);
+    fx(s, { kind: 'card', pid: p.id, title: '¡Tarea entregada!', text: `Sacaste ${n} (necesitabas más de ${x}).` + (p.stuck ? '' : ` Avanzas ${n}.`), good: true });
+    if (!T.in.length) tareaEnd(s);
+    if (p.stuck) return endTurn(s);
+    return move(s, p, n);
+  }
+  log(s, `${p.name} sacó ${n}: sigue modelando.`, p.id);
+  fx(s, { kind: 'card', pid: p.id, title: 'Sigues modelando', text: `Sacaste ${n}, necesitabas más de ${x}. La próxima ronda es más fácil.` });
+  endTurn(s);
+}
+function tareaEnd(s) {
+  const T = s.ev.tarea; if (!T) return; s.ev.tarea = null;
+  if (T.best) { const w = s.players.find(p => p.id === T.best.pid); apply(s, w, { k: 3 }, 'mejor modelo'); const text = `El mejor modelo fue de ${w.name} (sacó ${T.best.n}): +3 Conocimiento.`; s.ev.hist.push({ round: s.round, title: 'Terminó la tarea de modelación', text }); fx(s, { kind: 'event', key: 'tarea', ended: true, title: 'Terminó la tarea de modelación', text }); }
+}
+
 // ---------- Puntaje ----------
 function score(s) {
   const L = s.leaders || {};
@@ -1006,18 +1276,18 @@ function botAction(s) {
   let v;
   switch (P.choice) {
     case 'via': v = r() < 0.6 ? 'paes' : 'conv'; break;
-    case 'fin': v = ['trabajando', 'beca', 'familia'][h % 3]; break;
+    case 'fin': v = o[h % o.length].id; break;
     case 'forkM': { const mates = o.find(x => x.sub.startsWith('Grupo')); v = mates && r() < 0.5 ? mates.id : o[h % o.length].id; break; }
     case 'forkT': v = r() < 0.35 ? 'magister' : 'memoria'; break;
     case 'pega': v = o.map(x => x.id).sort((a, b) => (PEGAS[b].base || 1500) - (PEGAS[a].base || 1500))[0]; break;
     case 'decision': v = r() < 0.5 ? 'si' : 'no'; break;
-    case 'dilema': v = r() < 0.5 ? 'a' : 'b'; break;
+    case 'dilema': case 'compra': v = r() < 0.5 ? (P.choice === 'dilema' ? 'a' : 'si') : (P.choice === 'dilema' ? 'b' : 'no'); break;
     default: v = o[h % o.length].id;
   }
   return { type: 'choose', value: v, pid: p.id };
 }
 
-return { TOKENS, COLORS, CFG, BOARD, NODE, PEGAS, MENCIONES, PROFES_MEN, GUIA, LIDER, newGame, reduce, botAction, score, bono, fmt, tierOf, umbralFiltro };
+return { EVENTOS, DIST, progreso, TOKENS, COLORS, CFG, BOARD, NODE, PEGAS, MENCIONES, PROFES_MEN, GUIA, LIDER, newGame, reduce, botAction, score, bono, fmt, tierOf, umbralFiltro };
 })();
 if (typeof module !== 'undefined') module.exports = GAME;
 
@@ -1032,6 +1302,180 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const COLORS = ['#e8442e', '#2f7de1', '#f2b705', '#24a35a', '#9b4dca', '#ef7d1a'];
 const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
 function show(id) { for (const x of ['lobby', 'room', 'game']) $('#' + x).classList.toggle('hidden', x !== id); }
+
+// ================= Sonido y música (sintetizados, sin archivos) =================
+const SND = (() => {
+  const cfg = Object.assign({ music: 0.35, sfx: 0.7 }, store.get('vic-audio') || {});
+  let ctx = null, mG = null, sG = null, musicT = 0, nextT = 0, step = 0;
+  function ensure() {
+    if (ctx) return true;
+    try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return false; }
+    mG = ctx.createGain(); sG = ctx.createGain(); mG.connect(ctx.destination); sG.connect(ctx.destination);
+    apply(); return true;
+  }
+  function apply() { if (!ctx) return; mG.gain.value = cfg.music * 0.5; sG.gain.value = cfg.sfx; }
+  function tone(freq, t, dur, type, vol, dest) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || 'triangle'; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.3, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest || sG); o.start(t); o.stop(t + dur + 0.05);
+  }
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const fx = {
+    tick() { tone(1200, ctx.currentTime, 0.04, 'square', 0.08); },
+    step() { tone(hz(72 + Math.floor(Math.random() * 3) * 2), ctx.currentTime, 0.09, 'triangle', 0.2); },
+    stepBig() { tone(hz(67), ctx.currentTime, 0.16, 'triangle', 0.3); tone(hz(74), ctx.currentTime + 0.05, 0.16, 'triangle', 0.2); },
+    coin() { const t = ctx.currentTime; tone(hz(83), t, 0.1, 'square', 0.12); tone(hz(88), t + 0.08, 0.25, 'square', 0.12); },
+    good() { const t = ctx.currentTime; [72, 76, 79, 84].forEach((m, i) => tone(hz(m), t + i * 0.08, 0.25, 'triangle', 0.25)); },
+    bad() { const t = ctx.currentTime; [67, 63, 60].forEach((m, i) => tone(hz(m), t + i * 0.12, 0.3, 'sawtooth', 0.12)); },
+    card() { tone(hz(79), ctx.currentTime, 0.08, 'sine', 0.2); },
+    turn() { const t = ctx.currentTime; tone(hz(76), t, 0.15, 'triangle', 0.25); tone(hz(81), t + 0.12, 0.3, 'triangle', 0.25); },
+    num() { const t = ctx.currentTime; tone(hz(84), t, 0.12, 'square', 0.15); tone(hz(91), t + 0.06, 0.3, 'square', 0.12); },
+    event() { const t = ctx.currentTime; [60, 64, 67, 72, 67, 72].forEach((m, i) => tone(hz(m), t + i * 0.1, 0.22, 'square', 0.12)); },
+    lucky() { const t = ctx.currentTime; [88, 91, 96].forEach((m, i) => tone(hz(m), t + i * 0.06, 0.2, 'sine', 0.2)); },
+  };
+  const blip = f => { try { if (ctx && cfg.sfx > 0) tone(f * (0.85 + Math.random() * 0.35), ctx.currentTime, 0.06, 'square', 0.07); } catch (e) {} };
+  // Música: progresión I–V–vi–IV en Do mayor, 112 bpm, bajo + acordes + melodía saltarina
+  const CH = [[48, 60, 64, 67], [43, 59, 62, 67], [45, 60, 64, 69], [41, 60, 65, 69]];
+  const MEL = [72, 74, 76, 79, 81, 79, 76, 74];
+  function sched() {
+    const spb = 60 / 112 / 2; // corcheas
+    while (nextT < ctx.currentTime + 0.2) {
+      const bar = Math.floor(step / 8) % 4, beat = step % 8, ch = CH[bar];
+      if (beat % 4 === 0) tone(hz(ch[0]), nextT, 0.35, 'triangle', 0.35, mG);
+      if (beat % 4 === 2) tone(hz(ch[0] + 12), nextT, 0.2, 'triangle', 0.2, mG);
+      if (beat % 2 === 1) ch.slice(1).forEach(m => tone(hz(m), nextT, 0.12, 'sine', 0.07, mG));
+      if ([0, 3, 5, 6].includes(beat)) { const m = MEL[(step * 3 + bar * 2) % MEL.length] - (bar === 1 ? 2 : 0); tone(hz(m), nextT, 0.18, 'square', 0.05, mG); }
+      nextT += spb; step++;
+    }
+  }
+  return {
+    cfg,
+    unlock() { if (!ensure()) return; if (ctx.state === 'suspended') ctx.resume(); if (!musicT && cfg.music > 0) { nextT = ctx.currentTime + 0.1; musicT = setInterval(sched, 50); } },
+    play(k) { try { if (ctx && cfg.sfx > 0 && fx[k]) fx[k](); } catch (e) {} },
+    blip,
+    set(k, v) { cfg[k] = v; store.set('vic-audio', cfg); apply(); if (k === 'music') { if (v > 0) this.unlock(); else { clearInterval(musicT); musicT = 0; } } },
+  };
+})();
+document.addEventListener('pointerdown', () => SND.unlock(), { once: true });
+function openSettings() {
+  openModal(`<h2>Sonido y música</h2>
+    <label for="volM"><b>Música</b></label><input type="range" id="volM" min="0" max="1" step="0.05" value="${SND.cfg.music}">
+    <label for="volS"><b>Efectos</b></label><input type="range" id="volS" min="0" max="1" step="0.05" value="${SND.cfg.sfx}">
+    <p class="lead">Lleva cada barra a la izquierda para apagarlos. Se guarda en este dispositivo.</p>
+    <button class="btn primary" type="button" id="setOk">Listo</button>`);
+  $('#volM').addEventListener('input', e => SND.set('music', +e.target.value));
+  $('#volS').addEventListener('input', e => { SND.set('sfx', +e.target.value); SND.play('coin'); });
+  $('#setOk').addEventListener('click', () => { closeModal(); if (S && !busy) loop(); });
+}
+
+// ================= Anfitrión: jefe de carrera =================
+// Personajes dibujados por Rudi (Cendoya, Silva y Merino) con capas animadas encima:
+// cejas y boca cambian según la expresión, la boca se abre al hablar y parpadean.
+const CHAR_IMG = {"cendoya": [480, 670, "data:image/webp;base64,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"], "silva": [460, 670, "data:image/webp;base64,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"], "merino": [480, 670, "data:image/webp;base64,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"]};
+const CHAR = {
+  Cendoya: { eyes: [[187, 235], [294, 235]], mouth: [242, 328, 100], skin: '#f6cea7', def: 'serious' },
+  Silva: { eyes: [[178, 238], [282, 238]], mouth: [230, 328, 100], skin: '#ce9468', def: 'neutral' },
+  Merino: { eyes: [[190, 237], [293, 237]], mouth: [240, 333, 86], skin: '#f4c9a0', def: 'smug', patch: [52, 22] },
+};
+function hostSvg(name, w, expr) {
+  const C = CHAR[name] || CHAR.Silva, img = CHAR_IMG[name.toLowerCase()] || CHAR_IMG.silva;
+  if (!img) return '';
+  const [L, Rr] = C.eyes, [mx, my, mw] = C.mouth, K = '#1d2430';
+  expr = expr || C.def;
+  const brow = (x, y1, y2, cy) => cy != null ? `<path d="M${x - 28} ${y1} Q${x} ${cy} ${x + 28} ${y2}" fill="none" stroke="${K}" stroke-width="11" stroke-linecap="round"/>` : `<path d="M${x - 28} ${y1} L${x + 28} ${y2}" fill="none" stroke="${K}" stroke-width="11" stroke-linecap="round"/>`;
+  const brows = {
+    neutral: brow(L[0], 172, 172, 164) + brow(Rr[0], 172, 172, 164),
+    happy: brow(L[0], 176, 176, 152) + brow(Rr[0], 176, 176, 152),
+    sad: brow(L[0], 178, 162) + brow(Rr[0], 162, 178),
+    serious: brow(L[0], 164, 180) + brow(Rr[0], 180, 164),
+    surprised: brow(L[0], 162, 162, 138) + brow(Rr[0], 162, 162, 138),
+    smug: brow(L[0], 176, 176, 168) + brow(Rr[0], 170, 166, 140),
+  }[expr] || '';
+  const pr = C.patch || [mw / 2 + 22, 30];
+  const patch = `<ellipse cx="${mx}" cy="${my}" rx="${pr[0]}" ry="${pr[1]}" fill="${C.skin}"/>`;
+  const closed = {
+    sad: patch + `<path d="M${mx - 36} ${my + 10} Q${mx} ${my - 16} ${mx + 36} ${my + 10}" fill="none" stroke="${K}" stroke-width="11" stroke-linecap="round"/>`,
+    serious: patch + `<path d="M${mx - 34} ${my} L${mx + 34} ${my}" stroke="${K}" stroke-width="11" stroke-linecap="round"/>`,
+    surprised: patch + `<ellipse cx="${mx}" cy="${my}" rx="14" ry="18" fill="#6b2a2a" stroke="${K}" stroke-width="8"/>`,
+    smug: patch + `<path d="M${mx - 34} ${my + 2} Q${mx + 4} ${my + 14} ${mx + 38} ${my - 10}" fill="none" stroke="${K}" stroke-width="11" stroke-linecap="round"/>`,
+  }[expr] || '';
+  const open = patch + `<path d="M${mx - 38} ${my - 10} Q${mx} ${my + 46} ${mx + 38} ${my - 10} Z" fill="#6b2a2a" stroke="${K}" stroke-width="9" stroke-linejoin="round"/><ellipse cx="${mx}" cy="${my + 18}" rx="14" ry="7" fill="#e88a8a"/>`;
+  const lids = [L, Rr].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="31" fill="${C.skin}"/><path d="M${x - 26} ${y + 4} Q${x} ${y + 14} ${x + 26} ${y + 4}" fill="none" stroke="${K}" stroke-width="7" stroke-linecap="round"/>`).join('');
+  const W = w || 64;
+  return `<svg viewBox="20 40 440 620" width="${W}" height="${W * 1.41}" aria-hidden="true" class="char"><image href="${img[2]}" x="0" y="0" width="${img[0]}" height="${img[1]}"/><g class="m-c">${closed}</g><g class="m-o">${open}</g><g class="lids">${lids}</g>${brows}</svg>`;
+}
+// Personalidad de cada jefe de carrera (con consentimiento de los profes): voz, ritmo y frases
+function stutter(t) { const m = t.match(/^([¡¿"]*)(\p{L})/u); if (!m) return t; const i = m[1].length; return t.slice(0, i) + m[2] + '-' + m[2].toLowerCase() + t.slice(i + 1); }
+const PERSON = {
+  Silva: { pitch: 210, speed: 34, say: t => stutter(t), quips: {
+    good: ['¡E-eso! Muy bien.', 'Bi-bien, así se avanza.', '¡E-excelente, sigue así!', '¡Mu-muy bien! Me gusta ver eso.'],
+    bad: ['Tra-tranquilo, a todos nos ha pasado.', 'A-a estudiar más para la próxima.', 'N-nos vemos en la repetición.', 'U-un tropiezo no es caída.'],
+    pay: ['¡Lle-llegó la plata! Adminístrenla bien.', 'Cui-cuiden sus lucas.'],
+    neutral: ['Ve-veamos qué pasa…', 'A-así es la vida del ingeniero.', 'Si-sigamos.', 'In-interesante.'] } },
+  Cendoya: { pitch: 130, speed: 46, say: t => 'Atención. ' + t, quips: {
+    good: ['Mmm. Está bien. Nada del otro mundo.', 'Correcto. Era lo mínimo.', 'Bien… ¡bien de verdad! Felicitaciones.', 'Aceptable. Converge.'],
+    bad: ['Era esperable.', 'Eso le pasa por no refinar la malla.', 'Mal. Pero se puede mejorar, ánimo.', 'Revise sus supuestos.'],
+    pay: ['La plata no converge sola.', 'Ahórrela. Es un consejo.'],
+    neutral: ['Sigamos, no tenemos todo el día.', 'Mmm.', 'Veamos.', 'Siguiente.'] } },
+  Merino: { pitch: 290, speed: 28, say: t => 'Les tengo un anuncio, y lo digo yo: ' + t, quips: {
+    good: ['Obvio, eso lo aprendió en mi clase.', 'Como yo siempre digo: innovación y sustentabilidad.', 'Gracias a mí, claramente.', 'Brillante. Casi tanto como yo.'],
+    bad: ['Eso no habría pasado en mi ramo.', 'Le faltó mi curso, se nota.', 'Hay que ser un poco más como yo.', 'Yo nunca reprobé nada, para que sepa.'],
+    pay: ['Yo a su edad ya ganaba el doble.', 'Inviértala en materiales innovadores, como yo.'],
+    neutral: ['Les cuento que yo… bueno, sigamos.', 'Interesante, pero yo lo haría mejor.', 'Sigamos con mi partida.', 'Mírenme y aprendan.'] } },
+};
+let quipN = 0;
+const persona = () => PERSON[hostName()] || PERSON.Silva;
+const quip = kind => { const a = persona().quips[kind] || persona().quips.neutral; return a[(quipN++) % a.length]; };
+function hostLine(f) {
+  if (/Reprobaste|Sin ascenso|Correcciones|Sin beca|Sigues modelando|no hizo nada/.test(f.title)) return quip('bad');
+  if (/pago|semestre/i.test(f.title)) return quip('pay');
+  if (f.good) return quip('good');
+  return quip('neutral');
+}
+const hostName = () => (S && S.ev && S.ev.jefe) || 'Silva';
+function hostExpr(f) {
+  if (/Reprobaste|Sin ascenso|Correcciones|Sin beca|Sigues modelando|no hizo nada/.test(f.title)) return hostName() === 'Cendoya' ? 'serious' : 'sad';
+  if (f.good) return hostName() === 'Merino' ? 'smug' : 'happy';
+  return null;
+}
+function hostBlock(text, expr) { const n = hostName(); const t = text; return `<div class="host" data-who="${esc(n)}">${hostSvg(n, 62, expr)}<div class="bubble"><b>Jefe de carrera: ${esc(n)}</b><span class="say" data-t="${esc(t)}"></span></div></div>`; }
+setInterval(() => { document.querySelectorAll('.host').forEach(h => { h.classList.add('blink'); setTimeout(() => h.classList.remove('blink'), 140); }); }, 3600);
+// Hace hablar al anfitrión: escribe el texto letra a letra, mueve la boca y suena con su voz
+function talk(root) {
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  root.querySelectorAll('.host').forEach(h => {
+    const sp = h.querySelector('.say'); const text = sp.dataset.t; const P = PERSON[h.dataset.who] || PERSON.Silva;
+    if (reduce) { sp.textContent = text; return; }
+    let i = 0; h.classList.add('talking');
+    const done = () => { clearInterval(t); sp.textContent = text; h.classList.remove('talking', 'open'); };
+    const t = setInterval(() => {
+      if (!h.isConnected) return clearInterval(t);
+      i += 1; sp.textContent = text.slice(0, i);
+      const ch = text[i - 1] || '';
+      if (/[\p{L}]/u.test(ch)) { h.classList.toggle('open'); if (i % 2) SND.blip(P.pitch); } else h.classList.remove('open');
+      if (i >= text.length) done();
+    }, /[.,…!?]/.test(text[i - 1] || '') ? P.speed * 4 : P.speed);
+    h.addEventListener('click', done, { once: true });
+  });
+}
+const TUTORIAL = [
+  '¡Bienvenidos a Ingeniería Civil! Soy Silva, el jefe de carrera, y los voy a guiar durante toda la partida.',
+  'Primero cada uno gira la ruleta: el más alto parte. Ese número queda como su número de la suerte: cuando otro lo saque, ustedes ganan plata.',
+  'Avancen del Arco a la Consultora. Las estrellas rojas son ramos filtro: hay que aprobarlos para seguir. Los signos $ solo pagan si caen justo ahí, y los que trabajan ganan un poco cada ronda.',
+  'Gana quien junte más Plata, Conocimiento y Vida Social. Desde el tercer año pueden pasar eventos inesperados: paros, cambios de jefe, terremotos… ¡Suerte!',
+];
+function tutorial() {
+  return new Promise(res => {
+    let i = 0;
+    const step = () => {
+      openModal(`${hostBlock(stutter(TUTORIAL[i]), i === 0 || i === 3 ? 'happy' : 'neutral')}<div class="row"><button class="btn" type="button" id="tutSkip">Saltar</button><button class="btn primary" type="button" id="tutNext">${i < TUTORIAL.length - 1 ? 'Siguiente' : '¡A jugar!'}</button></div>`);
+      $('#tutNext').onclick = () => { SND.play('card'); i++; if (i < TUTORIAL.length) step(); else { closeModal(); res(); } };
+      $('#tutSkip').onclick = () => { closeModal(); res(); };
+    };
+    step();
+  });
+}
 
 // ================= Lobby local =================
 let lobby = [{ name: 'Jugador 1', bot: false, token: 'casco' }, { name: 'Bot Mechón', bot: true, token: 'pisco' }, { name: 'Bot Memorista', bot: true, token: 'calculadora' }];
@@ -1090,6 +1534,7 @@ $('#joinBtn').addEventListener('click', () => {
   store.set('vic-name', name); online({ t: 'join', code, name });
 });
 $('#addBotBtn').addEventListener('click', () => send({ t: 'addBot' }));
+$('#setBtn').addEventListener('click', () => busy ? toast('Espera a que termine la jugada', 1200) : openSettings()); $('#setBtn2').addEventListener('click', openSettings);
 $('#roomTimer').addEventListener('change', e => send({ t: 'timer', on: e.target.checked }));
 $('#roomStart').addEventListener('click', () => send({ t: 'start' }));
 $('#leaveRoom').addEventListener('click', () => { send({ t: 'leave' }); NET.code = null; store.del('vic-session'); if (NET.ws) NET.ws.close(); show('lobby'); });
@@ -1098,9 +1543,14 @@ $('#roomSeats').addEventListener('click', e => { const b = e.target.closest('but
 function onMsg(m) {
   if (m.t === 'error') { $('#onErr').textContent = m.msg; $('#roomErr').textContent = m.msg; if (m.fatal) { NET.code = null; store.del('vic-session'); show('lobby'); } return; }
   if (m.t === 'joined') { NET.on = true; NET.code = m.code; NET.token = m.token; store.set('vic-session', { code: m.code, token: m.token }); return; }
+  if (m.t === 'step') { stepDone(m.i); return; }
+  if (m.t === 'chat') { m.msg.mine = m.msg.i === +String(NET.me || 'p-1').slice(1); addChat(m.msg); return; }
+  if (m.t === 'chatlog') { $('#chatList').innerHTML = ''; (m.list || []).forEach(x => addChat(x, true)); return; }
   if (m.t === 'room') {
     NET.on = true; NET.room = m; NET.host = m.host; NET.me = m.you; NET.deadline = m.deadline ? Date.now() + m.deadlineIn : 0;
-    if (!m.state) { renderRoom(m); show('room'); return; }
+    if (m.elapsed != null) clock.start = Date.now() - m.elapsed;
+    if (!m.state) { renderRoom(m); show('room'); placeChat('room'); return; }
+    placeChat('game');
     if (!S || S.v !== m.state.v || S.gid !== m.state.gid && !S.gid) { /* primera vez */ }
     if (!S) { opts.timer = m.timer; startOnline(m.state); return; }
     enqueue(m.state);
@@ -1188,13 +1638,20 @@ function shortLabel(n) {
   if (n.type === 'forkM') return 'Menciones';
   if (n.type === 'forkT') return 'Titulación';
   if (n.type === 'guia') return 'Profe guía';
-  const nm = n.name || '';
-  return nm.length > 12 ? nm.slice(0, 11).trim() + '…' : nm;
+  return n.name || '';
+}
+function labelLines(t) {
+  if (t.length <= 12) return [t];
+  const words = t.split(' '); let a = '';
+  while (words.length && (a + ' ' + words[0]).trim().length <= 12) a = (a + ' ' + words.shift()).trim();
+  if (!a) { a = t.slice(0, 11) + '-'; return [a, t.slice(11, 22)]; }
+  let b = words.join(' '); if (b.length > 12) b = b.slice(0, 11).trim() + '…';
+  return [a, b];
 }
 
 const POS = {}; const BANDS = [], LANE_LABELS = []; let H = 0;
 (function layout() {
-  const X0 = 44, DX = 62.4, ROW = 64, COLS = 6;
+  const X0 = 44, DX = 78, ROW = 72, COLS = 5;
   let y = 0;
   const band = (zone) => { BANDS.push({ zone, y }); y += 92; };
   const snake = (ids) => {
@@ -1212,13 +1669,13 @@ const POS = {}; const BANDS = [], LANE_LABELS = []; let H = 0;
   band('labs'); snake(O.labs);
   band('facultad'); POS[B.fork1] = { x: 200, y }; y += 58;
   const keys = Object.keys(B.lanes); const LX = i => 44 + i * 78;
-  keys.forEach((k, i) => { LANE_LABELS.push({ x: LX(i), y: y - 4, k }); B.lanes[k].forEach((id, j) => { POS[id] = { x: LX(i), y: y + 26 + j * 58 }; }); });
-  y += 26 + 8 * 58 + 10;
+  keys.forEach((k, i) => { LANE_LABELS.push({ x: LX(i), y: y - 4, k }); B.lanes[k].forEach((id, j) => { POS[id] = { x: LX(i), y: y + 26 + j * 64 }; }); });
+  y += 26 + 8 * 64 + 10;
   snake(O.fac);
   POS[B.fork2] = { x: 200, y }; y += 58;
   LANE_LABELS.push({ x: 120, y: y - 4, k: 'memoria' }, { x: 280, y: y - 4, k: 'magister' });
-  const span = (O.mag.length - 1) * 58;
-  O.mag.forEach((id, j) => { POS[id] = { x: 280, y: y + 26 + j * 58 }; });
+  const span = (O.mag.length - 1) * 64;
+  O.mag.forEach((id, j) => { POS[id] = { x: 280, y: y + 26 + j * 64 }; });
   O.mem.forEach((id, j) => { POS[id] = { x: 120, y: y + 26 + j * (span / (O.mem.length - 1)) }; });
   y += 26 + span + 70;
   band('consultora'); snake(O.pega);
@@ -1247,13 +1704,16 @@ const FONT = 'Fredoka, Trebuchet MS, sans-serif', DFONT = 'Bowlby One, Arial Bla
 function drawBoard() {
   const svg = $('#board');
   svg.setAttribute('viewBox', `0 0 400 ${H}`);
-  let h = '';
+  let h = '', top = '';
   BANDS.forEach((b, i) => {
     const next = BANDS[i + 1] ? BANDS[i + 1].y : H; const z = ZONE[b.zone];
     h += `<rect x="0" y="${b.y}" width="400" height="${next - b.y}" fill="${z.bg}"/><rect x="0" y="${b.y}" width="400" height="74" fill="#1d2430" opacity=".06"/>`;
-    h += `<g transform="translate(14 ${b.y + 8})">${zoneArt(b.zone)}</g>`;
-    h += `<text x="94" y="${b.y + 36}" font-family="${DFONT}" font-size="19" fill="#1d2430">${esc(z.name)}</text>`;
-    h += `<text x="94" y="${b.y + 56}" font-family="${FONT}" font-size="12" fill="#1d2430">${esc(z.sub)}</text>`;
+    // cartel de la zona: va en la capa superior, con fondo, para que caminos y fichas no lo tapen
+    const wName = z.name.length * 12.6, wSub = z.sub.length * 6.3, w = Math.min(392, Math.max(wName, wSub) + 96);
+    top += `<g class="zlabel"><rect x="6" y="${b.y + 6}" width="${w}" height="64" rx="12" fill="#fffaf0" stroke="#1d2430" stroke-width="2.5" opacity=".96"/>`;
+    top += `<g transform="translate(14 ${b.y + 8}) scale(.88)">${zoneArt(b.zone)}</g>`;
+    top += `<text x="84" y="${b.y + 34}" font-family="${DFONT}" font-size="18" fill="#1d2430">${esc(z.name)}</text>`;
+    top += `<text x="84" y="${b.y + 54}" font-family="${FONT}" font-size="11.5" fill="#1d2430">${esc(z.sub)}</text></g>`;
   });
   let roads = '', dashes = '';
   for (const id in N) for (const nx of N[id].next) {
@@ -1273,9 +1733,10 @@ function drawBoard() {
     const n = N[id], p = POS[id], st = nodeStyle(n), r = st.r || 18;
     h += `<g class="node" data-id="${id}" style="cursor:pointer"><circle cx="${p.x}" cy="${p.y + 2.5}" r="${r}" fill="#1d2430"/><circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${st.fill}" stroke="${st.ring || '#1d2430'}" stroke-width="${st.ring ? 4.5 : 3}"/>`;
     if (st.ic) h += `<text x="${p.x}" y="${p.y + 5.5}" text-anchor="middle" font-family="${FONT}" font-weight="700" font-size="${r > 20 ? 17 : 15}" fill="#1d2430">${st.ic}</text>`;
-    h += `<text x="${p.x}" y="${p.y + r + 11}" text-anchor="middle" font-family="${FONT}" font-weight="600" font-size="8" fill="#1d2430" paint-order="stroke" stroke="#f4efe1" stroke-width="3">${esc(shortLabel(n))}</text></g>`;
+    const ls = labelLines(shortLabel(n));
+    h += `<text x="${p.x}" y="${p.y + r + 10}" text-anchor="middle" font-family="${FONT}" font-weight="600" font-size="8" fill="#1d2430" paint-order="stroke" stroke="#f4efe1" stroke-width="3">${ls.map((l, i) => `<tspan x="${p.x}" dy="${i ? 9 : 0}">${esc(l)}</tspan>`).join('')}</text></g>`;
   }
-  h += `<g id="tokens"></g>`;
+  h += top + `<g id="tokens"></g><g id="floats"></g>`;
   svg.innerHTML = h;
 }
 function describe(n) {
@@ -1307,6 +1768,30 @@ function drawTokens() {
   }
   $('#tokens').innerHTML = h;
 }
+function floatText(pid, text, up) {
+  const c = POS[disp[pid]]; if (!c) return;
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  g.setAttribute('x', c.x); g.setAttribute('y', c.y - 40); g.setAttribute('text-anchor', 'middle'); g.setAttribute('class', 'float');
+  g.setAttribute('fill', up ? '#1e7a3d' : '#b3261e'); g.setAttribute('stroke', '#fff'); g.setAttribute('stroke-width', '3'); g.setAttribute('paint-order', 'stroke');
+  g.textContent = text; $('#floats').appendChild(g); setTimeout(() => g.remove(), 1900);
+}
+function floatDeltas(ds) {
+  const by = {};
+  for (const d of ds || []) (by[d.pid] = by[d.pid] || []).push(d);
+  for (const pid in by) by[pid].forEach((d, i) => setTimeout(() => floatText(pid, dText(d, true), d.val > 0), i * 350));
+}
+const DICO = { m: '💰', k: '📚', v: '🎉', c: '🤝', skip: '⏸' };
+function dText(d, short) {
+  if (d.key === 'm') return (d.val > 0 ? '+' : '') + (short ? money(d.val) : G.fmt(d.val));
+  if (d.key === 'skip') return short ? '−turno' : 'Pierde un turno';
+  const name = { k: 'Conocimiento', v: 'Vida Social', c: 'contacto' }[d.key];
+  return `${d.val > 0 ? '+' : '−'}${Math.abs(d.val)}${short ? ' ' + DICO[d.key] : ' ' + name}`;
+}
+function deltasHtml(ds) {
+  if (!ds || !ds.length) return '';
+  const by = []; for (const d of ds) { let g = by.find(x => x.pid === d.pid); if (!g) by.push(g = { pid: d.pid, items: [] }); g.items.push(d); }
+  return `<div class="deltas">${by.map(g => { const q = S.players.find(x => x.id === g.pid); return `<div class="dgroup"><div class="who2">${hatSvg(q, 18)} ${esc(q.name)}</div>${g.items.map(d => `<div class="dl ${d.key === 'skip' ? 'down' : d.val > 0 ? 'up' : 'down'}"><i>${DICO[d.key]}</i>${esc(dText(d))}</div>`).join('')}</div>`; }).join('')}</div>`;
+}
 function scrollTo(id, smooth) {
   const wrap = $('#boardWrap'), svg = $('#board');
   const scale = svg.getBoundingClientRect().width / 400;
@@ -1319,30 +1804,93 @@ function drawWheel() {
   for (let i = 0; i < 10; i++) {
     const a0 = (i * 36 - 108) * Math.PI / 180, a1 = ((i + 1) * 36 - 108) * Math.PI / 180, am = (i * 36 - 90) * Math.PI / 180;
     h += `<path d="M60 62 L${60 + 54 * Math.cos(a0)} ${62 + 54 * Math.sin(a0)} A54 54 0 0 1 ${60 + 54 * Math.cos(a1)} ${62 + 54 * Math.sin(a1)} Z" fill="${i % 2 ? '#f4efe1' : '#ffc23c'}" stroke="#1d2430" stroke-width="2"/>`;
-    h += `<text x="${60 + 41 * Math.cos(am)}" y="${62 + 41 * Math.sin(am) + 5}" text-anchor="middle" font-family="${DFONT}" font-size="13" fill="#1d2430">${i + 1}</text>`;
+    const tx = 60 + 41 * Math.cos(am), ty = 62 + 41 * Math.sin(am);
+    h += `<text x="${tx}" y="${ty + 5}" transform="rotate(${i * 36} ${tx} ${ty})" text-anchor="middle" font-family="${DFONT}" font-size="13" fill="#1d2430">${i + 1}</text>`;
   }
   h += `<circle cx="60" cy="62" r="55" fill="none" stroke="#1d2430" stroke-width="3"/></g><g transform="translate(40 44) scale(.62)">${hatPath('#ffc23c')}</g><path d="M52 0 L68 0 L60 14 Z" fill="#e3432f" stroke="#1d2430" stroke-width="2.5"/></svg>`;
   $('#wheelBox').innerHTML = h;
 }
+function wheelSvg() {
+  let h = `<svg viewBox="0 0 120 124"><g class="wg" style="transform-origin:60px 64px">`;
+  for (let i = 0; i < 10; i++) {
+    const a0 = (i * 36 - 108) * Math.PI / 180, a1 = ((i + 1) * 36 - 108) * Math.PI / 180, am = (i * 36 - 90) * Math.PI / 180;
+    h += `<path d="M60 64 L${60 + 54 * Math.cos(a0)} ${64 + 54 * Math.sin(a0)} A54 54 0 0 1 ${60 + 54 * Math.cos(a1)} ${64 + 54 * Math.sin(a1)} Z" fill="${i % 2 ? '#f4efe1' : '#ffc23c'}" stroke="#1d2430" stroke-width="1.5"/>`;
+    const tx = 60 + 41 * Math.cos(am), ty = 64 + 41 * Math.sin(am);
+    h += `<text x="${tx}" y="${ty + 5}" transform="rotate(${i * 36} ${tx} ${ty})" text-anchor="middle" font-family="${DFONT}" font-size="14" fill="#1d2430">${i + 1}</text>`;
+  }
+  h += `<circle cx="60" cy="64" r="55" fill="none" stroke="#1d2430" stroke-width="3"/></g><g transform="translate(40 46) scale(.62)">${hatPath('#ffc23c')}</g><path d="M52 0 L68 0 L60 14 Z" fill="#e3432f" stroke="#1d2430" stroke-width="2.5"/></svg>`;
+  return h;
+}
+function drawBigWheel() { $('#bigWheel').innerHTML = wheelSvg(); }
+const rotTo = (rot, n, turns) => { const target = (((-(n - 1) * 36) % 360) + 360) % 360, curr = ((rot % 360) + 360) % 360; let d = target - curr; if (d < 0) d += 360; return rot + turns * 360 + d; };
+let duelRot = [0, 0];
+// Duelo: dos ruletas lado a lado que giran al mismo tiempo
+async function spinDuel(f) {
+  const A = S.players.find(x => x.id === f.a.pid), Bq = S.players.find(x => x.id === f.b.pid);
+  const dur = opts.fastNow ? 0.8 : 2.8;
+  $('#duelBox').innerHTML = [[A, f.a.n], [Bq, f.b.n]].map(([q], i) => `<div class="duelSide"><h3>${hatSvg(q, 26)} ${esc(q.name)}</h3><div class="dw">${wheelSvg()}</div><div class="bignum" id="dn${i}"></div></div>`).join('<div class="vs">VS</div>');
+  $('#duelLayer').classList.remove('hidden');
+  const wgs = $('#duelBox').querySelectorAll('.wg');
+  wgs.forEach(w => { w.style.transitionDuration = dur + 's'; });
+  await sleep(40);
+  duelRot = [rotTo(duelRot[0], f.a.n, opts.fastNow ? 1 : 3), rotTo(duelRot[1], f.b.n, opts.fastNow ? 1 : 4)];
+  wgs[0].style.transform = `rotate(${duelRot[0]}deg)`; wgs[1].style.transform = `rotate(${duelRot[1]}deg)`;
+  const ticks = opts.fastNow ? 6 : 20; for (let i = 0; i < ticks; i++) setTimeout(() => SND.play('tick'), dur * 1000 * (1 - Math.pow(1 - i / ticks, 2)));
+  await sleep(dur * 1000 + 100);
+  [f.a.n, f.b.n].forEach((n, i) => { const e = $('#dn' + i); e.textContent = n; e.classList.add('pop'); });
+  SND.play('num');
+  await sleep(opts.fastNow ? 500 : 1600);
+  $('#duelLayer').classList.add('hidden');
+}
+const SPIN_WHY = { move: 'Avanza', filtro: 'Rinde el ramo filtro', ascenso: 'Busca el ascenso', defensa: 'Defiende', efecto: 'Gira por la casilla', grupal: 'Proyecto grupal', becaMag: 'Beca de magíster', beca: 'Postula a la beca', tarea: 'Tarea de modelación', orden: 'Orden de juego y número de la suerte', duelo: 'Duelo' };
 let wheelRot = 0;
-async function spinWheel(n) {
+async function spinWheel(n, p, reason) {
   const target = (((-(n - 1) * 36) % 360) + 360) % 360, curr = ((wheelRot % 360) + 360) % 360;
   let delta = target - curr; if (delta < 0) delta += 360;
-  wheelRot += 720 + delta;
-  $('#wheel').style.transform = `rotate(${wheelRot}deg)`;
-  await sleep(opts.fastNow ? 450 : 1350);
+  wheelRot += (opts.fastNow ? 360 : 1080) + delta; const finalRot = wheelRot;
+  $('#spinWho').innerHTML = `${hatSvg(p, 30)} Gira ${esc(p.name)}`;
+  $('#spinWhy').textContent = SPIN_WHY[reason] || '';
+  $('#bigNum').textContent = ''; $('#bigNum').classList.remove('pop');
+  $('#spinLayer').classList.remove('hidden');
+  const wg = $('#bigWheel .wg'); const dur = opts.fastNow ? 0.8 : 2.6;
+  wg.style.transitionDuration = dur + 's';
+  await sleep(30);
+  wg.style.transform = `rotate(${wheelRot}deg)`;
+  const ticks = opts.fastNow ? 6 : 18; for (let i = 0; i < ticks; i++) setTimeout(() => SND.play('tick'), dur * 1000 * (1 - Math.pow(1 - i / ticks, 2)));
+  await sleep(dur * 1000 + 100);
+  $('#bigNum').textContent = n; $('#bigNum').classList.add('pop'); SND.play('num');
+  // la ruleta chica muestra el número solo después de la grande, sin spoiler
+  const sw = $('#wheel'); sw.style.transition = 'none'; sw.style.transform = `rotate(${finalRot}deg)`;
+  await sleep(opts.fastNow ? 400 : 1200);
+  $('#spinLayer').classList.add('hidden');
+}
+async function showBanner(p) {
+  $('#banner').innerHTML = `<div>${hatSvg(p, 40)} Turno de ${esc(p.name)}</div>`;
+  $('#banner').classList.remove('hidden'); SND.play('turn');
+  await sleep(opts.fastNow ? 500 : 1400);
+  $('#banner').classList.add('hidden');
 }
 
 // ================= Estado de UI =================
 let S = null, busy = false, autoSpin = false, opts = { timer: true, fast: false, fastNow: false }, timerEnd = 0, timerId = 0;
 const queue = [];
+const clock = { start: 0 };
+setInterval(() => { if (!S || !clock.start || S.phase === 'end') return; const t = Math.floor((Date.now() - clock.start) / 1000); $('#clockChip').textContent = `⏱ ${Math.floor(t / 3600) ? Math.floor(t / 3600) + ':' : ''}${String(Math.floor(t / 60) % 60).padStart(Math.floor(t / 3600) ? 2 : 1, '0')}:${String(t % 60).padStart(2, '0')}`; }, 1000);
+const BOT_CARD_MS = 3200;
+// Sincronización de "Seguir": quien tiene el turno avanza las tarjetas para todos
+const stepWait = {}, stepSeen = new Set();
+function stepDone(i) { stepSeen.add(i); if (stepWait[i]) { stepWait[i](); delete stepWait[i]; } }
 
 function initView(state) {
   S = state; disp = {}; S.players.forEach(p => disp[p.id] = p.pos);
-  show('game'); drawBoard(); drawWheel(); render(); scrollTo(B.start);
+  show('game'); drawBoard(); drawWheel(); drawBigWheel(); render(); scrollTo(B.start);
 }
-function start(state) { initView(state); $('#codeChip').classList.add('hidden'); loop(); }
-function startOnline(state) { initView(state); $('#codeChip').textContent = 'Sala ' + NET.code; $('#codeChip').classList.remove('hidden'); loop(); sendIdle(); }
+async function start(state) { clock.start = Date.now(); initView(state); $('#codeChip').classList.add('hidden'); SND.unlock(); await tutorial(); loop(); }
+async function startOnline(state) {
+  initView(state); $('#codeChip').textContent = 'Sala ' + NET.code; $('#codeChip').classList.remove('hidden');
+  if (state.phase === 'order' && state.seq < 8 && !store.get('vic-tut-' + state.gid)) { store.set('vic-tut-' + state.gid, 1); busy = true; await tutorial(); busy = false; }
+  pump(); loop(); sendIdle();
+}
 
 const meP = () => S.players.find(p => p.id === NET.me);
 function myTurn() { const p = S.players[S.turn]; return NET.on ? p.id === NET.me : !p.bot; }
@@ -1358,9 +1906,18 @@ function render() {
   $('#whoStatus').textContent = S.phase === 'order' ? 'Gira para definir el orden y tu número de la suerte' : statusOf(p);
   const P = S.pending, can = S.phase !== 'end' && myTurn() && !busy && !NET.waiting;
   const btn = $('#actionBtn');
-  if (P && P.kind === 'spin') { btn.textContent = can ? (P.label || 'Girar') : `Turno de ${p.name}`; btn.disabled = !can; }
+  if (busy) { btn.textContent = `Turno de ${p.name}`; btn.disabled = true; }
+  else if (P && P.kind === 'spin') { btn.textContent = can ? (P.label || 'Girar') : `Turno de ${p.name}`; btn.disabled = !can; }
   else if (P && P.kind === 'choice') { btn.textContent = can ? 'Decidir: ' + P.title : `${p.name} está decidiendo`; btn.disabled = !can; }
   else { btn.textContent = 'Esperando…'; btn.disabled = true; }
+  const ev = S.ev || { act: {} }; const chips = [];
+  if (ev.jefe && ev.jefe !== 'Silva') chips.push(`Jefe: ${ev.jefe} (filtros +1)`);
+  if (ev.gob && ev.gob.mult !== 1) chips.push(`${ev.gob.name} (pagos ${ev.gob.mult > 1 ? '+' : '−'}${Math.round(Math.abs(ev.gob.mult - 1) * 100)}%)`);
+  for (const k in ev.act) { const left = ev.act[k].end - S.round; if (left > 0) chips.push(`${G.EVENTOS[k].name}${k === 'congreso' ? ' (' + ev.act[k].prof + ')' : ''} · ${left} ronda${left > 1 ? 's' : ''}`); }
+  if (ev.tarea) chips.push('Tarea de modelación en curso');
+  $('#evBar').innerHTML = chips.map(c => `<button type="button" class="evchip" title="Ver detalle en la pestaña Eventos">${esc(c)}</button>`).join('');
+  const hist = (ev.hist || []).slice().reverse();
+  $('#evList').innerHTML = hist.length ? hist.map(e => `<div class="histItem"><b>Ronda ${e.round} · ${esc(e.title)}</b>${esc(e.text)}</div>`).join('') : '<div class="histItem">Todavía no hay eventos. Pueden empezar cuando alguien llegue a los Laboratorios (3.er año).</div>'; $('#evBar').classList.toggle('hidden', !chips.length);
   const L = S.leaders || {};
   $('#players').innerHTML = S.players.map(q => {
     const tags = [];
@@ -1394,7 +1951,7 @@ function statusOf(p) {
 // ================= Bucle principal =================
 async function act(a) {
   if (busy || !S || S.phase === 'end') return;
-  clearTimer(); closeModal();
+  clearTimer(); if (a.type !== 'choose') closeModal();
   if (NET.on) { NET.waiting = true; render(); send({ t: 'act', a }); return; }
   const next = G.reduce(S, a); if (next === S) return;
   await playState(next);
@@ -1403,8 +1960,9 @@ async function act(a) {
 async function playState(next) {
   busy = true;
   const prev = S; S = next;
-  opts.fastNow = !NET.on && opts.fast && prev.players[prev.turn].bot;
-  for (const f of next.fx) await playFx(f);
+  const actor = prev.players[prev.turn];
+  opts.fastNow = !NET.on && opts.fast && actor.bot;
+  for (const f of next.fx) await playFx(f, actor);
   busy = false; render();
 }
 function enqueue(state) { queue.push(state); pump(); }
@@ -1420,21 +1978,46 @@ async function pump() {
   render(); sendIdle(); loop();
 }
 function sendIdle() { if (NET.on && S) send({ t: 'idle', seq: S.seq }); }
-async function playFx(f) {
+async function playFx(f, actor) {
   const p = S.players.find(x => x.id === f.pid);
-  if (f.kind === 'spin') { render(); $('#actionBtn').disabled = true; await spinWheel(f.n); toast(`${p.name}: ¡${f.n}!`, 900); }
-  else if (f.kind === 'move') { for (let i = 1; i < f.path.length; i++) { disp[f.pid] = f.path[i]; drawTokens(); scrollTo(f.path[i], true); await sleep(opts.fastNow ? 70 : 190); } }
-  else if (f.kind === 'lucky') { const from = S.players.find(x => x.id === f.from); toast(`🍀 ${from.name} sacó ${f.n}: ${p.name} gana ${money(f.m)}`, 1800); await sleep(opts.fastNow ? 200 : 700); }
-  else if (f.kind === 'card') { render(); await showCard(f, p); }
+  if (f.kind === 'spin') { render(); $('#actionBtn').disabled = true; closeModal(); await spinWheel(f.n, p, f.reason); }
+  else if (f.kind === 'duel') { render(); closeModal(); await spinDuel(f); }
+  else if (f.kind === 'move') {
+    const L = f.path.length - 1;
+    for (let i = 1; i <= L; i++) {
+      disp[f.pid] = f.path[i]; drawTokens(); scrollTo(f.path[i], true);
+      const fromEnd = L - i; // suspenso en el último tramo
+      SND.play(fromEnd < 3 && L >= 4 ? 'stepBig' : 'step');
+      await sleep(opts.fastNow ? 90 : fromEnd === 0 ? 700 : fromEnd === 1 && L >= 4 ? 850 : fromEnd === 2 && L >= 4 ? 620 : 360);
+    }
+  }
+  else if (f.kind === 'lucky') { const from = S.players.find(x => x.id === f.from); SND.play('lucky'); toast(`🍀 ${from.name} sacó ${f.n}: ${p.name} gana ${money(f.m)}`, 2200); floatText(p.id, '+' + money(f.m), true); await sleep(opts.fastNow ? 200 : 900); }
+  else if (f.kind === 'income') { if (!f.silent) { SND.play('coin'); toast(`Ronda ${f.round}: ingresos por trabajar`, 1800); } floatDeltas(f.deltas); render(); await sleep(opts.fastNow ? 300 : f.silent ? 700 : 1400); }
+  else if (f.kind === 'skip') { toast(`${p.name} pierde este turno`, 1600); await sleep(opts.fastNow ? 300 : 1400); }
+  else if (f.kind === 'chose') {
+    const btns = [...document.querySelectorAll('#modal .opt')];
+    const b = btns.find(x => x.dataset.label === f.label);
+    if (b) { btns.forEach(x => x.disabled = true); b.classList.add('chosen'); SND.play('card'); await sleep(opts.fastNow ? 300 : 1300); closeModal(); }
+    else if (!isMine(p)) { toast(`${p.name} eligió: ${f.label}`, 1800); await sleep(opts.fastNow ? 200 : 900); }
+  }
+  else if (f.kind === 'card' || f.kind === 'event') { render(); floatDeltas(f.deltas); await showCard(f, p, actor); render(); }
 }
-function loop() {
-  if (!S) return;
+let lastBanner = '', looping = false;
+async function loop() {
+  if (!S || looping) return;
   render();
   if (S.phase === 'end') return showResults();
   const p = S.players[S.turn]; const P = S.pending; if (!P) return;
+  const key = `${S.gid}-${S.round}-${S.turn}-${S.phase}`;
+  if (key !== lastBanner) { lastBanner = key; looping = true; await showBanner(p); looping = false; if (busy) return; }
   startTimer();
-  if (NET.on) { if (p.id !== NET.me) return; }
-  else if (p.bot) { setTimeout(() => act(G.botAction(S)), opts.fast ? 250 : 700); return; }
+  const mine = NET.on ? p.id === NET.me : !p.bot;
+  if (!mine) {
+    if (P.kind === 'choice') showChoice(P, true);
+    if (!NET.on && p.bot) { const s0 = S; setTimeout(() => { if (S === s0) act(G.botAction(S)); }, opts.fast ? 300 : P.kind === 'choice' ? 1800 : 900); }
+    return;
+  }
+  if (P.kind === 'spin' && document.querySelector('#modal .opt')) closeModal();
   if (P.kind === 'choice') showChoice(P);
   else if (autoSpin && P.kind === 'spin') { autoSpin = false; setTimeout(() => act({ type: 'spin', pid: p.id }), 150); return; }
   autoSpin = false;
@@ -1454,44 +2037,61 @@ function startTimer() {
 function clearTimer() { clearInterval(timerId); timerId = 0; $('#timer').textContent = '—'; }
 $('#actionBtn').addEventListener('click', () => {
   if (!S || !S.pending || !myTurn()) return;
+  SND.unlock();
   if (S.pending.kind === 'spin') act({ type: 'spin', pid: S.players[S.turn].id });
   else showChoice(S.pending);
 });
 
 // ================= Modales =================
-function openModal(html) { $('#overlay').onclick = null; $('#modal').innerHTML = html; $('#overlay').classList.remove('hidden'); }
+function openModal(html) { $('#overlay').onclick = null; $('#modal').innerHTML = html; $('#overlay').classList.remove('hidden'); talk($('#modal')); }
 function closeModal() { $('#overlay').classList.add('hidden'); $('#modal').innerHTML = ''; }
-function showChoice(P) {
+function showChoice(P, readOnly) {
   const p = S.players[S.turn];
-  const two = P.choice === 'dilema' || P.choice === 'decision';
-  let h = `<h2>${esc(P.title)}</h2><p class="lead"><b>${esc(p.name)}</b> · ${esc(P.text || '')}</p><div class="opts ${two ? 'two' : ''}">`;
+  const two = P.choice === 'dilema' || P.choice === 'decision' || P.choice === 'compra';
+  let h = `<div class="by" style="display:flex;gap:6px;align-items:center">${hatSvg(p, 22)} <b>${esc(p.name)}</b>${readOnly ? ' está decidiendo…' : ''}</div><h2>${esc(P.title)}</h2><p class="lead">${esc(P.text || '')}</p><div class="opts ${two ? 'two' : ''}">`;
   let lastG = null;
-  for (const o of P.options) {
+  for (const o of (P.shown || P.options)) {
     if (o.group && o.group !== lastG) { h += `<div class="optgroup">${esc(o.group)}</div>`; lastG = o.group; }
-    h += `<button class="opt" type="button" data-v="${esc(o.id)}"><b>${esc(o.label)}</b>${o.sub ? `<span>${esc(o.sub)}</span>` : ''}</button>`;
+    h += `<button class="opt" type="button" data-v="${esc(o.id)}" data-label="${esc(o.label)}" ${readOnly || o.disabled ? 'disabled' : ''} ${o.disabled ? 'style="opacity:.5"' : ''}><b>${esc(o.label)}</b>${o.sub ? `<span>${esc(o.sub)}</span>` : ''}</button>`;
   }
   openModal(h + '</div>');
-  $('#modal').querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => act({ type: 'choose', value: b.dataset.v, pid: p.id })));
+  SND.play('card');
+  if (!readOnly) $('#modal').querySelectorAll('.opt:not(:disabled)').forEach(b => b.addEventListener('click', () => { SND.unlock(); act({ type: 'choose', value: b.dataset.v, pid: p.id }); }));
 }
-function showCard(f, p) {
+function showCard(f, p, actor) {
   return new Promise(res => {
-    const deck = f.deck ? DECK[f.deck] : null;
+    const deck = f.deck ? DECK[f.deck] : null; const isEv = f.kind === 'event';
     let duel = '';
     if (f.duel) { const [a, b, na, nb] = f.duel; const A = S.players.find(x => x.id === a), Bq = S.players.find(x => x.id === b); duel = `<div class="duel"><span>${hatSvg(A)} ${na}</span><span style="font-size:16px">vs</span><span>${nb} ${hatSvg(Bq)}</span></div>`; }
-    openModal(`<div class="card" style="display:grid;gap:10px">
+    const ds = f.deltas && f.deltas.length ? deltasHtml(f.deltas) : (f.eff ? `<div class="eff ${f.good ? 'good' : ''}">${esc(f.eff)}</div>` : '');
+    const actorP = actor || p;
+    const iCtrl = NET.on ? actorP.id === NET.me : !actorP.bot;
+    const auto = !iCtrl && (actorP.bot || opts.fastNow);
+    const wait = f.wait && iCtrl && actorP.id === p.id;
+    const ctrl = iCtrl ? `<button class="btn primary" type="button" id="cardOk">${wait ? 'Girar' : 'Seguir'}</button>` : `<div class="waitmsg">${auto ? 'Avanza solo en unos segundos…' : `Esperando a que ${esc(actorP.name)} presione Seguir…`}</div>`;
+    if (isEv) SND.play(f.ended ? 'card' : 'event'); else if (f.good) SND.play('good'); else if (/Reprobaste|Sin |Correcciones|Sigues modelando/.test(f.title)) SND.play('bad'); else SND.play('card');
+    if (f.deltas && f.deltas.some(d => d.key === 'm' && d.val > 0)) setTimeout(() => SND.play('coin'), 250);
+    openModal(isEv ? `<div class="card evcard" style="display:grid;gap:10px">
+      <div class="deck"><span style="background:#ffe48a;border:2px solid #1d2430;border-radius:999px;padding:2px 10px">${f.ended ? 'Fin del evento' : 'Evento inesperado'}</span></div>
+      <h2>${esc(f.title)}</h2>
+      ${hostBlock(f.ended ? f.text : persona().say(f.text), f.ended ? 'happy' : 'surprised')}
+      ${deltasHtml(f.deltas)}
+      ${ctrl}
+    </div>` : `<div class="card" style="display:grid;gap:10px">
       ${deck ? `<div class="deck"><span style="background:${deck[1]};border:2px solid #1d2430;border-radius:999px;padding:2px 10px">${esc(deck[0])}</span></div>` : ''}
       ${duel || `<div style="display:flex;justify-content:center">${hatSvg(p, 44)}</div>`}
       <div class="by">${esc(p.name)}</div>
       <h2>${esc(f.title)}</h2>
       ${f.text ? `<p class="lead">${esc(f.text)}</p>` : ''}
-      ${f.eff ? `<div class="eff ${f.good ? 'good' : ''}">${esc(f.eff)}</div>` : ''}
-      <button class="btn primary" type="button" id="cardOk">${f.wait && isMine(p) ? 'Girar' : 'Seguir'}</button>
+      ${ds}
+      ${hostBlock(hostLine(f), hostExpr(f))}
+      ${ctrl}
     </div>`);
     let done = false;
-    const fin = () => { if (done) return; done = true; if (f.wait && isMine(p)) autoSpin = true; closeModal(); res(); };
-    $('#cardOk').addEventListener('click', fin);
-    $('#cardOk').focus();
-    if (opts.fastNow) setTimeout(fin, 500);
+    const fin = () => { if (done) return; done = true; delete stepWait[f.i]; if (wait) autoSpin = true; closeModal(); res(); };
+    if (iCtrl) { $('#cardOk').addEventListener('click', () => { SND.unlock(); if (NET.on) send({ t: 'step', i: f.i }); fin(); }); $('#cardOk').focus(); }
+    else if (auto) setTimeout(fin, opts.fastNow ? 600 : isEv ? 9000 : BOT_CARD_MS);
+    else { if (stepSeen.has(f.i)) setTimeout(fin, 400); else { stepWait[f.i] = fin; setTimeout(fin, 45000); } }
   });
 }
 function isMine(p) { return NET.on ? p.id === NET.me : !p.bot; }
@@ -1507,27 +2107,46 @@ function showResults() {
   $('#again').onclick = () => { closeModal(); S = null; if (NET.on) { send({ t: 'leave' }); NET.code = null; store.del('vic-session'); } show('lobby'); };
   $('#seeBoard').onclick = closeModal;
 }
-$('#rulesBtn').addEventListener('click', () => openModal(`<h2>Reglas rápidas</h2>
-  <p class="lead">Gira la ruleta, avanza y resuelve la casilla donde caes. Gana quien sume más puntos entre Plata, Conocimiento y Vida Social.</p>
+$('#rulesBtn').addEventListener('click', () => { if (busy) return toast('Espera a que termine la jugada', 1200); openModal(`<h2>Reglas rápidas</h2>
+  ${hostBlock('Les explico lo esencial. Cualquier duda, me preguntan.')}
   <div style="display:grid;gap:6px;font-size:14px">
-  <div><b>Orden y número de la suerte:</b> al inicio cada uno gira; el más alto parte. Ese número es tuyo: cada vez que otro lo saque, ganas ${G.fmt(G.CFG.suerte)}. Si sacas 10 eres Mechón de Oro.</div>
-  <div><b>★ Ramo filtro:</b> parada obligatoria. Apruebas con el umbral (fácil 3, media 5, alta 7) menos 1 por cada 4 de Conocimiento (máx. −3). Trabajar suma +1; un ayudante resta 1. Si repruebas 2 veces el mismo ramo, cada intento requiere carta. Si apruebas al llegar, sigues avanzando.</div>
-  <div><b>$ Pagos:</b> solo cobras si caes en la casilla: fin de semestre según tu financiamiento, o día de pago con tu sueldo.</div>
-  <div><b>⇄ Dilemas:</b> eliges entre dos opciones. <b>⚔ Duelos:</b> desafías a otro jugador y ambos giran.</div>
-  <div><b>Líderes:</b> quien va primero solo (sin empate y con más de 0) en Plata, Conocimiento o Vida Social al final de la partida suma +${G.CFG.bonoLider} puntos por cada categoría, y +${G.CFG.bonoMulti} extra si lidera dos o más. No da ventajas en el tablero.</div>
-  <div><b>Profe guía:</b> solo de tu mención.</div>
-  <div><b>Final:</b> el primero en llegar a Ing. Senior suma +${G.CFG.bonoPrimero} y los demás tienen ${G.CFG.rondasFinales} turnos más.</div>
-  </div><button class="btn primary" type="button" id="rulesOk">Entendido</button>`) || $('#rulesOk').addEventListener('click', closeModal));
+  <div><b>Orden y número de la suerte:</b> al inicio cada uno gira; el más alto parte. Cada vez que otro saque tu número, ganas ${G.fmt(G.CFG.suerte)}. Si sacas 10 eres Mechón de Oro.</div>
+  <div><b>Financiamiento:</b> trabajando cobras más y ganas el ${Math.round(G.CFG.sueldoRonda * 100)}% de tu pago en cada ronda, pero los filtros te cuestan +1. La beca se gana girando ${G.CFG.becaMin}+, hay ${G.CFG.becaCupos} cupos y se pierde con ${G.CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${G.CFG.becaPierde.total} en total.</div>
+  <div><b>★ Ramo filtro:</b> parada obligatoria. Apruebas con el umbral (fácil 3, media 5, alta 7) menos 1 por cada 4 de Conocimiento (máx. −3). Si repruebas 2 veces el mismo ramo, cada intento requiere carta. Si apruebas al llegar, sigues avanzando.</div>
+  <div><b>$ Pagos:</b> solo cobras si caes en la casilla. Con pega, además ganas el ${Math.round(G.CFG.sueldoRonda * 100)}% de tu sueldo en cada ronda.</div>
+  <div><b>⇄ Dilemas</b> con dos opciones y <b>⚔ duelos</b> contra otro jugador.</div>
+  <div><b>Profe guía:</b> de tu mención. Silva, Cendoya y los part-time no guían magíster.</div>
+  <div><b>Eventos:</b> desde que alguien llega a los Laboratorios, cada ronda puede ocurrir uno (máximo ${G.CFG.ev.maxPorPartida}): paro, cambio de jefe y de gobierno, tarea de modelación, GTA 6, pandemia, estallido social, profe en congreso, terremoto, aniversario, toma, feria laboral, Mundial, temporal y beca de excelencia. Son más probables los que aceleran si la partida va lenta.</div>
+  <div><b>Puntaje:</b> Plata (1 punto por cada ${G.fmt(G.CFG.plataPorPunto)}) + Conocimiento + Vida Social. Quien lidera una categoría al final (sin empate y con más de 0) suma +${G.CFG.bonoLider}, y +${G.CFG.bonoMulti} extra si lidera dos o más. El primero en llegar a Ing. Senior suma +${G.CFG.bonoPrimero} y los demás tienen ${G.CFG.rondasFinales} turnos más.</div>
+  </div><button class="btn primary" type="button" id="rulesOk">Entendido</button>`); $('#rulesOk').addEventListener('click', () => { closeModal(); if (S && !busy) loop(); }); });
 let toastT = 0;
 function toast(msg, ms) {
   document.querySelectorAll('.toast').forEach(t => t.remove());
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
   clearTimeout(toastT); toastT = setTimeout(() => t.remove(), ms || 1200);
 }
+let chatOpen = false, chatUnread = 0;
+$('#evBar').addEventListener('click', e => { if (e.target.closest('.evchip')) $('#evTab').click(); });
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
-  $('#players').classList.toggle('hidden', b.dataset.tab !== 'players'); $('#log').classList.toggle('hidden', b.dataset.tab !== 'log');
+  $('#evList').classList.toggle('hidden', b.dataset.tab !== 'events');
+  $('#players').classList.toggle('hidden', b.dataset.tab !== 'players'); $('#log').classList.toggle('hidden', b.dataset.tab !== 'log'); $('#chatSlot').classList.toggle('hidden', b.dataset.tab !== 'chat');
+  chatOpen = b.dataset.tab === 'chat'; if (chatOpen) { chatUnread = 0; $('#chatBadge').classList.add('hidden'); const l = $('#chatList'); l.scrollTop = l.scrollHeight; }
 }));
+// ================= Chat (solo online) =================
+const QUICK = ['¡Vamos!', 'Jajaja', '¡Nooo!', 'GG', '¡Suerte!', 'F'];
+$('#quickChat').innerHTML = QUICK.map(q => `<button class="tag" type="button" style="cursor:pointer;padding:4px 10px;font-size:13px">${esc(q)}</button>`).join('');
+$('#quickChat').addEventListener('click', e => { const b = e.target.closest('button'); if (b) send({ t: 'chat', text: b.textContent }); });
+$('#chatForm').addEventListener('submit', e => { e.preventDefault(); const v = $('#chatIn').value.trim(); if (!v) return; send({ t: 'chat', text: v }); $('#chatIn').value = ''; });
+function chatLine(m) { return `<div style="border-left-color:${COLORS[m.i % COLORS.length]}"><b>${esc(m.name)}:</b> ${esc(m.text)}</div>`; }
+function addChat(m, quiet) {
+  const l = $('#chatList'); l.insertAdjacentHTML('beforeend', chatLine(m)); while (l.children.length > 60) l.firstChild.remove(); l.scrollTop = l.scrollHeight;
+  if (quiet || m.mine) return;
+  SND.play('card');
+  const inGame = !$('#game').classList.contains('hidden');
+  if (inGame && !chatOpen) { chatUnread++; $('#chatBadge').textContent = chatUnread; $('#chatBadge').classList.remove('hidden'); toast(`💬 ${m.name}: ${m.text.length > 60 ? m.text.slice(0, 59) + '…' : m.text}`, 2600); }
+}
+function placeChat(where) { const box = $('#chatBox'); (where === 'game' ? $('#chatSlot') : $('#roomChatSlot')).appendChild(box); $('#chatTab').classList.toggle('hidden', !NET.on); }
 
 renderLobby();
 (async () => {

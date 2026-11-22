@@ -28,20 +28,27 @@ const CFG = {
   suerte: 150,
   sueldoMult: 2, nivelSueldo: [1, 1.4, 1.8], magister: 300, contacto: 100,
   ascenso: [6, 7],
-  plataPorPunto: 400, bonoPrimero: 5, bonoCorona: 2, bonoLider: 3, bonoMulti: 2,
+  plataPorPunto: 600, bonoPrimero: 5, bonoCorona: 2, bonoLider: 3, bonoMulti: 2,
   liderPlata: 150,
   conv: { m: 300, k: 2 },
   rondasFinales: 3,
+  sueldoRonda: 0.10,          // los que trabajan ganan el 10% de su pago en cada ronda
+  becaMin: 6, becaCupos: 2,   // para la beca hay que sacar 6+ y hay 2 cupos por partida
+  becaPierde: { mismo: 2, total: 3 },
+  gobierno: 0.2,              // un cambio de gobierno sube o baja los pagos en 20%
+  ev: { maxPorPartida: 4, prob: 0.2, probLenta: 0.15, probRapida: 0.3, rondasEsperadas: 24 },
 };
 
 // ---------- Profes guía por mención ----------
 const PROFES_MEN = {
   geo: { alta: ['Montalva'], media: ['M. Valenzuela', 'Escribano'], baja: ['Martínez'] },
-  est: { alta: ['Cendoya'], media: ['Aguilar', 'Calderón', 'Opazo'], baja: ['Silva', 'Ramírez'] },
+  est: { alta: ['Cendoya', 'Calderón'], media: ['Aguilar', 'Opazo'], baja: ['Silva', 'Ramírez'] },
   hid: { alta: ['Link'], media: ['Stehr', 'Schwarz'], baja: ['Guerra', 'Veloso', 'Ramos', 'Morales'] },
   tra: { alta: ['Tudela', 'Echaveguren'], media: ['Victoriano'], baja: ['Carrasco', 'Dufeu', 'Tapia'] },
   con: { alta: ['Echaveguren', 'Merino'], media: [], baja: ['Orellana', 'R. Valenzuela', 'Ávalos'] },
 };
+// Profes que no guían tesis de magíster (Silva, Cendoya y los part-time)
+const NO_MAG = ['Silva', 'Cendoya', 'M. Valenzuela', 'González', 'R. Valenzuela', 'Ávalos', 'Martínez', 'Ramírez', 'Veloso', 'Ramos', 'Morales', 'Dufeu', 'Tapia'];
 const GUIA = {
   alta: { umbral: 7, dur: 3, k: 3, contacto: 1 },
   media: { umbral: 5, dur: 2, k: 2, contacto: 0 },
@@ -181,7 +188,7 @@ const SEG = {
     D('hermanos'),
     G('Física I', 'Plano inclinado sin roce, como tu semestre'),
     E('campanil'),
-    Q(),
+    E('general'),
     G('Cálculo I', 'Derivaste hasta en sueños'),
     G('Química General I', 'El lab olía a huevo podrido', { v: 1 }),
     R('Intro a la Ing. Civil', 'Escribano y Aguilar', 'media', 'Primera clase: te muestran todo lo que viene'),
@@ -204,11 +211,11 @@ const SEG = {
     D('pareja'),
     P(),
     S('atrasado', { name: 'Ramo atrasado', dif: 'baja' }),
-    R('Estática', 'Calderón', 'media', 'Calderón pide las reacciones de la viga'),
+    R('Estática', 'Calderón', 'alta', 'Calderón pide las reacciones de la viga'),
     DU(),
     F('Complemento de Cálculo', null, 'media'),
     R('Geomática', 'Orellana', 'baja', 'Nivelación topográfica con Orellana'),
-    Q(),
+    E('general'),
     E('tm'),
     P(),
   ],
@@ -229,10 +236,10 @@ const SEG = {
     E('campanil'),
     P(),
     G('Innovación', 'Te quedaste dormido en Innovación', { k: -1, v: 1 }),
-    Q(),
+    E('general'),
     R('Sistemas de Transporte', 'Tudela y Victoriano', 'alta', 'Tudela pregunta el modelo de 4 etapas'),
     F('Ingeniería de Suelos', 'Escribano', 'alta'),
-    R('Hormigón Armado', 'Calderón', 'media', 'Calderón revisa tu cuantía'),
+    R('Hormigón Armado', 'Calderón', 'alta', 'Calderón revisa tu cuantía'),
     E('matadero'),
     P(),
     R('Ingeniería Antisísmica', 'Cendoya', 'alta', 'Cendoya pide el espectro de diseño'),
@@ -244,7 +251,7 @@ const SEG = {
   ],
   mencion: {
     geo: [R('Estructuras de Retención', 'M. Valenzuela', 'media', 'Muro de contención con M. Valenzuela'), R('Mec. de Suelos en Ing. Vial', 'M. Valenzuela', 'media', 'Ensayo de suelos para un camino'), Q(), F('Ing. Geotécnica-Sísmica', 'Montalva', 'alta'), R('Modelamiento Numérico Geotécnico', 'Martínez', 'baja', 'El modelo de Martínez por fin corre'), R('Mec. de Suelos Avanzada', 'Escribano', 'media', 'Escribano pide el triaxial completo'), R('Geoingeniería en Terreno', 'Montalva y Escribano', 'alta', 'Terreno con Montalva y Escribano'), P()],
-    est: [R('Hormigón Armado Avanzado', 'Aguilar', 'media', 'Aguilar revisa tu armadura'), R('Estructuras de Acero', 'Silva', 'baja', 'Conexiones de acero con Silva'), Q(), F('Elementos Finitos', 'Cendoya', 'alta'), R('Diseño Sismorresistente', 'Calderón', 'media', 'Calderón pide la tarea en Python con la API de SAP2000'), R('Diseño de Edificios de HA', 'Opazo', 'media', 'Opazo revisa tu modelo en ETABS'), R('Ingeniería de Puentes', 'Aguilar, Montalva y Link', 'alta', 'Puente diseñado con Aguilar, Montalva y Link'), P()],
+    est: [R('Hormigón Armado Avanzado', 'Aguilar', 'media', 'Aguilar revisa tu armadura'), R('Estructuras de Acero', 'Silva', 'baja', 'Conexiones de acero con Silva'), Q(), F('Elementos Finitos', 'Cendoya', 'alta'), R('Diseño Sismorresistente', 'Calderón', 'alta', 'Calderón pide la tarea en Python con la API de SAP2000'), R('Diseño de Edificios de HA', 'Opazo', 'media', 'Opazo revisa tu modelo en ETABS'), R('Ingeniería de Puentes', 'Aguilar, Montalva y Link', 'alta', 'Puente diseñado con Aguilar, Montalva y Link'), P()],
     hid: [R('Hidráulica Urbana', 'Ramos', 'baja', 'Ramos diseña un colector contigo'), R('Ingeniería Sanitaria', 'Schwarz', 'media', 'Planta de tratamiento con Schwarz'), Q(), F('Hidrología Distribuida', 'Stehr', 'alta'), R('Ingeniería de Costas', 'Guerra', 'baja', 'Terreno en la playa con Guerra'), R('Ingeniería de Ríos', 'Link', 'alta', 'Link te explica el transporte de sedimentos'), R('Obras Hidráulicas', 'Morales', 'baja', 'Bocatoma diseñada con Morales'), P()],
     tra: [R('Demanda de Transportes', 'Carrasco', 'baja', 'Carrasco te hace una encuesta origen-destino'), R('Ingeniería de Tráfico', 'Dufeu', 'baja', 'Conteo vehicular con Dufeu'), Q(), F('Seguridad Vial', 'Echaveguren', 'alta'), R('Redes de Transporte', 'Tapia', 'baja', 'Tapia te pide la ruta mínima'), R('Ciudad y Transporte', 'Carrasco', 'baja', 'Clase de Ciudad y Transporte con Carrasco'), R('Planificación y Economía de Transporte', 'Tudela', 'alta', 'Tudela evalúa tu proyecto vial'), P()],
     con: [R('Diseño de Pavimentos', 'Echaveguren', 'alta', 'Echaveguren te pide recalcular el espesor del pavimento'), R('Materiales Avanzados', 'Merino', 'alta', 'Merino trae un material innovador y sustentable a clase'), Q(), F('Gestión de Infraestructura de Transporte', 'Echaveguren', 'alta'), R('Planificación y Control de Proyectos', 'Orellana', 'baja', 'Carta Gantt entregada a tiempo con Orellana'), R('Edificación', 'R. Valenzuela', 'baja', 'Clase de Edificación con R. Valenzuela'), R('Inspección Técnica de Obras', 'Ávalos', 'baja', 'Ávalos te manda a inspeccionar una obra'), P()],
@@ -318,14 +325,15 @@ function newGame({ players, seed, timer }) {
       stuck: null, skip: 0, finished: false, finishRank: 0, turnsLeft: null,
     })),
     pending: { kind: 'spin', reason: 'orden', label: 'Girar para el orden' },
-    log: [], seq: 0, fx: [], firstSenior: null, finishCount: 0, leaders: { m: null, k: null, v: null },
+    log: [], seq: 0, fx: [], acc: [], firstSenior: null, finishCount: 0, leaders: { m: null, k: null, v: null },
+    ev: { on: false, count: 0, used: [], hist: [], lastJefe: -99, jefe: 'Silva', gob: { mult: 1, name: null }, act: {}, tarea: null, buy: null },
   };
   log(s, 'Cada jugador gira para definir el orden. Ese número queda como su número de la suerte.');
   return s;
 }
 const cur = s => s.players[s.turn];
 function log(s, txt, pid) { s.log.push({ i: ++s.seq, t: txt, p: pid ?? null }); if (s.log.length > 80) s.log.shift(); }
-function fx(s, f) { f.i = ++s.seq; s.fx.push(f); }
+function fx(s, f) { f.i = ++s.seq; if (f.kind === 'card' || f.kind === 'event' || f.kind === 'income') { f.deltas = s.acc; s.acc = []; f.host = s.ev.jefe; } s.fx.push(f); }
 const bono = p => Math.min(CFG.bonoMax, Math.floor(Math.max(0, p.k) / CFG.bonoCada));
 const estudiando = p => !p.pega;
 
@@ -350,14 +358,20 @@ const LIDER = {
 };
 const isL = (s, p, key) => s.leaders && s.leaders[key] === p.id;
 
-function apply(s, p, e, src) {
+const act = (s, k) => !!(s.ev && s.ev.act[k] && s.round < s.ev.act[k].end);
+function apply(s, p, e, src, raw) {
   if (!e) return '';
-  const parts = [];
-  if (e.m) { p.m += e.m; parts.push((e.m > 0 ? '+' : '') + fmt(e.m)); }
-  if (e.k) { p.k += e.k; parts.push((e.k > 0 ? '+' : '−') + Math.abs(e.k) + ' Conocimiento'); }
-  if (e.v) { p.v += e.v; parts.push((e.v > 0 ? '+' : '−') + Math.abs(e.v) + ' Vida Social'); }
-  if (e.c) { p.c += e.c; parts.push('+' + e.c + ' contacto'); }
-  if (e.skip) { p.skip += e.skip; parts.push('pierdes un turno'); }
+  const parts = []; e = Object.assign({}, e);
+  if (!raw && e.v > 0) {
+    if (act(s, 'pandemia')) e.v = 0;
+    else if (act(s, 'paro') || act(s, 'aniversario')) e.v *= 2;
+  }
+  const d = (key, val) => { if (val) s.acc.push({ pid: p.id, key, val }); };
+  if (e.m) { p.m += e.m; parts.push((e.m > 0 ? '+' : '') + fmt(e.m)); d('m', e.m); }
+  if (e.k) { p.k += e.k; parts.push((e.k > 0 ? '+' : '−') + Math.abs(e.k) + ' Conocimiento'); d('k', e.k); }
+  if (e.v) { p.v += e.v; parts.push((e.v > 0 ? '+' : '−') + Math.abs(e.v) + ' Vida Social'); d('v', e.v); }
+  if (e.c) { p.c += e.c; parts.push('+' + e.c + ' contacto'); d('c', e.c); }
+  if (e.skip) { p.skip += e.skip; parts.push('pierdes un turno'); d('skip', e.skip); }
   if (parts.length) log(s, `${p.name}: ${parts.join(', ')}${src ? ' (' + src + ')' : ''}`, p.id);
   return parts.join(', ');
 }
@@ -370,12 +384,28 @@ function beginTurn(s) {
     const p = cur(s);
     if (p.finished || (p.turnsLeft !== null && p.turnsLeft <= 0)) { advance(s); continue; }
     if (p.turnsLeft !== null) p.turnsLeft--;
-    if (p.skip > 0) { p.skip--; log(s, `${p.name} pierde este turno.`, p.id); advance(s); continue; }
+    if (p.skip > 0) { p.skip--; log(s, `${p.name} pierde este turno.`, p.id); fx(s, { kind: 'skip', pid: p.id }); advance(s); continue; }
     s.pending = null;
     if (!p.via) return ask(s, 'via');
     if (!p.fin) return ask(s, 'fin');
+    if (s.ev.buy && s.ev.buy.left.includes(p.id)) { s.ev.buy.left = s.ev.buy.left.filter(x => x !== p.id); return ask(s, 'compra', { kind: s.ev.buy.kind }); }
+    return continueTurn(s, p);
+  }
+}
+function continueTurn(s, p) {
+  {
+    const T = s.ev.tarea;
+    if (T && T.in.includes(p.id)) {
+      const x = tareaX(s);
+      s.pending = { kind: 'spin', reason: 'tarea', label: `Salir de la tarea (más de ${x})` };
+      return;
+    }
     if (p.stuck) {
       const st = p.stuck;
+      if (st.kind === 'defensa' && act(s, 'congreso') && s.ev.act.congreso.prof === p.guia) {
+        fx(s, { kind: 'card', pid: p.id, title: 'Tu profe guía está en un congreso', text: `${p.guia} vuelve en unas rondas. No puedes defender todavía.`, eff: '' });
+        return endTurn(s);
+      }
       if (st.kind === 'defensa' && st.wait > 0) {
         st.wait--; apply(s, p, { k: 1 }, 'trabajando en la ' + (p.titulo === 'magister' ? 'tesis' : 'memoria'));
         fx(s, { kind: 'card', pid: p.id, title: 'Trabajando en la ' + (p.titulo === 'magister' ? 'tesis' : 'memoria'), text: st.wait > 0 ? `Te quedan ${st.wait} turno${st.wait > 1 ? 's' : ''} antes de defender.` : 'El próximo turno defiendes.', eff: '+1 Conocimiento' });
@@ -390,7 +420,7 @@ function beginTurn(s) {
 }
 function advance(s) {
   s.turn = (s.turn + 1) % s.players.length;
-  if (s.turn === 0) s.round++;
+  if (s.turn === 0) { s.round++; roundStart(s); }
 }
 function endTurn(s) { computeLeaders(s); s.pending = null; advance(s); beginTurn(s); }
 function gameOver(s) { return s.players.every(p => p.finished || (p.turnsLeft !== null && p.turnsLeft <= 0)); }
@@ -402,10 +432,15 @@ function ask(s, kind, ctx) {
   if (kind === 'via') Object.assign(P, { title: 'Ingreso a la carrera', text: '¿Cómo entras a Ingeniería Civil?', options: [
     { id: 'paes', label: 'PAES', sub: 'Haces toda la nivelación. Partes con +2 Conocimiento.' },
     { id: 'conv', label: 'Convalidación', sub: `Te saltas el primer semestre, partes con +${CFG.conv.k} Conocimiento y ${fmt(CFG.conv.m)}, pero te espera un ramo atrasado en Los Cubos.` }] });
-  if (kind === 'fin') Object.assign(P, { title: 'Financiamiento', text: '¿Cómo vas a pagar la carrera? Cobras al caer en "Fin de semestre".', options: [
-    { id: 'trabajando', label: 'Trabajando', sub: `${fmt(CFG.pagoEstudio.trabajando)} por pago, pero los filtros te cuestan +1.` },
-    { id: 'beca', label: 'Beca', sub: `${fmt(CFG.pagoEstudio.beca)} por pago. Si repruebas un filtro, la pierdes.` },
-    { id: 'familia', label: 'Familia', sub: `Partes con ${fmt(CFG.familiaExtra)} extra y recibes ${fmt(CFG.pagoEstudio.familia)} por pago.` }] });
+  if (kind === 'fin') {
+    const becados = s.players.filter(o => o.fin === 'beca').length;
+    const opts = [{ id: 'trabajando', label: 'Trabajando', sub: `${fmt(CFG.pagoEstudio.trabajando)} por pago y ${Math.round(CFG.sueldoRonda * 100)}% de eso en cada ronda, pero los filtros te cuestan +1.` }];
+    if (!ctx || !ctx.noBeca) opts.push(becados < CFG.becaCupos
+      ? { id: 'beca', label: 'Postular a beca', sub: `Gira: necesitas ${CFG.becaMin}+. ${fmt(CFG.pagoEstudio.beca)} por pago. Se pierde con ${CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${CFG.becaPierde.total} en total. Cupos: ${CFG.becaCupos - becados} de ${CFG.becaCupos}.` }
+      : { id: 'sinCupo', label: 'Beca: sin cupos', sub: `Ya hay ${CFG.becaCupos} becados en la partida.`, disabled: true });
+    opts.push({ id: 'familia', label: 'Familia', sub: `Partes con ${fmt(CFG.familiaExtra)} extra y recibes ${fmt(CFG.pagoEstudio.familia)} por pago.` });
+    Object.assign(P, { title: 'Financiamiento', text: ctx && ctx.noBeca ? 'No alcanzaste la beca. Elige otra forma de pagar la carrera.' : '¿Cómo vas a pagar la carrera? Cobras al caer en "Fin de semestre".', options: opts.filter(o => !o.disabled), shown: opts });
+  }
   if (kind === 'forkM') Object.assign(P, { title: 'Elegir mención', text: 'Terreno u Oficina: elige tu mención. Tu profe guía será de esta mención.', options: Object.entries(MENCIONES).map(([id, m]) => {
     const others = s.players.filter(o => o !== p && o.mencion === id).map(o => o.name);
     return { id, label: m.name, group: m.rama, sub: (others.length ? `Grupo de estudio con ${others.join(', ')} · ` : '') + `Pegas: ${PEGAS_POR[id].map(x => PEGAS[x].name).join(', ')}` };
@@ -414,10 +449,10 @@ function ask(s, kind, ctx) {
     { id: 'memoria', label: 'Memoria', sub: 'Camino corto: sales antes a trabajar.' },
     { id: 'magister', label: 'Magíster', sub: `Camino largo: más Conocimiento, +${fmt(CFG.magister)} de sueldo y acceso a Academia.` }] });
   if (kind === 'guia') {
-    const T = PROFES_MEN[p.mencion];
-    Object.assign(P, { title: 'Elegir profe guía', text: `Profes de ${MENCIONES[p.mencion].name}. Más exigente = más difícil y más largo, pero mejor recompensa.`, options: [].concat(
-      ...['alta', 'media', 'baja'].map(t => T[t].map(name => ({ id: name, label: name, group: { alta: 'Exigencia alta', media: 'Exigencia media', baja: 'Exigencia baja' }[t],
-        sub: `Defiendes con ${GUIA[t].umbral}+ · ${GUIA[t].dur} turno${GUIA[t].dur > 1 ? 's' : ''} de trabajo · +${GUIA[t].k} Conocimiento${GUIA[t].contacto ? ' y un contacto' : ''}` })))) });
+    const T = PROFES_MEN[p.mencion]; const mag = p.titulo === 'magister';
+    Object.assign(P, { title: 'Elegir profe guía', text: `Profes de ${MENCIONES[p.mencion].name}${mag ? ' que guían tesis de magíster' : ''}. Más exigente = más difícil y más largo, pero mejor recompensa.`, options: [].concat(
+      ...['alta', 'media', 'baja'].map(t0 => T[t0].filter(name => !mag || !NO_MAG.includes(name)).map(name => { const t = guiaTier(s, p.mencion, name); return { id: name, label: name, group: { alta: 'Exigencia alta', media: 'Exigencia media', baja: 'Exigencia baja' }[t0],
+        sub: `Defiendes con ${GUIA[t].umbral}+ · ${GUIA[t].dur} turno${GUIA[t].dur > 1 ? 's' : ''} de trabajo · +${GUIA[t].k} Conocimiento${GUIA[t].contacto ? ' y un contacto' : ''}` }; }))) });
   }
   if (kind === 'pega') {
     let ids = [...PEGAS_POR[p.mencion]]; if (p.titulo === 'magister' && !ids.includes('academia')) ids.push('academia');
@@ -435,6 +470,10 @@ function ask(s, kind, ctx) {
     Object.assign(P, { title: d.q, text: 'Elige una opción.', options: [
       { id: 'a', label: d.a[0], sub: d.a[2] || effText(d.a[1]) }, { id: 'b', label: d.b[0], sub: d.b[2] || effText(d.b[1]) }] });
   }
+  if (kind === 'compra') {
+    const E = EVENTOS[ctx.kind];
+    Object.assign(P, { title: E.compra.q, text: E.compra.text, options: [{ id: 'si', label: E.compra.si, sub: effText(E.compra.e) }, { id: 'no', label: E.compra.no, sub: 'Sin efecto' }] });
+  }
   if (kind === 'otro') Object.assign(P, { title: ctx.title, text: ctx.text, options: s.players.filter(o => o !== p).map(o => ({ id: o.id, label: o.name, sub: `${fmt(o.m)} · ${o.k} Conocimiento · ${o.v} Vida Social` })) });
   s.pending = P;
 }
@@ -450,13 +489,14 @@ function effText(e) {
 // ---------- Acciones ----------
 function reduce(s0, a) {
   const s = structuredClone(s0);
-  s.fx = [];
+  s.fx = []; s.acc = [];
   if (!['play', 'order'].includes(s.phase) || !s.pending) return s0;
   const p = cur(s);
   if (a.pid && a.pid !== p.id) return s0;
   if (a.type === 'spin' && s.pending.kind === 'spin') doSpin(s, p);
   else if (a.type === 'choose' && s.pending.kind === 'choice' && s.pending.options.some(o => o.id === a.value)) doChoose(s, p, a.value);
   else return s0;
+  if (s.acc.length) fx(s, { kind: 'income', silent: true }); // cambios sin tarjeta: se muestran flotando
   return s;
 }
 
@@ -488,7 +528,19 @@ function doSpin(s, p) {
   }
   fx(s, { kind: 'spin', pid: p.id, n, reason: P.reason });
   lucky(s, p, n);
-  if (P.reason === 'move') { log(s, `${p.name} giró un ${n}.`, p.id); return move(s, p, n); }
+  if (P.reason === 'move') {
+    let steps = n; const why = [];
+    if (act(s, 'estallido') && !p.pega) { steps = Math.ceil(n / 2); why.push('estallido: la mitad'); }
+    if (act(s, 'temporal')) { steps = Math.max(1, steps - 1); why.push('temporal: −1'); }
+    log(s, `${p.name} giró un ${n}${why.length ? ` y avanza ${steps} (${why.join(', ')})` : ''}.`, p.id);
+    return move(s, p, steps);
+  }
+  if (P.reason === 'beca') {
+    if (n >= CFG.becaMin) { p.fin = 'beca'; log(s, `${p.name} ganó la beca con ${n}.`, p.id); fx(s, { kind: 'card', pid: p.id, title: '¡Ganaste la beca!', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}.`, eff: `${fmt(CFG.pagoEstudio.beca)} en cada fin de semestre`, good: true }); s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return; }
+    log(s, `${p.name} no alcanzó la beca (sacó ${n}).`, p.id); fx(s, { kind: 'card', pid: p.id, title: 'Sin beca', text: `Sacaste ${n}, necesitabas ${CFG.becaMin}. Elige otra forma de financiar la carrera.` });
+    return ask(s, 'fin', { noBeca: true });
+  }
+  if (P.reason === 'tarea') return tareaSpin(s, p, n);
   if (P.reason === 'filtro') return rendir(s, p, n, (P.ctx && P.ctx.carry) || 0);
   if (P.reason === 'ascenso') {
     const node = NODE(p.stuck.node); const need = needAscenso(s, p, node);
@@ -501,7 +553,7 @@ function doSpin(s, p) {
     return endTurn(s);
   }
   if (P.reason === 'defensa') {
-    const t = tierOf(p.mencion, p.guia); const g = GUIA[t]; const need = needDefensa(s, p);
+    const t = guiaTier(s, p.mencion, p.guia); const g = GUIA[t]; const need = needDefensa(s, p);
     if (n >= need) {
       p.stuck = null; const extra = p.titulo === 'magister' ? 2 : 0;
       apply(s, p, { k: g.k + extra, c: g.contacto }, 'defensa aprobada');
@@ -564,20 +616,21 @@ function pago(s, p, n) {
   if (n.work) {
     if (!p.pega) return endTurn(s);
     let m = p.pega === 'emprende' ? Math.round((800 + pickI(s, 50) * 100 + (p.titulo === 'magister' ? CFG.magister : 0) + p.c * CFG.contacto) * CFG.nivelSueldo[p.nivel] / 10) * 10 : sueldo(p, p.pega, p.nivel);
+    m = Math.round(m * s.ev.gob.mult / 10) * 10;
     m += lp + (p.pareja ? CFG.pareja : 0) + (p.mascota ? CFG.mascota : 0);
     e = { m, v: 1 };
     if (['publico', 'ito', 'constructora'].includes(p.pega)) e.v = 2;
     if (p.pega === 'academia') e.k = 1;
     title = 'Día de pago';
   } else {
-    let m = p.fin === 'beca' && p.becaLost ? CFG.pagoEstudio.becaPerdida : CFG.pagoEstudio[p.fin];
+    let m = Math.round((p.fin === 'beca' && p.becaLost ? CFG.pagoEstudio.becaPerdida : CFG.pagoEstudio[p.fin]) * s.ev.gob.mult / 10) * 10;
     if (p.ayudante) m += CFG.ayudantePago;
     m += lp + (p.pareja ? CFG.pareja : 0) + (p.mascota ? CFG.mascota : 0) + (p.hermanos ? CFG.hermanos : 0);
     if (!p.ayudante && n.zone !== 'plato' && p.k >= CFG.ayudanteMinK) { p.ayudante = true; m += CFG.ayudantePago; log(s, `${p.name} ahora es ayudante: cobra más y ayuda en filtros que ya aprobó.`, p.id); }
     e = { m, v: 2 }; title = 'Fin de semestre y vacaciones';
   }
   const res = apply(s, p, e, title.toLowerCase());
-  fx(s, { kind: 'card', pid: p.id, title, text: lp ? 'Incluye el bono de líder en Plata.' : (p.ayudante && !n.work ? 'Incluye tu sueldo de ayudante.' : ''), eff: res, good: true });
+  fx(s, { kind: 'card', pid: p.id, title, text: [p.ayudante && !n.work ? 'Incluye tu sueldo de ayudante.' : '', s.ev.gob.mult !== 1 ? `${s.ev.gob.name}: pagos ${s.ev.gob.mult > 1 ? '+' : '−'}${Math.round(Math.abs(s.ev.gob.mult - 1) * 100)}%.` : ''].filter(Boolean).join(' '), eff: res, good: true });
   endTurn(s);
 }
 
@@ -586,6 +639,7 @@ function land(s, p, n, carry) {
   switch (n.type) {
     case 'pago': return pago(s, p, n);
     case 'ramo': {
+      if (n.tier === 'baja' && hard(s)) { const res = apply(s, p, TIER_EFF.media, n.name); fx(s, { kind: 'card', pid: p.id, title: n.name, text: n.text + ` (con el jefe ${s.ev.jefe}, este profe exige más)`, eff: res }); return endTurn(s); }
       if (n.e && n.e.spin) { s.pending = { kind: 'spin', reason: 'efecto', label: `Girar: ${n.name}`, ctx: { spin: n.e.spin, src: n.name } }; fx(s, { kind: 'card', pid: p.id, title: n.name, text: n.text, eff: `Gira: con ${n.e.spin.min} o más, +2 Conocimiento y +1 Vida Social; si no, −1 Vida Social`, wait: true }); return; }
       const res = apply(s, p, n.e, n.name);
       fx(s, { kind: 'card', pid: p.id, title: n.name, text: n.text, eff: res || 'Sin efecto' });
@@ -616,7 +670,7 @@ function land(s, p, n, carry) {
     }
     case 'guia': return ask(s, 'guia', { carry });
     case 'defensa': {
-      const g = GUIA[tierOf(p.mencion, p.guia)];
+      const g = GUIA[guiaTier(s, p.mencion, p.guia)];
       p.stuck = { kind: 'defensa', node: n.id, wait: g.dur - 1 };
       fx(s, { kind: 'card', pid: p.id, title: n.name, text: `${p.guia} es tu profe guía: ${g.dur} turno${g.dur > 1 ? 's' : ''} de trabajo y luego defiendes con ${needDefensa(s, p)}+.`, wait: p.stuck.wait <= 0 });
       if (p.stuck.wait <= 0) { s.pending = { kind: 'spin', reason: 'defensa', label: 'Girar por la defensa', ctx: {} }; return; }
@@ -650,11 +704,17 @@ function land(s, p, n, carry) {
 }
 
 function needAscenso(s, p, node) { return Math.max(2, CFG.ascenso[node.nivel - 1] - Math.min(2, p.c) - (bono(p) > 1 ? 1 : 0)); }
-function needDefensa(s, p) { return Math.max(2, GUIA[tierOf(p.mencion, p.guia)].umbral - bono(p)); }
+function needDefensa(s, p) { return Math.max(2, GUIA[guiaTier(s, p.mencion, p.guia)].umbral - bono(p)); }
+const hard = s => s.ev && s.ev.jefe !== 'Silva';
+function guiaTier(s, men, name) { const t = tierOf(men, name); return t === 'baja' && hard(s) ? 'media' : t; }
 function umbralFiltro(s, p, n) {
   let need = CFG.umbral[n.dif]; const parts = [`base ${need}`];
   const b = bono(p); if (b) { need -= b; parts.push(`−${b} por Conocimiento`); }
   if (p.fin === 'trabajando' && estudiando(p)) { need += 1; parts.push('+1 por trabajar'); }
+  if (hard(s)) { need += 1; parts.push(`+1 jefe ${s.ev.jefe}`); }
+  if (act(s, 'paro')) { need -= 1; parts.push('−1 paro'); }
+  if (act(s, 'pandemia')) { need -= 1; parts.push('−1 pruebas online'); }
+  if (act(s, 'congreso') && n.profe && n.profe.includes(s.ev.act.congreso.prof)) { need -= 2; parts.push(`−2 ${s.ev.act.congreso.prof} en congreso`); }
   const helper = s.players.find(o => o !== p && o.ayudante && o.passed[n.id]);
   if (helper) { need -= 1; parts.push(`−1 ayudante ${helper.name}`); }
   if ((p.fails[n.id] || 0) >= 2) parts.push(`carta: cuesta ${fmt(CFG.carta)} y 1 Vida Social`);
@@ -673,7 +733,8 @@ function rendir(s, p, n, carry) {
   } else {
     p.fails[node.id] = (p.fails[node.id] || 0) + 1;
     let extra = '';
-    if (p.fin === 'beca' && !p.becaLost) { p.becaLost = true; extra = ' Perdiste la beca.'; }
+    const total = Object.values(p.fails).reduce((a, b) => a + b, 0);
+    if (p.fin === 'beca' && !p.becaLost && (p.fails[node.id] >= CFG.becaPierde.mismo || total >= CFG.becaPierde.total)) { p.becaLost = true; extra = ' Perdiste la beca.'; }
     if (p.fails[node.id] === 2) extra += ' Quedaste en causal: desde ahora cada intento requiere carta.';
     log(s, `${p.name} reprobó ${node.name} con ${n} (necesitaba ${u.need}).${extra}`, p.id);
     fx(s, { kind: 'card', pid: p.id, title: `Reprobaste ${node.name}`, text: `Sacaste ${n}, necesitabas ${u.need}.${extra}`, eff: 'Lo intentas de nuevo el próximo turno' });
@@ -716,7 +777,7 @@ function duelo(s, p, o, node) {
   const a = spinN(s), b = spinN(s); lucky(s, p, a); lucky(s, o, b);
   const pa = a, pb = b;
   const work = node.work; const title = work ? 'Licitación' : 'Duelo de certamen';
-  fx(s, { kind: 'spin', pid: p.id, n: a, reason: 'duelo' });
+  fx(s, { kind: 'duel', a: { pid: p.id, n: a }, b: { pid: o.id, n: b } });
   let txt = `${p.name} sacó ${a}${pa > a ? ' +1' : ''}; ${o.name} sacó ${b}${pb > b ? ' +1' : ''}.`, eff;
   if (pa === pb) { apply(s, p, { k: 1 }, title); apply(s, o, { k: 1 }, title); eff = 'Empate: ambos +1 Conocimiento'; }
   else {
@@ -731,13 +792,22 @@ function duelo(s, p, o, node) {
 
 function doChoose(s, p, val) {
   const P = s.pending; s.pending = null;
+  const opt = P.options.find(o => o.id === val);
+  fx(s, { kind: 'chose', pid: p.id, title: P.title, label: opt ? opt.label : val });
   switch (P.choice) {
+    case 'compra': {
+      const E = EVENTOS[P.ctx.kind];
+      if (val === 'si') { const res = apply(s, p, E.compra.e, E.name); fx(s, { kind: 'card', pid: p.id, title: E.compra.si, text: E.name, eff: res }); }
+      else log(s, `${p.name}: ${E.compra.no.toLowerCase()}.`, p.id);
+      return continueTurn(s, p);
+    }
     case 'via':
       p.via = val;
       if (val === 'paes') apply(s, p, { k: 2 }, 'PAES');
       else { p.pos = BOARD.conv; apply(s, p, { m: CFG.conv.m, k: CFG.conv.k }, 'convalidación'); log(s, `${p.name} entra por convalidación y parte en el segundo semestre.`, p.id); fx(s, { kind: 'move', pid: p.id, path: [BOARD.start, BOARD.conv] }); }
       return ask(s, 'fin');
     case 'fin':
+      if (val === 'beca') { s.pending = { kind: 'spin', reason: 'beca', label: `Postular a la beca (${CFG.becaMin}+)` }; return; }
       p.fin = val; if (val === 'familia') apply(s, p, { m: CFG.familiaExtra }, 'familia');
       log(s, `${p.name} financia la carrera: ${{ trabajando: 'trabajando', beca: 'con beca', familia: 'con su familia' }[val]}.`, p.id);
       s.pending = { kind: 'spin', reason: 'move', label: 'Girar la ruleta' }; return;
@@ -779,6 +849,144 @@ function doChoose(s, p, val) {
   endTurn(s);
 }
 
+
+// ---------- Eventos espontáneos ----------
+// Se activan la primera vez que alguien llega a los Laboratorios (3.er año).
+// "lento" = retrasa la partida; "rapido" = la acelera o no la afecta.
+const EVENTOS = {
+  paro: { name: 'Paro en la carrera', tipo: 'rapido' },
+  cambioJefe: { name: 'Cambio de jefe de carrera', tipo: 'lento', max: 3 },
+  tarea: { name: 'Tarea de modelación', tipo: 'lento' },
+  gta: { name: 'Salió el GTA 6', tipo: 'rapido', compra: { q: '¿Comprar el GTA 6?', text: 'Cuesta $300.000. Ganas Vida Social, pero pierdes Conocimiento.', si: 'Comprarlo', no: 'No comprarlo', e: { m: -300, v: 2, k: -1 } } },
+  pandemia: { name: 'Pandemia: clases online', tipo: 'rapido' },
+  estallido: { name: 'Estallido social', tipo: 'lento' },
+  congreso: { name: 'Profe en congreso', tipo: 'rapido' },
+  terremoto: { name: 'Terremoto', tipo: 'lento' },
+  aniversario: { name: 'Aniversario de la UdeC', tipo: 'rapido' },
+  toma: { name: 'Toma de la Facultad', tipo: 'lento' },
+  feria: { name: 'Feria laboral', tipo: 'rapido' },
+  mundial: { name: 'Mundial', tipo: 'rapido', compra: { q: '¿Ver el partido en vez de estudiar?', text: 'Juega Chile. Ganas Vida Social, pero pierdes Conocimiento.', si: 'Ver el partido', no: 'Estudiar', e: { v: 2, k: -1 } } },
+  temporal: { name: 'Temporal penquista', tipo: 'lento' },
+  becaEx: { name: 'Beca de excelencia', tipo: 'rapido' },
+};
+const PROFES_ALTA_TODOS = ['Montalva', 'Cendoya', 'Calderón', 'Echaveguren', 'Merino', 'Link', 'Tudela'];
+
+// distancia de cada casilla a la meta (para medir el avance)
+const DIST = (() => {
+  const d = {}; const N = BOARD.nodes; const fin = Object.keys(N).find(id => N[id].type === 'fin');
+  d[fin] = 0; let changed = true;
+  while (changed) { changed = false; for (const id in N) for (const nx of N[id].next) if (d[nx] !== undefined && (d[id] === undefined || d[nx] + 1 < d[id])) { d[id] = d[nx] + 1; changed = true; } }
+  return d;
+})();
+const progreso = p => p.finished ? 1 : 1 - DIST[p.pos] / DIST[BOARD.start];
+const estudiantes = s => s.players.filter(p => !p.finished && !p.pega);
+
+function roundStart(s) {
+  // ingresos por trabajar: 10% del pago asignado
+  for (const p of s.players) {
+    if (p.finished) continue;
+    let base = 0, why = '';
+    if (p.pega) { base = p.pega === 'emprende' ? 1600 * CFG.sueldoMult * CFG.nivelSueldo[p.nivel] : sueldo(p, p.pega, p.nivel); why = 'sueldo de la ronda'; }
+    else if (p.fin === 'trabajando') { base = CFG.pagoEstudio.trabajando; why = 'pega de estudiante'; }
+    if (base) apply(s, p, { m: Math.round(base * CFG.sueldoRonda * s.ev.gob.mult / 10) * 10 }, why);
+    if (act(s, 'estallido')) apply(s, p, { v: 1 }, 'asambleas y cabildos', true);
+    if (act(s, 'pandemia') && p.pega) apply(s, p, { v: 1 }, 'teletrabajo', true);
+  }
+  if (s.acc.length) fx(s, { kind: 'income', round: s.round });
+  // fin de eventos con duración
+  for (const k of Object.keys(s.ev.act)) if (s.round === s.ev.act[k].end) { fx(s, { kind: 'event', key: k, ended: true, title: `Terminó: ${EVENTOS[k].name}`, text: 'Todo vuelve a la normalidad.' }); s.ev.hist.push({ round: s.round, title: `Terminó: ${EVENTOS[k].name}`, text: 'Todo vuelve a la normalidad.' }); delete s.ev.act[k]; }
+  if (s.ev.tarea && s.round - s.ev.tarea.r0 >= 3) tareaEnd(s);
+  // activación y sorteo
+  if (!s.ev.on && s.players.some(p => p.finished || ['labs', 'facultad', 'consultora'].includes(NODE(p.pos).zone))) { s.ev.on = true; log(s, 'Desde ahora pueden ocurrir eventos espontáneos.'); }
+  if (!s.ev.on || s.ev.tarea || s.phase !== 'play') return;
+  const avg = s.players.reduce((a, p) => a + progreso(p), 0) / s.players.length;
+  const ritmo = avg / Math.min(1, s.round / CFG.ev.rondasEsperadas);
+  const lento = ritmo < 0.9, rapido = ritmo > 1.1;
+  const prob = lento ? CFG.ev.probLenta : rapido ? CFG.ev.probRapida : CFG.ev.prob;
+  if (rngNext(s) >= prob) return;
+  const pool = [];
+  const lleno = s.ev.count >= CFG.ev.maxPorPartida; // tope de 4 eventos distintos (el cambio de jefe va aparte)
+  const mitad = avg >= 0.35 && avg <= 0.65;
+  for (const [k, E] of Object.entries(EVENTOS)) {
+    const usados = s.ev.used.filter(x => x === k).length;
+    if (usados >= (E.max || 1) || s.ev.act[k]) continue;
+    if (k !== 'cambioJefe' && lleno) continue;
+    if (k === 'cambioJefe') {
+      if (s.round - s.ev.lastJefe < 4) continue; // al menos 4 rondas entre cambios
+      if (usados === 0 && mitad) { if (estudiantes(s).length) for (let i = 0; i < 6; i++) pool.push(k); continue; } // el primer cambio es más probable a mitad de carrera
+    }
+    if (lento && E.tipo === 'lento') continue;
+    if (['cambioJefe', 'paro', 'pandemia', 'estallido', 'congreso', 'becaEx'].includes(k) && !estudiantes(s).length) continue;
+    if (k === 'toma' && !s.players.some(p => !p.finished && !p.pega && NODE(p.pos).zone === 'facultad')) continue;
+    const w = rapido && E.tipo === 'lento' ? 2 : 1;
+    for (let i = 0; i < w; i++) pool.push(k);
+  }
+  if (!pool.length) return;
+  startEvent(s, pool[pickI(s, pool.length)]);
+}
+
+function startEvent(s, k) {
+  if (k !== 'cambioJefe') s.ev.count++; else s.ev.lastJefe = s.round;
+  s.ev.used.push(k);
+  const E = EVENTOS[k]; const r = s.round; let text = '', d;
+  switch (k) {
+    case 'paro': d = 1 + pickI(s, 3); s.ev.act.paro = { end: r + d }; text = `Por ${d} ronda${d > 1 ? 's' : ''}: los filtros bajan 1 de dificultad y la Vida Social de las casillas se duplica.`; break;
+    case 'cambioJefe': {
+      const antes = s.ev.jefe;
+      s.ev.jefe = antes === 'Silva' ? (pickI(s, 2) ? 'Cendoya' : 'Merino') : 'Silva';
+      const up = pickI(s, 2) === 1; s.ev.gob = { mult: up ? 1 + CFG.gobierno : 1 - CFG.gobierno, name: up ? 'Gobierno expansivo' : 'Gobierno austero' };
+      text = s.ev.jefe === 'Silva'
+        ? `Vuelve Silva como jefe de carrera: la dificultad vuelve a la normalidad. Además cambia el gobierno: ${s.ev.gob.name}, los pagos ${up ? 'suben' : 'bajan'} ${CFG.gobierno * 100}%.`
+        : `${s.ev.jefe} reemplaza a ${antes}: los filtros suben 1 de dificultad y los profes de exigencia baja pasan a media por el resto de la partida. Además cambia el gobierno: ${s.ev.gob.name}, los pagos ${up ? 'suben' : 'bajan'} ${CFG.gobierno * 100}%.`;
+      break;
+    }
+    case 'tarea': s.ev.tarea = { r0: r, in: s.players.filter(p => !p.finished).map(p => p.id), best: null }; text = 'Todos quedan atrapados modelando. Para salir hay que sacar más de 8 esta ronda, más de 6 la siguiente y más de 4 la última. Quien sale avanza lo que sacó. El número más alto gana +3 Conocimiento.'; break;
+    case 'gta': case 'mundial': s.ev.buy = { kind: k, left: s.players.filter(p => !p.finished).map(p => p.id) }; text = k === 'gta' ? 'En su próximo turno, cada jugador decide si compra el juego por $300.000: +2 Vida Social y −1 Conocimiento.' : 'En su próximo turno, cada jugador decide si ve el partido: +2 Vida Social y −1 Conocimiento.'; break;
+    case 'pandemia': s.ev.act.pandemia = { end: r + 2 }; text = 'Por 2 rondas: pruebas en casa (filtros −1), no se gana Vida Social en las casillas y los que trabajan ganan +1 Vida Social por ronda con el teletrabajo.'; break;
+    case 'estallido': d = 1 + pickI(s, 2); s.ev.act.estallido = { end: r + d }; text = `Por ${d} ronda${d > 1 ? 's' : ''}: se suspende el semestre y los que estudian avanzan la mitad de lo que sacan. Todos ganan +1 Vida Social por ronda.`; break;
+    case 'congreso': { const prof = PROFES_ALTA_TODOS[pickI(s, PROFES_ALTA_TODOS.length)]; s.ev.act.congreso = { end: r + 2, prof }; text = `${prof} se va 2 rondas a un congreso: sus filtros bajan 2 de dificultad, pero sus tesistas no pueden defender hasta que vuelva.`; break; }
+    case 'terremoto': {
+      s.ev.act.terremoto = { end: r + 1 };
+      for (const p of s.players) if (!p.finished) { if (['est', 'geo'].includes(p.mencion)) apply(s, p, { m: 500, k: 2 }, 'peritajes'); else apply(s, p, { m: -100 }, 'arreglos'); if (!p.pega) apply(s, p, { skip: 1 }, 'universidad cerrada'); }
+      text = 'Los de Estructuras y Geotecnia hacen peritajes: +$500.000 y +2 Conocimiento. Los demás pagan $100.000 en arreglos. La universidad cierra: los que estudian pierden un turno.'; break;
+    }
+    case 'aniversario': s.ev.act.aniversario = { end: r + 1 }; for (const p of s.players) if (!p.finished) apply(s, p, { v: 1 }, 'aniversario', true); text = 'Todos ganan +1 Vida Social y, durante esta ronda, la Vida Social de las casillas se duplica.'; break;
+    case 'toma': for (const p of s.players) if (!p.finished && !p.pega && NODE(p.pos).zone === 'facultad') apply(s, p, { skip: 1, v: 1 }, 'toma'); text = 'Quienes están en la Facultad pierden su próximo turno, pero ganan +1 Vida Social.'; break;
+    case 'feria': { const res = []; for (const p of s.players) if (!p.finished) { const n = spinN(s); if (n >= 6) apply(s, p, { c: 1 }, `feria laboral (${n})`); res.push(`${p.name}: ${n}${n >= 6 ? ' ✓' : ''}`); } text = 'Todos giran: con 6 o más consiguen un contacto. ' + res.join(' · '); break; }
+    case 'temporal': s.ev.act.temporal = { end: r + 1 }; for (const p of s.players) if (!p.finished && p.mencion === 'hid') apply(s, p, { k: 1 }, 'medición de caudales'); text = 'Esta ronda todos avanzan 1 casilla menos. Los de Hidráulica ganan +1 Conocimiento midiendo caudales.'; break;
+    case 'becaEx': {
+      const st = estudiantes(s); const max = Math.max(...st.map(p => p.k)); const top = st.filter(p => p.k === max);
+      if (top.length === 1) { apply(s, top[0], { m: 500 }, 'beca de excelencia'); text = `${top[0].name} tiene más Conocimiento entre los que estudian y gana $500.000.`; }
+      else text = `Hay empate en Conocimiento (${top.map(p => p.name).join(', ')}): la beca queda desierta.`;
+      break;
+    }
+  }
+  log(s, `Evento: ${E.name}. ${text}`);
+  s.ev.hist.push({ round: s.round, title: E.name, text });
+  fx(s, { kind: 'event', key: k, title: E.name, text });
+}
+
+const tareaX = s => [8, 6, 4][Math.min(2, s.round - s.ev.tarea.r0)];
+function tareaSpin(s, p, n) {
+  const T = s.ev.tarea; const x = tareaX(s);
+  if (!T.best || n > T.best.n) T.best = { pid: p.id, n };
+  if (n > x) {
+    T.in = T.in.filter(id => id !== p.id);
+    log(s, `${p.name} sacó ${n} y terminó la tarea de modelación.`, p.id);
+    fx(s, { kind: 'card', pid: p.id, title: '¡Tarea entregada!', text: `Sacaste ${n} (necesitabas más de ${x}).` + (p.stuck ? '' : ` Avanzas ${n}.`), good: true });
+    if (!T.in.length) tareaEnd(s);
+    if (p.stuck) return endTurn(s);
+    return move(s, p, n);
+  }
+  log(s, `${p.name} sacó ${n}: sigue modelando.`, p.id);
+  fx(s, { kind: 'card', pid: p.id, title: 'Sigues modelando', text: `Sacaste ${n}, necesitabas más de ${x}. La próxima ronda es más fácil.` });
+  endTurn(s);
+}
+function tareaEnd(s) {
+  const T = s.ev.tarea; if (!T) return; s.ev.tarea = null;
+  if (T.best) { const w = s.players.find(p => p.id === T.best.pid); apply(s, w, { k: 3 }, 'mejor modelo'); const text = `El mejor modelo fue de ${w.name} (sacó ${T.best.n}): +3 Conocimiento.`; s.ev.hist.push({ round: s.round, title: 'Terminó la tarea de modelación', text }); fx(s, { kind: 'event', key: 'tarea', ended: true, title: 'Terminó la tarea de modelación', text }); }
+}
+
 // ---------- Puntaje ----------
 function score(s) {
   const L = s.leaders || {};
@@ -798,17 +1006,17 @@ function botAction(s) {
   let v;
   switch (P.choice) {
     case 'via': v = r() < 0.6 ? 'paes' : 'conv'; break;
-    case 'fin': v = ['trabajando', 'beca', 'familia'][h % 3]; break;
+    case 'fin': v = o[h % o.length].id; break;
     case 'forkM': { const mates = o.find(x => x.sub.startsWith('Grupo')); v = mates && r() < 0.5 ? mates.id : o[h % o.length].id; break; }
     case 'forkT': v = r() < 0.35 ? 'magister' : 'memoria'; break;
     case 'pega': v = o.map(x => x.id).sort((a, b) => (PEGAS[b].base || 1500) - (PEGAS[a].base || 1500))[0]; break;
     case 'decision': v = r() < 0.5 ? 'si' : 'no'; break;
-    case 'dilema': v = r() < 0.5 ? 'a' : 'b'; break;
+    case 'dilema': case 'compra': v = r() < 0.5 ? (P.choice === 'dilema' ? 'a' : 'si') : (P.choice === 'dilema' ? 'b' : 'no'); break;
     default: v = o[h % o.length].id;
   }
   return { type: 'choose', value: v, pid: p.id };
 }
 
-return { TOKENS, COLORS, CFG, BOARD, NODE, PEGAS, MENCIONES, PROFES_MEN, GUIA, LIDER, newGame, reduce, botAction, score, bono, fmt, tierOf, umbralFiltro };
+return { EVENTOS, DIST, progreso, TOKENS, COLORS, CFG, BOARD, NODE, PEGAS, MENCIONES, PROFES_MEN, GUIA, LIDER, newGame, reduce, botAction, score, bono, fmt, tierOf, umbralFiltro };
 })();
 if (typeof module !== 'undefined') module.exports = GAME;
