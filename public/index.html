@@ -177,6 +177,14 @@ table.res th, table.res td { padding: 6px 4px; border-bottom: 2px solid #ddd3b8;
 table.res th:first-child, table.res td:first-child, .cerBox table.res td:nth-child(2), .cerBox table.res th:nth-child(2) { text-align: left; }
 .toast { position: fixed; left: 50%; top: 60px; transform: translateX(-50%); background: var(--casco); color: var(--tinta); border: 2px solid var(--tinta); padding: 8px 14px; border-radius: 999px; font-weight: 700; z-index: 30; animation: pop .2s; pointer-events: none; max-width: 92vw; text-align: center; }
 /* ---------- Ruleta grande, cartel de turno, anfitrión ---------- */
+#verTag { position: fixed; left: 8px; bottom: 6px; z-index: 120; font: 700 11px/1 Fredoka, system-ui, sans-serif; color: #1d2430; background: rgba(255, 247, 224, .85); border: 1.5px solid #1d2430; border-radius: 999px; padding: 3px 8px; pointer-events: none; opacity: .8; }
+#mapJefe .mj { cursor: pointer; animation: mjIn .35s ease-out; }
+#mapJefe .mj.out { animation: mjOut .3s ease-in forwards; }
+#mapJefe .mjb { animation: mjBob 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+#mapJefe .mjsay { animation: pop .25s; }
+@keyframes mjIn { from { opacity: 0; transform: translateY(14px) scale(.6); } }
+@keyframes mjOut { to { opacity: 0; transform: translateY(10px) scale(.6); } }
+@keyframes mjBob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-3px) rotate(2deg); } }
 .cer { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(9, 22, 38, .93); padding: 12px; overflow: auto; }
 .cerBox { position: relative; z-index: 2; width: min(560px, 100%); display: grid; gap: 12px; background: var(--papel); border: 3px solid var(--tinta); border-radius: 24px; box-shadow: 0 8px 0 var(--tinta); padding: 16px; animation: pop .25s; }
 .cerBox h2 { margin: 0; text-align: center; font-family: 'Bowlby One', sans-serif; font-size: 24px; }
@@ -356,6 +364,7 @@ input[type=range] { width: 100%; accent-color: #1d2430; }
 <div id="overlay" class="overlay hidden"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
 <div id="spinLayer" class="spinLayer hidden" aria-live="polite"><div class="spinBox"><h3 id="spinWho"></h3><div class="waitmsg" id="spinWhy"></div><div id="bigWheel"></div><div class="bignum" id="bigNum"></div></div></div>
 <div id="banner" class="banner hidden" aria-live="polite"></div>
+<div id="verTag" aria-label="Versión del juego"></div>
 <div id="cer" class="cer hidden" aria-live="polite"><div class="cerBox"><div id="cerHost"></div><div id="cerStage"></div><div class="row" id="cerCtl"><button class="btn" type="button" id="cerSkip">Saltar animación</button><button class="btn primary" type="button" id="cerNext">Siguiente ▶</button></div></div><div id="confetti"></div></div>
 <div id="duelLayer" class="spinLayer hidden" aria-live="polite"><div class="spinBox"><h3>Duelo</h3><div id="duelBox" class="duelBox"></div></div></div>
 
@@ -1639,7 +1648,37 @@ const CHAR = {
   Silva: { eyes: [[178, 238], [282, 238]], mouth: [230, 328, 100], skin: '#ce9468', def: 'neutral' },
   Merino: { eyes: [[190, 237], [293, 237]], mouth: [240, 333, 86], skin: '#f4c9a0', def: 'smug', patch: [52, 22] },
 };
-function hostSvg(name, w, expr) {
+// ===== Vestimenta del jefe según los eventos =====
+// Prioridad: el evento que se está mostrando; si no, el evento activo más reciente con atuendo
+const OUTFIT_OF = { mundial: 'chile', aniversario: 'fiesta', pandemia: 'mascarilla', temporal: 'impermeable', terremoto: 'casco', paro: 'pañuelo', gta: 'audifonos', feria: 'corbata', tarea: 'ojeras', becaEx: 'birrete', sabatico: 'lentes', congreso: 'corbata', inflacion: 'ojeras' };
+let OUTFIT_NOW = null;
+function curOutfit() {
+  if (OUTFIT_NOW) return OUTFIT_OF[OUTFIT_NOW] || null;
+  const st = VIEW ? VIEW.base : S; if (!st || !st.ev) return null;
+  const ks = (VIEW && VIEW.acts) ? [...VIEW.acts] : Object.keys(st.ev.act || {});
+  for (let i = ks.length - 1; i >= 0; i--) if (OUTFIT_OF[ks[i]]) return OUTFIT_OF[ks[i]];
+  return null;
+}
+function outfitSvg(o, C) {
+  if (!o) return { under: '', over: '' };
+  const K = '#1d2430', [L, R] = C.eyes, cx = (L[0] + R[0]) / 2, ey = L[1], [mx, my] = C.mouth, S8 = `stroke="${K}" stroke-width="10" stroke-linejoin="round"`;
+  const torso = fill => `<path d="M24 662 L24 540 Q34 430 ${cx - 85} 400 Q${cx} 445 ${cx + 85} 400 Q446 430 456 540 L456 662 Z" fill="${fill}" ${S8}/>`;
+  switch (o) {
+    case 'chile': return { under: '', over: torso('#d52b1e') + `<path d="M${cx - 85} 400 L${cx} 470 L${cx + 85} 400" fill="none" stroke="#fff" stroke-width="16"/><path d="M${cx + 95} 505 l9 26 l27 0 l-22 16 l8 26 l-22 -16 l-22 16 l8 -26 l-22 -16 l27 0 Z" fill="#fff" stroke="${K}" stroke-width="5"/><text x="${cx - 120}" y="600" font-family="Arial Black, sans-serif" font-size="70" fill="#fff" stroke="${K}" stroke-width="4">10</text>` };
+    case 'fiesta': return { under: '', over: `<path d="M${cx - 70} 125 L${cx + 25} 45 L${cx + 70} 125 Z" fill="#9b4dca" ${S8}/><path d="M${cx - 40} 100 L${cx + 52} 100 M${cx - 15} 75 L${cx + 37} 75" stroke="#ffc23c" stroke-width="12"/><circle cx="${cx + 25}" cy="50" r="16" fill="#ffc23c" stroke="${K}" stroke-width="6"/>` };
+    case 'mascarilla': return { under: '', over: `<path d="M${mx - 150} ${my - 70} L${mx - 95} ${my - 40} M${mx + 150} ${my - 70} L${mx + 95} ${my - 40}" stroke="#eef2f5" stroke-width="10"/><rect x="${mx - 98}" y="${my - 58}" width="196" height="118" rx="38" fill="#a8d4ee" ${S8}/><path d="M${mx - 70} ${my - 20} H${mx + 70} M${mx - 70} ${my + 10} H${mx + 70}" stroke="#7fb4d6" stroke-width="7"/>` };
+    case 'impermeable': return { under: '', over: torso('#f2c230') + `<path d="M${cx} 445 L${cx} 662" stroke="${K}" stroke-width="8"/><circle cx="${cx - 22}" cy="520" r="9" fill="${K}"/><circle cx="${cx - 22}" cy="590" r="9" fill="${K}"/><path d="M${cx - 190} 300 Q${cx - 205} 90 ${cx} 72 Q${cx + 205} 90 ${cx + 190} 300" fill="none" stroke="#f2c230" stroke-width="34"/><path d="M${cx - 190} 300 Q${cx - 205} 90 ${cx} 72 Q${cx + 205} 90 ${cx + 190} 300" fill="none" stroke="${K}" stroke-width="6"/>` };
+    case 'casco': return { under: '', over: `<path d="M${cx - 175} 175 Q${cx - 170} 52 ${cx} 50 Q${cx + 170} 52 ${cx + 175} 175 Z" fill="#ffd23a" ${S8}/><rect x="${cx - 200}" y="160" width="400" height="34" rx="16" fill="#ffd23a" ${S8}/><path d="M${cx - 20} 56 L${cx - 20} 165 M${cx + 20} 56 L${cx + 20} 165" stroke="${K}" stroke-width="8"/>` };
+    case 'pañuelo': return { under: '', over: `<path d="M${cx - 170} 150 Q${cx} 120 ${cx + 170} 150 L${cx + 172} 182 Q${cx} 152 ${cx - 172} 182 Z" fill="#d52b1e" ${S8}/><path d="M${cx + 165} 165 l45 -20 l-8 40 Z M${cx + 165} 165 l50 25 l-35 22 Z" fill="#d52b1e" ${S8}/>` };
+    case 'audifonos': return { under: '', over: `<path d="M${cx - 175} 240 Q${cx - 180} 40 ${cx} 45 Q${cx + 180} 40 ${cx + 175} 240" fill="none" stroke="${K}" stroke-width="22"/><rect x="${cx - 205}" y="205" width="55" height="100" rx="22" fill="#24a35a" ${S8}/><rect x="${cx + 150}" y="205" width="55" height="100" rx="22" fill="#24a35a" ${S8}/>` };
+    case 'corbata': return { under: '', over: `<path d="M${cx - 22} 420 L${cx + 22} 420 L${cx + 14} 445 L${cx + 34} 590 L${cx} 630 L${cx - 34} 590 L${cx - 14} 445 Z" fill="#d52b1e" ${S8}/><path d="M${cx - 12} 470 L${cx + 20} 500 M${cx - 18} 530 L${cx + 24} 565" stroke="#ffc23c" stroke-width="8"/>` };
+    case 'ojeras': return { under: '', over: [L, R].map(([x, y]) => `<path d="M${x - 42} ${y + 52} Q${x} ${y + 72} ${x + 42} ${y + 52}" fill="none" stroke="#7a5a9c" stroke-width="10" stroke-linecap="round" opacity=".8"/>`).join('') + `<text x="${cx + 120}" y="120" font-family="Arial Black, sans-serif" font-size="56" fill="#2f7de1" stroke="${K}" stroke-width="3">z</text><text x="${cx + 160}" y="80" font-family="Arial Black, sans-serif" font-size="40" fill="#2f7de1" stroke="${K}" stroke-width="3">z</text>` };
+    case 'birrete': return { under: '', over: `<path d="M${cx - 210} 105 L${cx} 45 L${cx + 210} 105 L${cx} 165 Z" fill="${K}"/><rect x="${cx - 120}" y="115" width="240" height="55" fill="${K}"/><path d="M${cx + 10} 100 Q${cx + 170} 120 ${cx + 175} 200" fill="none" stroke="#ffc23c" stroke-width="9"/><circle cx="${cx + 175}" cy="208" r="14" fill="#ffc23c"/>` };
+    case 'lentes': return { under: '', over: [L, R].map(([x, y]) => `<rect x="${x - 50}" y="${y - 36}" width="100" height="72" rx="24" fill="#1d2430" opacity=".92"/>`).join('') + `<path d="M${L[0] + 50} ${ey - 10} H${R[0] - 50}" stroke="${K}" stroke-width="10"/><path d="M${L[0] - 30} ${ey - 26} l26 0" stroke="#fff" stroke-width="7" opacity=".7"/>` };
+  }
+  return { under: '', over: '' };
+}
+function hostSvg(name, w, expr, outfit) {
   const C = CHAR[name] || CHAR.Silva, img = CHAR_IMG[name.toLowerCase()] || CHAR_IMG.silva;
   if (!img) return '';
   const [L, Rr] = C.eyes, [mx, my, mw] = C.mouth, K = '#1d2430';
@@ -1664,7 +1703,8 @@ function hostSvg(name, w, expr) {
   const open = patch + `<path d="M${mx - 38} ${my - 10} Q${mx} ${my + 46} ${mx + 38} ${my - 10} Z" fill="#6b2a2a" stroke="${K}" stroke-width="9" stroke-linejoin="round"/><ellipse cx="${mx}" cy="${my + 18}" rx="14" ry="7" fill="#e88a8a"/>`;
   const lids = [L, Rr].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="31" fill="${C.skin}"/><path d="M${x - 26} ${y + 4} Q${x} ${y + 14} ${x + 26} ${y + 4}" fill="none" stroke="${K}" stroke-width="7" stroke-linecap="round"/>`).join('');
   const W = w || 64;
-  return `<svg viewBox="20 40 440 620" width="${W}" height="${W * 1.41}" aria-hidden="true" class="char"><image href="${img[2]}" x="0" y="0" width="${img[0]}" height="${img[1]}"/><g class="m-c">${closed}</g><g class="m-o">${open}</g><g class="lids">${lids}</g>${brows}</svg>`;
+  const fit = outfitSvg(outfit === undefined ? curOutfit() : outfit, C);
+  return `<svg viewBox="20 40 440 620" width="${W}" height="${W * 1.41}" aria-hidden="true" class="char"><image href="${img[2]}" x="0" y="0" width="${img[0]}" height="${img[1]}"/>${fit.under}<g class="m-c">${closed}</g><g class="m-o">${open}</g><g class="lids">${lids}</g>${brows}${fit.over}</svg>`;
 }
 // Personalidad de cada jefe de carrera (con consentimiento de los profes): voz, ritmo y frases
 function stutter(t) { const m = t.match(/^([¡¿"]*)(\p{L})/u); if (!m) return t; const i = m[1].length; return t.slice(0, i) + m[2] + '-' + m[2].toLowerCase() + t.slice(i + 1); }
@@ -2019,7 +2059,7 @@ function drawBoard() {
     const ls = labelLines(shortLabel(n));
     h += `<text x="${p.x}" y="${p.y + r + 10}" text-anchor="middle" font-family="${FONT}" font-weight="600" font-size="8" fill="#1d2430" paint-order="stroke" stroke="#f4efe1" stroke-width="3">${ls.map((l, i) => `<tspan x="${p.x}" dy="${i ? 9 : 0}">${esc(l)}</tspan>`).join('')}</text></g>`;
   }
-  h += top + `<g id="tokens"></g><g id="floats"></g>`;
+  h += top + `<g id="tokens"></g><g id="mapJefe"></g><g id="floats"></g>`;
   svg.innerHTML = h;
 }
 function describe(n) {
@@ -2262,7 +2302,7 @@ async function act(a) {
 let GEN = 0; // cambia al salir: las animaciones de una partida abandonada se cortan
 async function playState(next) {
   busy = true; const gen = GEN;
-  const prev = S; S = next; VIEW = { base: prev, ds: [], jefe: (prev.ev && prev.ev.jefe) || 'Silva' };
+  const prev = S; S = next; VIEW = { base: prev, ds: [], jefe: (prev.ev && prev.ev.jefe) || 'Silva', acts: new Set(Object.keys((prev.ev && prev.ev.act) || {})) };
   const actor = prev.players[prev.turn];
   opts.fastNow = !NET.on && opts.fast && actor.bot;
   try { for (const f of next.fx) { if (gen !== GEN) return; if (f.deltas && f.kind !== 'card' && f.kind !== 'event') VIEW.ds.push(...f.deltas); await playFx(f, actor); } }
@@ -2309,9 +2349,11 @@ async function playFx(f, actor) {
     if (f.key === 'cambioJefe') await jefeAnim(VIEW ? VIEW.jefe : 'Silva', f.host || hostName());
     else await eventIntro(f);
     if (VIEW && f.host) VIEW.jefe = f.host;
-    if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas); await showCard(f, p, actor); render();
+    if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas);
+    OUTFIT_NOW = f.key; await showCard(f, p, actor); OUTFIT_NOW = null;
+    if (VIEW && S.ev && S.ev.act && S.ev.act[f.key]) VIEW.acts.add(f.key); render();
   }
-  else if (f.kind === 'card' || f.kind === 'event') { if (VIEW && f.host && f.key !== 'cambioJefe') VIEW.jefe = f.host; if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas); await showCard(f, p, actor); render(); }
+  else if (f.kind === 'card' || f.kind === 'event') { if (f.kind === 'event' && f.ended && VIEW) VIEW.acts.delete(f.key); if (VIEW && f.host && f.key !== 'cambioJefe') VIEW.jefe = f.host; if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas); await showCard(f, p, actor); render(); }
 }
 let lastBanner = '', looping = false;
 async function loop() {
@@ -2461,7 +2503,7 @@ async function eventIntro(f) {
 }
 // Cambio de jefe: el anterior se va, una ruleta de caras y aparece el nuevo
 async function jefeAnim(from, to) {
-  const L = document.createElement('div'); L.className = 'spinLayer'; L.style.zIndex = 29; L.innerHTML = '<div class="spinBox"></div>'; document.body.appendChild(L); const box = L.firstChild;
+  const L = document.createElement('div'); L.className = 'spinLayer jefeLayer'; L.style.zIndex = 29; L.innerHTML = '<div class="spinBox"></div>'; document.body.appendChild(L); const box = L.firstChild;
   box.innerHTML = `<h3>📢 Cambio de jefe de carrera</h3><div class="jefeRow"><div class="slot" id="jOld">${hostSvg(from, 110, 'sad')}</div><div style="font-size:34px">➜</div><div class="slot" id="jNew"><span style="font-size:70px">❓</span></div></div><div class="waitmsg" id="jMsg">${esc(from)} deja la jefatura…</div>`;
   SND.play('event');
   const fast = opts.fastNow;
@@ -2578,7 +2620,7 @@ function exitGame() {
   GEN++; busy = false; $('#exitLayer') && $('#exitLayer').remove();
   endCeremony(); closeModal(); clearTimer(); queue.length = 0;
   ['#spinLayer', '#duelLayer', '#banner'].forEach(q => $(q) && $(q).classList.add('hidden'));
-  document.querySelectorAll('.evBanner, body > .spinLayer:not(#spinLayer)').forEach(x => x.remove()); if ($('#fxRain')) $('#fxRain').innerHTML = '';
+  document.querySelectorAll('.evBanner, .jefeLayer').forEach(x => x.remove()); if ($('#fxRain')) $('#fxRain').innerHTML = '';
   const wasEnd = S && S.phase === 'end'; S = null; VIEW = null; $('#resBtn').classList.add('hidden');
   if (NET.on) { send({ t: 'leave' }); NET.code = null; store.del('vic-session'); }
   show('lobby');
@@ -2640,6 +2682,47 @@ function placeChat(where) { const box = $('#chatBox'); (where === 'game' ? $('#c
 // El botón Salir flota sobre todo: se reserva su ancho real en la barra para que no tape nada
 function fitExit() { const b = $('#exitBtn'); if (b && b.offsetWidth) document.documentElement.style.setProperty('--exitW', b.offsetWidth + 'px'); }
 window.addEventListener('resize', fitExit); new ResizeObserver(fitExit).observe($('#exitBtn'));
+const VERSION = 'v0.8.5';
+$('#verTag').textContent = 'La vida de un Ing. Civil · ' + VERSION;
+// ===== El jefe de carrera se pasea por el mapa cuando no está hablando =====
+const WANDER = {
+  Silva: ['Pa-paseando por el campus…', '¿Y-ya giraron?', 'E-este ramo me trae recuerdos.', 'Sa-saludos, cabros.', 'O-ojo con los filtros.'],
+  Cendoya: ['Mmm.', 'Estoy revisando sus mallas.', 'No corran por el pasillo.', 'Esto no converge.', 'Sigan, sigan.'],
+  Merino: ['Este campus lo diseñé yo. Casi.', 'Miren cómo camino.', 'Saludos de su jefe favorito.', 'Innovación, cabros.', 'Pasaba a que me vieran.'],
+};
+const MJ = { shown: false, until: 0, next: Date.now() + 6000, say: 0 };
+function mjBusy() {
+  return !S || S.phase === 'end' || $('#game').classList.contains('hidden') || !!document.querySelector('#overlay:not(.hidden), #spinLayer:not(.hidden), #duelLayer:not(.hidden), #banner:not(.hidden), #cer:not(.hidden), .evBanner, #exitLayer, .jefeLayer');
+}
+function mjHide() { const g = $('#mapJefe .mj'); if (g) { g.classList.add('out'); setTimeout(() => { if (!MJ.shown) $('#mapJefe').innerHTML = ''; }, 320); } MJ.shown = false; MJ.next = Date.now() + 5000 + Math.random() * 9000; }
+function mjSay(force) {
+  const g = $('#mapJefe .mj'); if (!g) return;
+  const n = hostName(), list = WANDER[n] || WANDER.Silva, t = list[Math.floor(Math.random() * list.length)];
+  g.querySelector('.mjsay') && g.querySelector('.mjsay').remove();
+  const w = Math.max(60, t.length * 6.4 + 16);
+  const BW = ($('#board').viewBox && $('#board').viewBox.baseVal.width) || 640;
+  const bx = Math.min(BW - 6 - (MJ.x + w), Math.max(6 - MJ.x, 22 - w / 2)); // la burbuja no se sale del mapa
+  g.insertAdjacentHTML('beforeend', `<g class="mjsay"><rect x="${bx}" y="-24" width="${w}" height="22" rx="10" fill="#fff" stroke="#1d2430" stroke-width="2"/><path d="M18 -3 L22 6 L27 -3" fill="#fff" stroke="#1d2430" stroke-width="2"/><text x="${bx + w / 2}" y="-9" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="11.5" font-weight="600" fill="#1d2430">${esc(t)}</text></g>`);
+  const P = PERSON[n] || PERSON.Silva; if (force) for (let i = 0; i < Math.min(6, t.length / 3); i++) setTimeout(() => SND.blip(P.pitch), i * 70);
+  clearTimeout(MJ.say); MJ.say = setTimeout(() => { const b = $('#mapJefe .mjsay'); if (b) b.remove(); }, 2600);
+}
+function mjShow() {
+  const p = S.players[S.turn], c0 = POS[disp[p.id]] || { x: 0, y: 0 };
+  const ids = Object.keys(POS).filter(id => Math.abs(POS[id].y - c0.y) < 260 && id !== disp[p.id]);
+  const id = ids[Math.floor(Math.random() * ids.length)] || Object.keys(POS)[0], c = POS[id];
+  const ex = ['neutral', 'happy', 'smug', 'surprised', 'neutral'][Math.floor(Math.random() * 5)];
+  MJ.x = c.x - 22;
+  $('#mapJefe').innerHTML = `<g class="mj" transform="translate(${c.x - 22} ${c.y - 72})" role="button" aria-label="Jefe de carrera ${esc(hostName())}"><ellipse cx="22" cy="67" rx="18" ry="4" fill="rgba(0,0,0,.25)"/><g class="mjb"><rect x="-3" y="-3" width="50" height="68" rx="11" fill="#f5efe0" stroke="#1d2430" stroke-width="2.5"/><svg x="0" y="0" width="44" height="62" viewBox="0 0 44 62" overflow="hidden"><g>${hostSvg(hostName(), 44, ex)}</g></svg></g></g>`;
+  $('#mapJefe .mj').addEventListener('click', e => { e.stopPropagation(); SND.unlock(); mjSay(true); });
+  MJ.shown = true; MJ.until = Date.now() + 6000 + Math.random() * 6000;
+  if (Math.random() < 0.4) setTimeout(() => mjSay(false), 700);
+}
+setInterval(() => {
+  if (mjBusy()) { if (MJ.shown || $('#mapJefe') && $('#mapJefe').innerHTML) { MJ.shown = false; if ($('#mapJefe')) $('#mapJefe').innerHTML = ''; MJ.next = Date.now() + 2500 + Math.random() * 5000; } return; }
+  const now = Date.now();
+  if (MJ.shown && now > MJ.until) mjHide();
+  else if (!MJ.shown && now > MJ.next) mjShow();
+}, 400);
 let ONLINE_OK = false;
 // Sonido en todos los botones (inicio y juego)
 document.addEventListener('pointerdown', e => {
@@ -2686,7 +2769,7 @@ renderLobby();
   const sess = store.get('vic-session');
   if (sess && sess.code) { NET.code = sess.code; NET.token = sess.token; try { await wsConnect(); send({ t: 'rejoin', code: sess.code, token: sess.token }); } catch (e) {} }
 })();
-if (location.hash === '#test') window.__t = { initView, showCard, closeModal, loop, jefeAnim, eventIntro, showChoice, playState, cerRemote, NET, get S() { return S; } };
+if (location.hash === '#test') window.__t = { hostSvg, initView, showCard, closeModal, loop, jefeAnim, eventIntro, showChoice, playState, cerRemote, NET, get S() { return S; } };
 })();
 </script>
 </body>
