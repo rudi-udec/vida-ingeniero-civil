@@ -166,6 +166,9 @@ wss.on('connection', ws => {
         room.seats.forEach(x => { if (x.ws) send(x.ws, { t: 'chat', msg }); });
         break;
       }
+      case 'cer': // ceremonia final: el anfitrión marca el ritmo del podio para todos
+        if (isHost && room.state && room.state.phase === 'end') room.seats.forEach((x, j) => { if (j !== seatI && x.ws) send(x.ws, { t: 'cer', i: m.i, skip: !!m.skip }); });
+        break;
       case 'step': // quien tiene el turno avanzó una tarjeta: avanza en todas las pantallas
         room.seats.forEach((x, j) => { if (j !== seatI && x.ws) send(x.ws, { t: 'step', i: m.i }); });
         break;

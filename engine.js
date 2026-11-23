@@ -18,17 +18,17 @@ const fmt = n => (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n) * 1000).toL
 // ---------- Números del juego (calibrables) ----------
 const CFG = {
   umbral: { baja: 3, media: 5, alta: 7 },
-  bonoCada: 4, bonoMax: 3,
+  bonoCada: 4, bonoMax: 3, bonoVSCada: 7, bonoVSMax: 2, cambioRamo: 0.5,
   plataInicial: 200, familiaExtra: 400,
   pagoEstudio: { trabajando: 1700, beca: 700, familia: 500, becaPerdida: 200 },
   ayudantePago: 300, ayudanteMinK: 8,
   pareja: -150, mascota: -80, hermanos: 200,
   carta: 150,
-  mechon: { plata: 500, k: 1 }, compTurno: 500,
+  mechon: { plata: 500, k: 1 }, compTurno: 700,
   suerte: 150,
   sueldoMult: 2, nivelSueldo: [1, 1.4, 1.8], magister: 300, contacto: 100,
   ascenso: [6, 7],
-  plataPorPunto: 800, bonoPrimero: 5, bonoCorona: 1, bonoLider: 3, bonoMulti: 2,
+  plataPorPunto: 830, bonoPrimero: 5, bonoCorona: 1, bonoLider: 3, bonoMulti: 2,
   liderPlata: 150,
   conv: { m: 300, k: 2 },
   rondasFinales: 3,
@@ -158,9 +158,9 @@ const DECKS = {
 // Dilemas: casillas con dos opciones
 const DILEMAS = {
   estu: [
-    { q: '¿Estudiar para el certamen o ir a carretear?', a: ['Estudiar', { k: 2, v: -2 }], b: ['Carretear', { v: 3, k: -1 }] },
-    { q: '¿Dormir 5 minutos más o llegar con sueño?', a: ['Dormir 5 minutos más', { spin: { min: 5, ok: { v: 2 }, ko: {} } }, 'Gira: con 5+ llegas igual (+2 Vida Social); si no, no pasa nada'], b: ['Llegar con sueño', { k: 1, v: -1 }] },
-    { q: '¿Almorzar en Los Patos o traer colación?', a: ['Los Patos', { v: 1, m: -30 }], b: ['Colación', { m: 30 }] },
+    { q: '¿Estudiar para el certamen o ir a carretear?', a: ['Estudiar', { k: 2, v: -1 }], b: ['Carretear', { v: 2, k: -1 }] },
+    { q: '¿Dormir 5 minutos más o llegar con sueño?', a: ['Dormir 5 minutos más', { spin: { min: 5, ok: { v: 1 }, ko: {} } }, 'Gira: con 5+ llegas igual (+1 Vida Social); si no, no pasa nada'], b: ['Llegar con sueño', { k: 1, v: -1 }] },
+    { q: '¿Almorzar en Los Patos o traer colación?', a: ['Los Patos', { v: 1, m: -30 }], b: ['Colación', { m: 150 }] },
     { q: '¿Hacer el informe solo o con alguien?', a: ['Solo', { k: 2, v: -1 }], b: ['Con otro jugador', { otro: { yo: { k: 1, v: 1 }, otro: { k: 1, v: 1 } } }, 'Ambos +1 Conocimiento y +1 Vida Social'] },
     { q: '¿Ir a la ayudantía o al partido?', a: ['Ayudantía', { k: 1 }], b: ['Partido', { v: 2, m: -20 }] },
     { q: '¿Ramo de verano o vacaciones?', a: ['Ramo de verano', { k: 1, m: -100 }], b: ['Vacaciones', { v: 2, m: -150 }] },
@@ -186,8 +186,8 @@ const DILEMAS = {
 // ---------- Construcción del tablero ----------
 const TIER_EFF = { alta: { spin: { min: 6, ok: { k: 2, v: 1 }, ko: { v: -1 } } }, media: { k: 1 }, baja: { k: 1, v: 1 } };
 // Decisiones: efecto inmediato del sí y del no (el no también da algo, para que sea una elección real)
-const DSI = { pareja: { v: 3 }, mascota: { v: 2 }, hermanos: { v: 2 }, casa: { v: CFG.casa.v, m: CFG.casa.m } };
-const DNO = { pareja: [{ k: 1 }, 'Más tiempo para estudiar'], mascota: [{ m: 300 }, 'Ahorras'], hermanos: [{ v: 1 }, 'Vives con amigos'] };
+const DSI = { pareja: { v: 2 }, mascota: { v: 2 }, hermanos: { v: 1 }, casa: { v: CFG.casa.v, m: CFG.casa.m } };
+const DNO = { pareja: [{ k: 1 }, 'Más tiempo para estudiar'], mascota: [{ m: 300, k: 1 }, 'Ahorras y tienes más tiempo'], hermanos: [{ v: 1 }, 'Vives con amigos'] };
 function R(name, profe, tier, text) { return { type: 'ramo', name, profe, tier, text, e: TIER_EFF[tier] }; }
 function G(name, text, e) { return { type: 'ramo', name, text, e: e || { k: 1 } }; }
 function F(name, profe, dif) { return { type: 'filtro', name, profe, dif }; }
@@ -355,7 +355,7 @@ const NODE = id => BOARD.nodes[id];
 
 // ---------- Estado ----------
 const COLORS = ['#e8442e', '#2f7de1', '#f2b705', '#24a35a', '#9b4dca', '#ef7d1a'];
-const TOKENS = ['casco', 'pisco', 'calculadora', 'plano', 'cono', 'cafe', 'huincha', 'escalimetro'];
+const TOKENS = ['casco', 'pisco', 'calculadora', 'plano', 'cono', 'cafe', 'huincha', 'escalimetro', 'energetica', 'probeta'];
 function newGame({ players, seed, timer }) {
   const s = {
     v: 2, gid: (seed >>> 0) || 1, rng: (seed >>> 0) || 1, turn: 0, round: 0, phase: 'order', timer: timer ?? 120,
@@ -378,6 +378,8 @@ const cur = s => s.players[s.turn];
 function log(s, txt, pid) { s.log.push({ i: ++s.seq, t: txt, p: pid ?? null }); if (s.log.length > 80) s.log.shift(); }
 function fx(s, f) { f.i = ++s.seq; if (f.kind === 'card' || f.kind === 'event' || f.kind === 'income' || f.kind === 'lucky') { f.deltas = s.acc; s.acc = []; f.host = s.ev.jefe; } s.fx.push(f); }
 const bono = p => Math.min(CFG.bonoMax, Math.floor(Math.max(0, p.k) / CFG.bonoCada));
+// Vida Social también ayuda en las evaluaciones: el grupo de estudio y los amigos te salvan (−1 cada 6, máx. −2)
+const bonoVS = p => Math.min(CFG.bonoVSMax, Math.floor(Math.max(0, p.v) / CFG.bonoVSCada));
 const estudiando = p => !p.pega;
 
 // Líderes: quien va primero (sin empate) en cada medidor tiene una ventaja
@@ -752,15 +754,18 @@ function land(s, p, n, carry) {
   }
 }
 
-function needAscenso(s, p, node) { return Math.max(2, CFG.ascenso[node.nivel - 1] - Math.min(2, p.c) - (bono(p) > 1 ? 1 : 0)); }
-function needDefensa(s, p) { return Math.max(2, GUIA[guiaTier(s, p.mencion, p.guia)].umbral - bono(p)); }
+function needAscenso(s, p, node) { return Math.max(2, CFG.ascenso[node.nivel - 1] - Math.min(2, p.c) - (bono(p) > 1 ? 1 : 0) - (bonoVS(p) > 1 ? 1 : 0)); }
+function needDefensa(s, p) { return Math.max(2, GUIA[guiaTier(s, p.mencion, p.guia)].umbral - bono(p) - bonoVS(p)); }
 const hard = s => s.ev && s.ev.jefe !== 'Silva';
 function guiaTier(s, men, name) { const t = tierOf(men, name); return t === 'baja' && hard(s) ? 'media' : t; }
 // Modificadores del umbral, con ícono para mostrarlos como chips
 function umbralFiltro(s, p, n) {
   let need = CFG.umbral[n.dif]; const mods = [{ i: '🎯', v: need, l: `Base (dificultad ${n.dif})` }];
   const add = (i, v, l) => { need += v; mods.push({ i, v, l }); };
+  const ch = p.cambio && p.cambio[n.id];
+  if (ch) add('🔄', CFG.umbral[ch.dif] - CFG.umbral[n.dif], ch.by === 'profe' ? `Cambio de profe: ahora lo dicta ${ch.prof}` : `Cambio de malla (ahora dificultad ${ch.dif})`);
   const b = bono(p); if (b) add('📚', -b, 'Bono por Conocimiento');
+  const bv = bonoVS(p); if (bv) add('🎉', -bv, 'Grupo de estudio (Vida Social)');
   if (p.fin === 'trabajando' && estudiando(p)) add('💼', 1, 'Estudias trabajando');
   if (hard(s)) add('👔', 1, `Jefe de carrera ${s.ev.jefe}`);
   if (act(s, 'paro')) add('✊', -1, 'Paro');
@@ -775,6 +780,7 @@ function modsAscenso(s, p, node) {
   const mods = [{ i: '🎯', v: CFG.ascenso[node.nivel - 1], l: 'Base' }];
   if (p.c) mods.push({ i: '🤝', v: -Math.min(2, p.c), l: 'Contactos' });
   if (bono(p) > 1) mods.push({ i: '📚', v: -1, l: 'Conocimiento 8+' });
+  if (bonoVS(p) > 1) mods.push({ i: '🎉', v: -1, l: `Vida Social ${CFG.bonoVSCada * 2}+ (buena red)` });
   return mods;
 }
 // Nota chilena (1,0 a 7,0) a partir del número de la ruleta: llegar al mínimo es un 4,0
@@ -799,6 +805,17 @@ function rendir(s, p, n, carry) {
     const total = Object.values(p.fails).reduce((a, b) => a + b, 0);
     if (p.fin === 'beca' && !p.becaLost && (p.fails[node.id] >= CFG.becaPierde.mismo || total >= CFG.becaPierde.total)) { p.becaLost = true; extra = ' Perdiste la beca.'; }
     if (p.fails[node.id] === 2) extra += ' Quedaste en causal: desde ahora cada intento requiere carta.';
+    // Después de reprobar: 50% de que cambie el profe o la malla (más fácil o más difícil)
+    if (rngNext(s) < CFG.cambioRamo) {
+      const L = ['baja', 'media', 'alta'], cur = (p.cambio && p.cambio[node.id] && p.cambio[node.id].dif) || node.dif, i = L.indexOf(cur);
+      const dirs = [-1, 1].filter(d => L[i + d]); const d = dirs[pickI(s, dirs.length)]; const dif = L[i + d];
+      const by = node.profe && rngNext(s) < 0.5 ? 'profe' : 'malla';
+      let prof = null;
+      if (by === 'profe') { const pool = [...new Set(Object.values(PROFES_MEN).flatMap(x => x[dif] || []))].filter(x => !(node.profe || '').includes(x)); prof = pool[pickI(s, pool.length)] || 'un profe nuevo'; }
+      (p.cambio = p.cambio || {})[node.id] = { dif, by, prof };
+      const tx = by === 'profe' ? `Cambio de profe: ahora ${node.name} lo dicta ${prof}` : 'Cambio de malla: el ramo se reformuló';
+      extra += ` 🔄 ${tx} (${d < 0 ? 'más fácil' : 'más difícil'}: ahora necesitas ${d < 0 ? '2 menos' : '2 más'}).`;
+    }
     log(s, `${p.name} reprobó ${node.name} con un ${nota(n, u.need)}.${extra}`, p.id);
     fx(s, { kind: 'card', pid: p.id, title: `Reprobaste ${node.name}`, nota: nota(n, u.need), text: `Te sacaste un ${nota(n, u.need)}: no alcanzó para el 4,0.${extra}`, eff: 'Lo intentas de nuevo el próximo turno' });
   }
