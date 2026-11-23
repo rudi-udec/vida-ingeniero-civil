@@ -45,13 +45,24 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; letter-spacing: .01e
 .orline { text-align: center; color: var(--gris); font-size: 13px; font-weight: 600; }
 .joinrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 #joinCode { text-transform: uppercase; letter-spacing: .2em; font-weight: 800; font-size: 20px; text-align: center; }
-@media (max-width: 480px) { .lobby-card { padding: 14px; } .brand svg { width: 48px; height: 40px; } .prow { grid-template-columns: 26px minmax(0, 1fr) auto; row-gap: 6px; } .prow > svg { grid-row: 1 / 3; align-self: center; } .prow > div { grid-column: 2; grid-row: 1; } .prow .iconbtn { grid-column: 3; grid-row: 1; align-self: start; } .prow .seg { grid-column: 2 / 4; grid-row: 2; justify-self: start; } }
+@media (max-width: 480px) { .lobby-card { padding: 14px; } .brand svg { width: 48px; height: 40px; } .prow { grid-template-columns: 58px minmax(0, 1fr) auto; row-gap: 6px; } .prow > svg, .prow > .tokbtn { grid-row: 1 / 3; align-self: center; } .prow > div { grid-column: 2; grid-row: 1; } .prow .iconbtn { grid-column: 3; grid-row: 1; align-self: start; } .prow .seg { grid-column: 2 / 4; grid-row: 2; justify-self: start; } }
 .brand { display: flex; gap: 14px; align-items: center; }
 .brand svg { flex: none; }
 .brand h1 { font-size: clamp(22px, 5.6vw, 32px); line-height: 1.05; }
 .brand p { margin: 4px 0 0; color: var(--gris); }
 .plist { display: grid; gap: 8px; }
-.prow { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 8px; align-items: center; background: #fff; border: 2px solid var(--tinta); border-radius: 14px; padding: 6px 8px; }
+.prow { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto auto; gap: 8px; align-items: center; background: #fff; border: 2px solid var(--tinta); border-radius: 14px; padding: 6px 8px; }
+.tokbtn { display: grid; justify-items: center; gap: 0; background: #fff7e0; border: 2px solid var(--tinta); border-radius: 12px; padding: 3px 2px 2px; cursor: pointer; font: inherit; color: var(--tinta); box-shadow: 0 3px 0 var(--tinta); }
+.tokbtn:hover { background: #ffe9a8; } .tokbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--tinta); }
+.tokbtn small { font-size: 10.5px; font-weight: 700; }
+.tkname { font-size: 12.5px; color: var(--gris); font-weight: 600; }
+.tkgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 10px; }
+.tkcard { display: grid; justify-items: center; gap: 3px; text-align: center; background: #fff; border: 2px solid var(--tinta); border-radius: 14px; padding: 8px 6px; cursor: pointer; font: inherit; color: var(--tinta); box-shadow: 0 4px 0 var(--tinta); transition: transform .12s; }
+.tkcard:hover { transform: translateY(-3px) rotate(-1deg); background: #fff7e0; }
+.tkcard.on { background: #ffc23c; } .tkcard b { font-size: 13.5px; } .tkcard small { font-size: 11.5px; color: var(--gris); line-height: 1.2; }
+.tkcard em { font-size: 10.5px; color: #b2402e; font-style: normal; font-weight: 700; } .tkcard[data-taken] { opacity: .7; }
+.tkcard:hover svg, .tkcard.on svg { animation: wob .5s; }
+@keyframes wob { 0%, 100% { transform: rotate(0) } 30% { transform: rotate(-10deg) scale(1.08) } 60% { transform: rotate(8deg) } }
 .tsel { font: inherit; font-size: 12.5px; border: 1.5px solid var(--tinta); border-radius: 8px; background: #fff; color: var(--tinta); padding: 2px 4px; max-width: 100%; }
 .prow input, .field { font: inherit; color: var(--tinta); border: 0; background: transparent; min-width: 0; padding: 6px 2px; font-weight: 600; }
 .field { background: #fff; border: 2px solid var(--tinta); border-radius: 12px; padding: 9px 12px; width: 100%; }
@@ -75,7 +86,7 @@ label.check { display: inline-flex; gap: 8px; align-items: center; font-weight: 
 #game { height: 100%; display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); }
 #exitLayer { z-index: 100; }
 #exitBtn { position: fixed; top: 8px; right: 10px; z-index: 95; }
-header.top { padding-right: 64px !important; }
+header.top { padding-right: calc(var(--exitW, 64px) + 20px) !important; }
 header.top { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: var(--tinta); background: var(--casco); border-bottom: 3px solid var(--tinta); }
 @media (max-width: 480px) { header.top h1 { display: none; } header.top { flex-wrap: wrap; justify-content: flex-end; } .topbtn .lbl { display: none; } header.top { gap: 5px; padding: 8px 8px; } .chip { padding: 3px 7px; } }
 header.top h1 { font-size: 16px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -166,6 +177,18 @@ table.res th, table.res td { padding: 6px 4px; border-bottom: 2px solid #ddd3b8;
 table.res th:first-child, table.res td:first-child, .cerBox table.res td:nth-child(2), .cerBox table.res th:nth-child(2) { text-align: left; }
 .toast { position: fixed; left: 50%; top: 60px; transform: translateX(-50%); background: var(--casco); color: var(--tinta); border: 2px solid var(--tinta); padding: 8px 14px; border-radius: 999px; font-weight: 700; z-index: 30; animation: pop .2s; pointer-events: none; max-width: 92vw; text-align: center; }
 /* ---------- Ruleta grande, cartel de turno, anfitrión ---------- */
+#verTag { position: fixed; left: 8px; bottom: 6px; z-index: 120; font: 700 11px/1 Fredoka, system-ui, sans-serif; color: #1d2430; background: rgba(255, 247, 224, .85); border: 1.5px solid #1d2430; border-radius: 999px; padding: 3px 8px; pointer-events: none; opacity: .8; }
+#uiJefe { position: fixed; right: 14px; bottom: 0; z-index: 24; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
+#uiJefe .ujfig { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; line-height: 0; margin-bottom: -26px; animation: ujIn .45s cubic-bezier(.2, .9, .3, 1.3), ujBob 1.8s ease-in-out .45s infinite; transform-origin: 50% 100%; filter: drop-shadow(0 4px 0 rgba(0,0,0,.25)); }
+#uiJefe .ujfig.talk { animation: ujBob .35s ease-in-out infinite; }
+#uiJefe.out .ujfig { animation: ujOut .38s ease-in forwards; }
+#uiJefe .ujsay { pointer-events: none; max-width: 210px; background: #fff; border: 2.5px solid #1d2430; border-radius: 14px; padding: 6px 10px; font-weight: 600; font-size: 13.5px; margin: 0 4px 6px 0; box-shadow: 0 3px 0 #1d2430; animation: pop .25s; position: relative; }
+#uiJefe .ujsay::after { content: ''; position: absolute; right: 26px; bottom: -9px; width: 12px; height: 12px; background: #fff; border-right: 2.5px solid #1d2430; border-bottom: 2.5px solid #1d2430; transform: rotate(45deg); }
+#uiJefe .ujsay.hidden { display: none; }
+@keyframes ujIn { from { transform: translateY(110%); } }
+@keyframes ujOut { to { transform: translateY(115%); } }
+@keyframes ujBob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-4px) rotate(2deg); } }
+@media (max-width: 480px) { #uiJefe .ujfig svg { width: 52px; height: 73px; } #uiJefe .ujsay { max-width: 170px; font-size: 12.5px; } }
 .cer { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(9, 22, 38, .93); padding: 12px; overflow: auto; }
 .cerBox { position: relative; z-index: 2; width: min(560px, 100%); display: grid; gap: 12px; background: var(--papel); border: 3px solid var(--tinta); border-radius: 24px; box-shadow: 0 8px 0 var(--tinta); padding: 16px; animation: pop .25s; }
 .cerBox h2 { margin: 0; text-align: center; font-family: 'Bowlby One', sans-serif; font-size: 24px; }
@@ -345,6 +368,8 @@ input[type=range] { width: 100%; accent-color: #1d2430; }
 <div id="overlay" class="overlay hidden"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
 <div id="spinLayer" class="spinLayer hidden" aria-live="polite"><div class="spinBox"><h3 id="spinWho"></h3><div class="waitmsg" id="spinWhy"></div><div id="bigWheel"></div><div class="bignum" id="bigNum"></div></div></div>
 <div id="banner" class="banner hidden" aria-live="polite"></div>
+<div id="verTag" aria-label="Versión del juego"></div>
+<div id="uiJefe" aria-live="polite"></div>
 <div id="cer" class="cer hidden" aria-live="polite"><div class="cerBox"><div id="cerHost"></div><div id="cerStage"></div><div class="row" id="cerCtl"><button class="btn" type="button" id="cerSkip">Saltar animación</button><button class="btn primary" type="button" id="cerNext">Siguiente ▶</button></div></div><div id="confetti"></div></div>
 <div id="duelLayer" class="spinLayer hidden" aria-live="polite"><div class="spinBox"><h3>Duelo</h3><div id="duelBox" class="duelBox"></div></div></div>
 
@@ -369,17 +394,17 @@ const fmt = n => (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n) * 1000).toL
 // ---------- Números del juego (calibrables) ----------
 const CFG = {
   umbral: { baja: 3, media: 5, alta: 7 },
-  bonoCada: 4, bonoMax: 3,
+  bonoCada: 4, bonoMax: 3, bonoVSCada: 7, bonoVSMax: 2, cambioRamo: 0.5,
   plataInicial: 200, familiaExtra: 400,
   pagoEstudio: { trabajando: 1700, beca: 700, familia: 500, becaPerdida: 200 },
   ayudantePago: 300, ayudanteMinK: 8,
   pareja: -150, mascota: -80, hermanos: 200,
   carta: 150,
-  mechon: { plata: 500, k: 1 }, compTurno: 500,
+  mechon: { plata: 500, k: 1 }, compTurno: 700,
   suerte: 150,
   sueldoMult: 2, nivelSueldo: [1, 1.4, 1.8], magister: 300, contacto: 100,
   ascenso: [6, 7],
-  plataPorPunto: 800, bonoPrimero: 5, bonoCorona: 1, bonoLider: 3, bonoMulti: 2,
+  plataPorPunto: 830, bonoPrimero: 5, bonoCorona: 1, bonoLider: 3, bonoMulti: 2,
   liderPlata: 150,
   conv: { m: 300, k: 2 },
   rondasFinales: 3,
@@ -509,9 +534,9 @@ const DECKS = {
 // Dilemas: casillas con dos opciones
 const DILEMAS = {
   estu: [
-    { q: '¿Estudiar para el certamen o ir a carretear?', a: ['Estudiar', { k: 2, v: -2 }], b: ['Carretear', { v: 3, k: -1 }] },
-    { q: '¿Dormir 5 minutos más o llegar con sueño?', a: ['Dormir 5 minutos más', { spin: { min: 5, ok: { v: 2 }, ko: {} } }, 'Gira: con 5+ llegas igual (+2 Vida Social); si no, no pasa nada'], b: ['Llegar con sueño', { k: 1, v: -1 }] },
-    { q: '¿Almorzar en Los Patos o traer colación?', a: ['Los Patos', { v: 1, m: -30 }], b: ['Colación', { m: 30 }] },
+    { q: '¿Estudiar para el certamen o ir a carretear?', a: ['Estudiar', { k: 2, v: -1 }], b: ['Carretear', { v: 2, k: -1 }] },
+    { q: '¿Dormir 5 minutos más o llegar con sueño?', a: ['Dormir 5 minutos más', { spin: { min: 5, ok: { v: 1 }, ko: {} } }, 'Gira: con 5+ llegas igual (+1 Vida Social); si no, no pasa nada'], b: ['Llegar con sueño', { k: 1, v: -1 }] },
+    { q: '¿Almorzar en Los Patos o traer colación?', a: ['Los Patos', { v: 1, m: -30 }], b: ['Colación', { m: 150 }] },
     { q: '¿Hacer el informe solo o con alguien?', a: ['Solo', { k: 2, v: -1 }], b: ['Con otro jugador', { otro: { yo: { k: 1, v: 1 }, otro: { k: 1, v: 1 } } }, 'Ambos +1 Conocimiento y +1 Vida Social'] },
     { q: '¿Ir a la ayudantía o al partido?', a: ['Ayudantía', { k: 1 }], b: ['Partido', { v: 2, m: -20 }] },
     { q: '¿Ramo de verano o vacaciones?', a: ['Ramo de verano', { k: 1, m: -100 }], b: ['Vacaciones', { v: 2, m: -150 }] },
@@ -537,8 +562,8 @@ const DILEMAS = {
 // ---------- Construcción del tablero ----------
 const TIER_EFF = { alta: { spin: { min: 6, ok: { k: 2, v: 1 }, ko: { v: -1 } } }, media: { k: 1 }, baja: { k: 1, v: 1 } };
 // Decisiones: efecto inmediato del sí y del no (el no también da algo, para que sea una elección real)
-const DSI = { pareja: { v: 3 }, mascota: { v: 2 }, hermanos: { v: 2 }, casa: { v: CFG.casa.v, m: CFG.casa.m } };
-const DNO = { pareja: [{ k: 1 }, 'Más tiempo para estudiar'], mascota: [{ m: 300 }, 'Ahorras'], hermanos: [{ v: 1 }, 'Vives con amigos'] };
+const DSI = { pareja: { v: 2 }, mascota: { v: 2 }, hermanos: { v: 1 }, casa: { v: CFG.casa.v, m: CFG.casa.m } };
+const DNO = { pareja: [{ k: 1 }, 'Más tiempo para estudiar'], mascota: [{ m: 300, k: 1 }, 'Ahorras y tienes más tiempo'], hermanos: [{ v: 1 }, 'Vives con amigos'] };
 function R(name, profe, tier, text) { return { type: 'ramo', name, profe, tier, text, e: TIER_EFF[tier] }; }
 function G(name, text, e) { return { type: 'ramo', name, text, e: e || { k: 1 } }; }
 function F(name, profe, dif) { return { type: 'filtro', name, profe, dif }; }
@@ -706,7 +731,7 @@ const NODE = id => BOARD.nodes[id];
 
 // ---------- Estado ----------
 const COLORS = ['#e8442e', '#2f7de1', '#f2b705', '#24a35a', '#9b4dca', '#ef7d1a'];
-const TOKENS = ['casco', 'pisco', 'calculadora', 'plano', 'cono', 'cafe', 'huincha', 'escalimetro'];
+const TOKENS = ['casco', 'pisco', 'calculadora', 'plano', 'cono', 'cafe', 'huincha', 'escalimetro', 'energetica', 'probeta'];
 function newGame({ players, seed, timer }) {
   const s = {
     v: 2, gid: (seed >>> 0) || 1, rng: (seed >>> 0) || 1, turn: 0, round: 0, phase: 'order', timer: timer ?? 120,
@@ -729,6 +754,8 @@ const cur = s => s.players[s.turn];
 function log(s, txt, pid) { s.log.push({ i: ++s.seq, t: txt, p: pid ?? null }); if (s.log.length > 80) s.log.shift(); }
 function fx(s, f) { f.i = ++s.seq; if (f.kind === 'card' || f.kind === 'event' || f.kind === 'income' || f.kind === 'lucky') { f.deltas = s.acc; s.acc = []; f.host = s.ev.jefe; } s.fx.push(f); }
 const bono = p => Math.min(CFG.bonoMax, Math.floor(Math.max(0, p.k) / CFG.bonoCada));
+// Vida Social también ayuda en las evaluaciones: el grupo de estudio y los amigos te salvan (−1 cada 6, máx. −2)
+const bonoVS = p => Math.min(CFG.bonoVSMax, Math.floor(Math.max(0, p.v) / CFG.bonoVSCada));
 const estudiando = p => !p.pega;
 
 // Líderes: quien va primero (sin empate) en cada medidor tiene una ventaja
@@ -1103,15 +1130,18 @@ function land(s, p, n, carry) {
   }
 }
 
-function needAscenso(s, p, node) { return Math.max(2, CFG.ascenso[node.nivel - 1] - Math.min(2, p.c) - (bono(p) > 1 ? 1 : 0)); }
-function needDefensa(s, p) { return Math.max(2, GUIA[guiaTier(s, p.mencion, p.guia)].umbral - bono(p)); }
+function needAscenso(s, p, node) { return Math.max(2, CFG.ascenso[node.nivel - 1] - Math.min(2, p.c) - (bono(p) > 1 ? 1 : 0) - (bonoVS(p) > 1 ? 1 : 0)); }
+function needDefensa(s, p) { return Math.max(2, GUIA[guiaTier(s, p.mencion, p.guia)].umbral - bono(p) - bonoVS(p)); }
 const hard = s => s.ev && s.ev.jefe !== 'Silva';
 function guiaTier(s, men, name) { const t = tierOf(men, name); return t === 'baja' && hard(s) ? 'media' : t; }
 // Modificadores del umbral, con ícono para mostrarlos como chips
 function umbralFiltro(s, p, n) {
   let need = CFG.umbral[n.dif]; const mods = [{ i: '🎯', v: need, l: `Base (dificultad ${n.dif})` }];
   const add = (i, v, l) => { need += v; mods.push({ i, v, l }); };
+  const ch = p.cambio && p.cambio[n.id];
+  if (ch) add('🔄', CFG.umbral[ch.dif] - CFG.umbral[n.dif], ch.by === 'profe' ? `Cambio de profe: ahora lo dicta ${ch.prof}` : `Cambio de malla (ahora dificultad ${ch.dif})`);
   const b = bono(p); if (b) add('📚', -b, 'Bono por Conocimiento');
+  const bv = bonoVS(p); if (bv) add('🎉', -bv, 'Grupo de estudio (Vida Social)');
   if (p.fin === 'trabajando' && estudiando(p)) add('💼', 1, 'Estudias trabajando');
   if (hard(s)) add('👔', 1, `Jefe de carrera ${s.ev.jefe}`);
   if (act(s, 'paro')) add('✊', -1, 'Paro');
@@ -1126,6 +1156,7 @@ function modsAscenso(s, p, node) {
   const mods = [{ i: '🎯', v: CFG.ascenso[node.nivel - 1], l: 'Base' }];
   if (p.c) mods.push({ i: '🤝', v: -Math.min(2, p.c), l: 'Contactos' });
   if (bono(p) > 1) mods.push({ i: '📚', v: -1, l: 'Conocimiento 8+' });
+  if (bonoVS(p) > 1) mods.push({ i: '🎉', v: -1, l: `Vida Social ${CFG.bonoVSCada * 2}+ (buena red)` });
   return mods;
 }
 // Nota chilena (1,0 a 7,0) a partir del número de la ruleta: llegar al mínimo es un 4,0
@@ -1150,6 +1181,17 @@ function rendir(s, p, n, carry) {
     const total = Object.values(p.fails).reduce((a, b) => a + b, 0);
     if (p.fin === 'beca' && !p.becaLost && (p.fails[node.id] >= CFG.becaPierde.mismo || total >= CFG.becaPierde.total)) { p.becaLost = true; extra = ' Perdiste la beca.'; }
     if (p.fails[node.id] === 2) extra += ' Quedaste en causal: desde ahora cada intento requiere carta.';
+    // Después de reprobar: 50% de que cambie el profe o la malla (más fácil o más difícil)
+    if (rngNext(s) < CFG.cambioRamo) {
+      const L = ['baja', 'media', 'alta'], cur = (p.cambio && p.cambio[node.id] && p.cambio[node.id].dif) || node.dif, i = L.indexOf(cur);
+      const dirs = [-1, 1].filter(d => L[i + d]); const d = dirs[pickI(s, dirs.length)]; const dif = L[i + d];
+      const by = node.profe && rngNext(s) < 0.5 ? 'profe' : 'malla';
+      let prof = null;
+      if (by === 'profe') { const pool = [...new Set(Object.values(PROFES_MEN).flatMap(x => x[dif] || []))].filter(x => !(node.profe || '').includes(x)); prof = pool[pickI(s, pool.length)] || 'un profe nuevo'; }
+      (p.cambio = p.cambio || {})[node.id] = { dif, by, prof };
+      const tx = by === 'profe' ? `Cambio de profe: ahora ${node.name} lo dicta ${prof}` : 'Cambio de malla: el ramo se reformuló';
+      extra += ` 🔄 ${tx} (${d < 0 ? 'más fácil' : 'más difícil'}: ahora necesitas ${d < 0 ? '2 menos' : '2 más'}).`;
+    }
     log(s, `${p.name} reprobó ${node.name} con un ${nota(n, u.need)}.${extra}`, p.id);
     fx(s, { kind: 'card', pid: p.id, title: `Reprobaste ${node.name}`, nota: nota(n, u.need), text: `Te sacaste un ${nota(n, u.need)}: no alcanzó para el 4,0.${extra}`, eff: 'Lo intentas de nuevo el próximo turno' });
   }
@@ -1518,6 +1560,20 @@ const SND = (() => {
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     src.connect(f); f.connect(g); g.connect(dest || sG); src.start(t); src.stop(t + dur + 0.05);
   }
+  function slide(f1, f2, t, d, type, vol) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(vol || 0.2, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.02); o.connect(g); g.connect(sG); o.start(t); o.stop(t + d + 0.05); }
+  // Sonido propio de cada pieza
+  const TOKSND = {
+    casco: t => { tone(1250, t, 0.05, 'square', 0.1); tone(940, t + 0.06, 0.12, 'square', 0.08); noise(t, 0.08, 0.12, 3000); },
+    pisco: t => { for (let i = 0; i < 3; i++) slide(420, 180, t + i * 0.13, 0.11, 'sine', 0.3); },
+    calculadora: t => { tone(1850, t, 0.06, 'square', 0.07); tone(1850, t + 0.1, 0.06, 'square', 0.07); tone(2470, t + 0.2, 0.09, 'square', 0.07); },
+    plano: t => { noise(t, 0.3, 0.25, 2500); noise(t + 0.18, 0.2, 0.15, 4000); },
+    cono: t => { tone(233, t, 0.28, 'sawtooth', 0.12); tone(294, t, 0.28, 'sawtooth', 0.1); },
+    cafe: t => { for (let i = 0; i < 4; i++) slide(500 + i * 90, 900 + i * 120, t + i * 0.08, 0.06, 'sine', 0.2); },
+    huincha: t => { slide(300, 1600, t, 0.32, 'square', 0.06); noise(t, 0.32, 0.1, 2000); },
+    escalimetro: t => { slide(220, 180, t, 0.45, 'triangle', 0.35); slide(440, 360, t, 0.3, 'sine', 0.1); },
+    energetica: t => { tone(2600, t, 0.02, 'square', 0.12); noise(t + 0.03, 0.45, 0.3, 3500); for (let i = 0; i < 6; i++) tone(2000 + Math.random() * 2500, t + 0.15 + i * 0.05, 0.02, 'sine', 0.06); },
+    probeta: t => { kick(t); noise(t + 0.18, 0.06, 0.4, 1500); noise(t + 0.27, 0.1, 0.3, 900); },
+  };
   function kick(t, dest) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.18); g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3); o.connect(g); g.connect(dest || sG); o.start(t); o.stop(t + 0.35); }
   const fx = {
     tick() { tone(1200, ctx.currentTime, 0.04, 'square', 0.08); },
@@ -1571,6 +1627,7 @@ const SND = (() => {
     unlock() { if (!ensure()) return; if (ctx.state === 'suspended') ctx.resume(); if (!musicT && cfg.music > 0) { nextT = ctx.currentTime + 0.1; musicT = setInterval(sched, 50); } },
     play(k) { try { if (ctx && cfg.sfx > 0 && fx[k]) fx[k](); } catch (e) {} },
     blip,
+    tok(k) { if (!ctx || cfg.sfx <= 0) return; try { TOKSND[k] && TOKSND[k](ctx.currentTime); } catch (e) {} },
     mode(m) { mode = m; step = 0; if (m === 'drums' && ctx && !musicT) { nextT = ctx.currentTime + 0.1; musicT = setInterval(sched, 50); } },
     set(k, v) { cfg[k] = v; store.set('vic-audio', cfg); apply(); if (k === 'music') { if (v > 0) this.unlock(); else { clearInterval(musicT); musicT = 0; } } },
   };
@@ -1596,7 +1653,37 @@ const CHAR = {
   Silva: { eyes: [[178, 238], [282, 238]], mouth: [230, 328, 100], skin: '#ce9468', def: 'neutral' },
   Merino: { eyes: [[190, 237], [293, 237]], mouth: [240, 333, 86], skin: '#f4c9a0', def: 'smug', patch: [52, 22] },
 };
-function hostSvg(name, w, expr) {
+// ===== Vestimenta del jefe según los eventos =====
+// Prioridad: el evento que se está mostrando; si no, el evento activo más reciente con atuendo
+const OUTFIT_OF = { mundial: 'chile', aniversario: 'fiesta', pandemia: 'mascarilla', temporal: 'impermeable', terremoto: 'casco', paro: 'pañuelo', gta: 'audifonos', feria: 'corbata', tarea: 'ojeras', becaEx: 'birrete', sabatico: 'lentes', congreso: 'corbata', inflacion: 'ojeras' };
+let OUTFIT_NOW = null;
+function curOutfit() {
+  if (OUTFIT_NOW) return OUTFIT_OF[OUTFIT_NOW] || null;
+  const st = VIEW ? VIEW.base : S; if (!st || !st.ev) return null;
+  const ks = (VIEW && VIEW.acts) ? [...VIEW.acts] : Object.keys(st.ev.act || {});
+  for (let i = ks.length - 1; i >= 0; i--) if (OUTFIT_OF[ks[i]]) return OUTFIT_OF[ks[i]];
+  return null;
+}
+function outfitSvg(o, C) {
+  if (!o) return { under: '', over: '' };
+  const K = '#1d2430', [L, R] = C.eyes, cx = (L[0] + R[0]) / 2, ey = L[1], [mx, my] = C.mouth, S8 = `stroke="${K}" stroke-width="10" stroke-linejoin="round"`;
+  const torso = fill => `<path d="M24 662 L24 540 Q34 430 ${cx - 85} 400 Q${cx} 445 ${cx + 85} 400 Q446 430 456 540 L456 662 Z" fill="${fill}" ${S8}/>`;
+  switch (o) {
+    case 'chile': return { under: '', over: torso('#d52b1e') + `<path d="M${cx - 85} 400 L${cx} 470 L${cx + 85} 400" fill="none" stroke="#fff" stroke-width="16"/><path d="M${cx + 95} 505 l9 26 l27 0 l-22 16 l8 26 l-22 -16 l-22 16 l8 -26 l-22 -16 l27 0 Z" fill="#fff" stroke="${K}" stroke-width="5"/><text x="${cx - 120}" y="600" font-family="Arial Black, sans-serif" font-size="70" fill="#fff" stroke="${K}" stroke-width="4">10</text>` };
+    case 'fiesta': return { under: '', over: `<path d="M${cx - 70} 125 L${cx + 25} 45 L${cx + 70} 125 Z" fill="#9b4dca" ${S8}/><path d="M${cx - 40} 100 L${cx + 52} 100 M${cx - 15} 75 L${cx + 37} 75" stroke="#ffc23c" stroke-width="12"/><circle cx="${cx + 25}" cy="50" r="16" fill="#ffc23c" stroke="${K}" stroke-width="6"/>` };
+    case 'mascarilla': return { under: '', over: `<path d="M${mx - 150} ${my - 70} L${mx - 95} ${my - 40} M${mx + 150} ${my - 70} L${mx + 95} ${my - 40}" stroke="#eef2f5" stroke-width="10"/><rect x="${mx - 98}" y="${my - 58}" width="196" height="118" rx="38" fill="#a8d4ee" ${S8}/><path d="M${mx - 70} ${my - 20} H${mx + 70} M${mx - 70} ${my + 10} H${mx + 70}" stroke="#7fb4d6" stroke-width="7"/>` };
+    case 'impermeable': return { under: '', over: torso('#f2c230') + `<path d="M${cx} 445 L${cx} 662" stroke="${K}" stroke-width="8"/><circle cx="${cx - 22}" cy="520" r="9" fill="${K}"/><circle cx="${cx - 22}" cy="590" r="9" fill="${K}"/><path d="M${cx - 190} 300 Q${cx - 205} 90 ${cx} 72 Q${cx + 205} 90 ${cx + 190} 300" fill="none" stroke="#f2c230" stroke-width="34"/><path d="M${cx - 190} 300 Q${cx - 205} 90 ${cx} 72 Q${cx + 205} 90 ${cx + 190} 300" fill="none" stroke="${K}" stroke-width="6"/>` };
+    case 'casco': return { under: '', over: `<path d="M${cx - 175} 175 Q${cx - 170} 52 ${cx} 50 Q${cx + 170} 52 ${cx + 175} 175 Z" fill="#ffd23a" ${S8}/><rect x="${cx - 200}" y="160" width="400" height="34" rx="16" fill="#ffd23a" ${S8}/><path d="M${cx - 20} 56 L${cx - 20} 165 M${cx + 20} 56 L${cx + 20} 165" stroke="${K}" stroke-width="8"/>` };
+    case 'pañuelo': return { under: '', over: `<path d="M${cx - 170} 150 Q${cx} 120 ${cx + 170} 150 L${cx + 172} 182 Q${cx} 152 ${cx - 172} 182 Z" fill="#d52b1e" ${S8}/><path d="M${cx + 165} 165 l45 -20 l-8 40 Z M${cx + 165} 165 l50 25 l-35 22 Z" fill="#d52b1e" ${S8}/>` };
+    case 'audifonos': return { under: '', over: `<path d="M${cx - 175} 240 Q${cx - 180} 40 ${cx} 45 Q${cx + 180} 40 ${cx + 175} 240" fill="none" stroke="${K}" stroke-width="22"/><rect x="${cx - 205}" y="205" width="55" height="100" rx="22" fill="#24a35a" ${S8}/><rect x="${cx + 150}" y="205" width="55" height="100" rx="22" fill="#24a35a" ${S8}/>` };
+    case 'corbata': return { under: '', over: `<path d="M${cx - 22} 420 L${cx + 22} 420 L${cx + 14} 445 L${cx + 34} 590 L${cx} 630 L${cx - 34} 590 L${cx - 14} 445 Z" fill="#d52b1e" ${S8}/><path d="M${cx - 12} 470 L${cx + 20} 500 M${cx - 18} 530 L${cx + 24} 565" stroke="#ffc23c" stroke-width="8"/>` };
+    case 'ojeras': return { under: '', over: [L, R].map(([x, y]) => `<path d="M${x - 42} ${y + 52} Q${x} ${y + 72} ${x + 42} ${y + 52}" fill="none" stroke="#7a5a9c" stroke-width="10" stroke-linecap="round" opacity=".8"/>`).join('') + `<text x="${cx + 120}" y="120" font-family="Arial Black, sans-serif" font-size="56" fill="#2f7de1" stroke="${K}" stroke-width="3">z</text><text x="${cx + 160}" y="80" font-family="Arial Black, sans-serif" font-size="40" fill="#2f7de1" stroke="${K}" stroke-width="3">z</text>` };
+    case 'birrete': return { under: '', over: `<path d="M${cx - 210} 105 L${cx} 45 L${cx + 210} 105 L${cx} 165 Z" fill="${K}"/><rect x="${cx - 120}" y="115" width="240" height="55" fill="${K}"/><path d="M${cx + 10} 100 Q${cx + 170} 120 ${cx + 175} 200" fill="none" stroke="#ffc23c" stroke-width="9"/><circle cx="${cx + 175}" cy="208" r="14" fill="#ffc23c"/>` };
+    case 'lentes': return { under: '', over: [L, R].map(([x, y]) => `<rect x="${x - 50}" y="${y - 36}" width="100" height="72" rx="24" fill="#1d2430" opacity=".92"/>`).join('') + `<path d="M${L[0] + 50} ${ey - 10} H${R[0] - 50}" stroke="${K}" stroke-width="10"/><path d="M${L[0] - 30} ${ey - 26} l26 0" stroke="#fff" stroke-width="7" opacity=".7"/>` };
+  }
+  return { under: '', over: '' };
+}
+function hostSvg(name, w, expr, outfit) {
   const C = CHAR[name] || CHAR.Silva, img = CHAR_IMG[name.toLowerCase()] || CHAR_IMG.silva;
   if (!img) return '';
   const [L, Rr] = C.eyes, [mx, my, mw] = C.mouth, K = '#1d2430';
@@ -1621,7 +1708,8 @@ function hostSvg(name, w, expr) {
   const open = patch + `<path d="M${mx - 38} ${my - 10} Q${mx} ${my + 46} ${mx + 38} ${my - 10} Z" fill="#6b2a2a" stroke="${K}" stroke-width="9" stroke-linejoin="round"/><ellipse cx="${mx}" cy="${my + 18}" rx="14" ry="7" fill="#e88a8a"/>`;
   const lids = [L, Rr].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="31" fill="${C.skin}"/><path d="M${x - 26} ${y + 4} Q${x} ${y + 14} ${x + 26} ${y + 4}" fill="none" stroke="${K}" stroke-width="7" stroke-linecap="round"/>`).join('');
   const W = w || 64;
-  return `<svg viewBox="20 40 440 620" width="${W}" height="${W * 1.41}" aria-hidden="true" class="char"><image href="${img[2]}" x="0" y="0" width="${img[0]}" height="${img[1]}"/><g class="m-c">${closed}</g><g class="m-o">${open}</g><g class="lids">${lids}</g>${brows}</svg>`;
+  const fit = outfitSvg(outfit === undefined ? curOutfit() : outfit, C);
+  return `<svg viewBox="20 40 440 620" width="${W}" height="${W * 1.41}" aria-hidden="true" class="char"><image href="${img[2]}" x="0" y="0" width="${img[0]}" height="${img[1]}"/>${fit.under}<g class="m-c">${closed}</g><g class="m-o">${open}</g><g class="lids">${lids}</g>${brows}${fit.over}</svg>`;
 }
 // Personalidad de cada jefe de carrera (con consentimiento de los profes): voz, ritmo y frases
 function stutter(t) { const m = t.match(/^([¡¿"]*)(\p{L})/u); if (!m) return t; const i = m[1].length; return t.slice(0, i) + m[2] + '-' + m[2].toLowerCase() + t.slice(i + 1); }
@@ -1697,20 +1785,21 @@ function tutorial() {
 
 // ================= Lobby local =================
 let lobby = [{ name: 'Jugador 1', bot: false, token: 'casco' }, { name: 'Bot Mechón', bot: true, token: 'pisco' }, { name: 'Bot Memorista', bot: true, token: 'calculadora' }];
-const tokenSelect = (id, val) => `<select id="${id}" class="tsel" aria-label="Atuendo">${G.TOKENS.map(t => `<option value="${t}" ${t === val ? 'selected' : ''}>${TOKEN_NAMES[t]}</option>`).join('')}</select>`;
+const _unusedTokenSelect = (id, val) => `<select id="${id}" class="tsel" aria-label="Atuendo">${G.TOKENS.map(t => `<option value="${t}" ${t === val ? 'selected' : ''}>${TOKEN_NAMES[t]}</option>`).join('')}</select>`;
 function renderLobby() {
   $('#plist').innerHTML = lobby.map((p, i) => `
     <div class="prow">
-      <svg width="30" height="30" viewBox="0 -12 64 66" aria-hidden="true">${tokenPath(p.token, COLORS[i])}</svg>
-      <div style="display:grid;gap:2px;min-width:0"><input id="pname${i}" aria-label="Nombre del jugador ${i + 1}" value="${esc(p.name)}" maxlength="16">${tokenSelect('ptok' + i, p.token)}</div>
+      ${tokBtn('p' + i, p.token, COLORS[i])}
+      <div style="display:grid;gap:2px;min-width:0"><input id="pname${i}" aria-label="Nombre del jugador ${i + 1}" value="${esc(p.name)}" maxlength="16"><span class="tkname">${TOKEN_NAMES[p.token]}</span></div>
       <span class="seg" role="group" aria-label="Tipo"><button type="button" data-i="${i}" data-bot="0" aria-pressed="${!p.bot}">Humano</button><button type="button" data-i="${i}" data-bot="1" aria-pressed="${p.bot}">Bot</button></span>
       <button class="iconbtn" type="button" data-del="${i}" aria-label="Quitar" ${lobby.length <= 2 ? 'disabled' : ''}>×</button>
     </div>`).join('');
   $('#addP').disabled = lobby.length >= 6;
-  lobby.forEach((p, i) => { $('#pname' + i).addEventListener('input', e => { p.name = e.target.value; }); $('#ptok' + i).addEventListener('change', e => { p.token = e.target.value; renderLobby(); }); });
+  lobby.forEach((p, i) => { $('#pname' + i).addEventListener('input', e => { p.name = e.target.value; }); });
 }
 $('#plist').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.tk) { const i = +b.dataset.tk.slice(1); return pickToken(lobby[i].token, COLORS[i], t => { lobby[i].token = t; renderLobby(); }, new Set(lobby.map(x => x.token))); }
   if (b.dataset.del) { lobby.splice(+b.dataset.del, 1); renderLobby(); }
   else if (b.dataset.i) { lobby[+b.dataset.i].bot = b.dataset.bot === '1'; renderLobby(); }
 });
@@ -1761,6 +1850,7 @@ function onMsg(m) {
   if (m.t === 'error') { $('#onErr').textContent = m.msg; $('#roomErr').textContent = m.msg; if (m.fatal) { NET.code = null; store.del('vic-session'); show('lobby'); } return; }
   if (m.t === 'joined') { NET.on = true; NET.code = m.code; NET.token = m.token; store.set('vic-session', { code: m.code, token: m.token }); return; }
   if (m.t === 'step') { stepDone(m.i); return; }
+  if (m.t === 'cer') { cerRemote(m); return; }
   if (m.t === 'chat') { m.msg.mine = m.msg.i === +String(NET.me || 'p-1').slice(1); addChat(m.msg); return; }
   if (m.t === 'chatlog') { $('#chatList').innerHTML = ''; (m.list || []).forEach(x => addChat(x, true)); return; }
   if (m.t === 'room') {
@@ -1777,13 +1867,14 @@ function renderRoom(m) {
   $('#roomCode').textContent = m.code;
   const mine = document.activeElement && document.activeElement.id === 'myName';
   if (mine) return; // no pisar lo que el jugador está escribiendo
-  $('#roomSeats').innerHTML = m.seats.map((s, i) => `<div class="prow" style="grid-template-columns:30px 1fr auto auto">
-    <svg width="30" height="30" viewBox="0 -12 64 66" aria-hidden="true">${tokenPath(s.token, COLORS[i])}</svg>
-    ${s.you ? `<div style="display:grid;gap:2px;min-width:0"><input id="myName" aria-label="Tu nombre" value="${esc(s.name)}" maxlength="16">${tokenSelect('myTok', s.token)}</div>` : `<b>${esc(s.name)}${i === 0 ? ' · anfitrión' : ''}<br><span class="sub" style="font-weight:500;font-size:12px">${esc(TOKEN_NAMES[s.token] || '')}</span></b>`}
+  $('#roomSeats').innerHTML = m.seats.map((s, i) => `<div class="prow" style="grid-template-columns:58px 1fr auto auto">
+    ${s.you ? tokBtn('me', s.token, COLORS[i]) : `<svg width="44" height="44" viewBox="0 -12 64 66" aria-hidden="true" style="justify-self:center">${tokenPath(s.token, COLORS[i])}</svg>`}
+    ${s.you ? `<div style="display:grid;gap:2px;min-width:0"><input id="myName" aria-label="Tu nombre" value="${esc(s.name)}" maxlength="16"><span class="tkname">${TOKEN_NAMES[s.token]}</span></div>` : `<b>${esc(s.name)}${i === 0 ? ' · anfitrión' : ''}<br><span class="sub" style="font-weight:500;font-size:12px">${esc(TOKEN_NAMES[s.token] || '')}</span></b>`}
     <span>${s.bot ? '<span class="tag">bot</span>' : `<span class="dotc ${s.connected ? '' : 'off'}" title="${s.connected ? 'conectado' : 'desconectado'}"></span>`}</span>
     ${m.host && i > 0 ? `<button class="iconbtn" type="button" data-kick="${i}" aria-label="Quitar">×</button>` : '<span></span>'}</div>`).join('');
-  const sendLook = () => send({ t: 'look', name: $('#myName').value, token: $('#myTok').value });
-  if ($('#myName')) { $('#myName').addEventListener('change', sendLook); $('#myTok').addEventListener('change', sendLook); }
+  const me = m.seats.find(x => x.you);
+  const sendLook = tok => send({ t: 'look', name: $('#myName').value, token: tok || me.token });
+  if ($('#myName')) { $('#myName').addEventListener('change', () => sendLook()); $('#roomSeats [data-tk="me"]').addEventListener('click', () => pickToken(me.token, COLORS[m.seats.indexOf(me)], t => sendLook(t), new Set(m.seats.map(x => x.token)))); }
   $('#hostCtl').classList.toggle('hidden', !m.host); $('#waitHost').classList.toggle('hidden', m.host);
   $('#roomStart').disabled = m.seats.length < 2; $('#addBotBtn').disabled = m.seats.length >= 6;
 }
@@ -1796,7 +1887,25 @@ function hatPath(color, crown) {
     ${crown ? '<path d="M18 6 L22 -6 L28 2 L32 -9 L36 2 L42 -6 L46 6 Z" fill="#ffd84a" stroke="#1d2430" stroke-width="3"/>' : ''}`;
 }
 
-const TOKEN_NAMES = { casco: 'Casco', pisco: 'Botella de pisco', calculadora: 'Calculadora', plano: 'Plano', cono: 'Cono de obra', cafe: 'Taza de café', huincha: 'Huincha de medir', escalimetro: 'Escalímetro' };
+const TOKEN_NAMES = { casco: 'Casco', pisco: 'Botella de pisco', calculadora: 'Calculadora', plano: 'Plano', cono: 'Cono de obra', cafe: 'Taza de café', huincha: 'Huincha de medir', escalimetro: 'Escalímetro', energetica: 'Lata energética', probeta: 'Probeta de hormigón' };
+const TOKEN_DESC = {
+  casco: 'Va a terreno hasta en sueños.', pisco: 'El alma del carrete.', calculadora: 'Casio en mano, siempre.', plano: 'Vive en AutoCAD.',
+  cono: 'Señaliza todo, hasta su vida.', cafe: 'Funciona a cafeína.', huincha: 'Lo mide todo dos veces.', escalimetro: 'Escala 1:100 y orgulloso.',
+  energetica: 'Sobrevive a punta de latas a las 4 a.m.', probeta: 'Resiste compresión… y certámenes.',
+};
+// Selector visual de pieza: grilla grande con nombre, frase y sonido propio
+function tokBtn(key, val, color) { return `<button type="button" class="tokbtn" data-tk="${key}" aria-label="Pieza: ${TOKEN_NAMES[val]}. Cambiar"><svg width="44" height="44" viewBox="0 -12 64 66" aria-hidden="true">${tokenPath(val, color)}</svg><small>Cambiar</small></button>`; }
+function pickToken(cur, color, cb, taken) {
+  const L = document.createElement('div'); L.className = 'overlay'; L.style.zIndex = 60;
+  L.innerHTML = `<div class="modal" style="width:min(620px,100%)"><h2>Elige tu pieza</h2><div class="tkgrid">${G.TOKENS.map(t => `<button type="button" class="tkcard ${t === cur ? 'on' : ''}" data-pick="${t}" ${taken && taken.has(t) && t !== cur ? 'data-taken="1"' : ''}><svg width="64" height="64" viewBox="0 -12 64 66" aria-hidden="true">${tokenPath(t, color)}</svg><b>${TOKEN_NAMES[t]}</b><small>${TOKEN_DESC[t]}</small>${taken && taken.has(t) && t !== cur ? '<em>ya elegida</em>' : ''}</button>`).join('')}</div><div class="row"><span class="note" style="margin:0">Pasa el mouse o toca para escucharla</span><button class="btn" type="button" id="tkClose">Cerrar</button></div></div>`;
+  document.body.appendChild(L);
+  const close = () => L.remove();
+  $('#tkClose').onclick = close; L.addEventListener('click', e => { if (e.target === L) close(); });
+  L.querySelectorAll('.tkcard').forEach(b => {
+    b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { SND.unlock(); SND.tok(b.dataset.pick); } });
+    b.addEventListener('click', () => { SND.unlock(); SND.tok(b.dataset.pick); b.classList.add('on'); setTimeout(() => { close(); cb(b.dataset.pick); }, 260); });
+  });
+}
 const CROWN = '<path d="M18 4 L22 -8 L28 0 L32 -11 L36 0 L42 -8 L46 4 Z" fill="#ffd84a" stroke="#1d2430" stroke-width="3"/>';
 function tokenPath(kind, color, crown) {
   const K = '#1d2430', W = 'stroke="#1d2430" stroke-width="4"';
@@ -1809,6 +1918,8 @@ function tokenPath(kind, color, crown) {
     case 'cafe': g = `<path d="M44 22 Q58 22 56 32 Q54 40 44 40" fill="none" stroke="${K}" stroke-width="5"/><path d="M12 16 L46 16 L43 48 Q42 51 38 51 L20 51 Q16 51 15 48 Z" fill="${color}" ${W}/><path d="M22 4 q4 4 0 8 M30 2 q4 4 0 8 M38 4 q4 4 0 8" fill="none" stroke="${K}" stroke-width="2.5"/>`; break;
     case 'huincha': g = `<rect x="40" y="34" width="22" height="9" fill="#ffd84a" ${W}/><path d="M46 34v4M51 34v6M56 34v4" stroke="${K}" stroke-width="1.8"/><rect x="8" y="8" width="40" height="40" rx="10" fill="${color}" ${W}/><circle cx="28" cy="28" r="9" fill="#fff" stroke="${K}" stroke-width="3"/>`; break;
     case 'escalimetro': g = `<path d="M4 40 L52 6 L60 16 L12 50 Z" fill="${color}" ${W}/>${[0, 1, 2, 3, 4, 5, 6].map(i => `<path d="M${10 + i * 6.6} ${42 - i * 4.7} l3 4" stroke="${K}" stroke-width="2"/>`).join('')}`; break;
+    case 'energetica': g = `<rect x="21" y="1" width="22" height="7" rx="2" fill="#c9ced6" ${W}/><rect x="16" y="6" width="32" height="46" rx="7" fill="#2b2f36" ${W}/><rect x="16" y="13" width="32" height="7" fill="${color}" stroke="${K}" stroke-width="2.5"/><path d="M36 22 L25 37 L31 37 L28 49 L40 32 L34 32 L37 22 Z" fill="${color}" stroke="${K}" stroke-width="2"/>`; break;
+    case 'probeta': g = `<path d="M15 12 L15 46 Q32 55 49 46 L49 12" fill="#bdb7ab" ${W}/><ellipse cx="32" cy="12" rx="17" ry="6" fill="#dcd7cc" ${W}/>${[[22, 22], [40, 20], [28, 31], [43, 38], [20, 41], [35, 45], [31, 19]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="#7d776c"/>`).join('')}<rect x="19" y="27" width="26" height="10" rx="2" fill="${color}" stroke="${K}" stroke-width="2"/><text x="32" y="35" text-anchor="middle" font-family="Bowlby One, Arial Black" font-size="8" fill="${K}">H30</text><path d="M40 13 L37 20 L41 24 L38 28" fill="none" stroke="${K}" stroke-width="1.8"/>`; break;
     default: return hatPath(color, crown);
   }
   return g + (crown ? CROWN : '');
@@ -1964,7 +2075,7 @@ function describe(n) {
   if (n.type === 'decision' && n.kind === 'casa') d += `<br>🏠 Comprar casa: ${G.fmt(G.CFG.casa.m)}, +${G.CFG.casa.v} 🎉 y +${G.fmt(G.CFG.casa.ahorro)} en cada día de pago`;
   if (n.profe) d += `<br>Profe: ${esc(n.profe)}`;
   if (n.type === 'ramo') d += `<br>${esc(n.text || '')}` + (n.tier ? ` · nivel ${n.tier}` : '');
-  if (n.type === 'filtro') d += `<br>🎯 ${G.CFG.umbral[n.dif]}+ (dificultad ${n.dif}) · 📚 −1 cada ${G.CFG.bonoCada} de Conocimiento`;
+  if (n.type === 'filtro') d += `<br>🎯 ${G.CFG.umbral[n.dif]}+ (dificultad ${n.dif}) · 📚 −1 cada ${G.CFG.bonoCada} de Conocimiento · 🎉 −1 cada ${G.CFG.bonoVSCada} de Vida Social`;
   return d;
 }
 $('#board').addEventListener('click', e => {
@@ -2086,7 +2197,7 @@ async function spinWheel(n, p, reason) {
 }
 async function showBanner(p) {
   $('#banner').innerHTML = `<div>${hatSvg(p, 40)} Turno de ${esc(p.name)}</div>`;
-  $('#banner').classList.remove('hidden'); SND.play('turn');
+  $('#banner').classList.remove('hidden'); SND.play('turn'); setTimeout(() => SND.tok(p.token), 380);
   await sleep(opts.fastNow ? 500 : 1400);
   $('#banner').classList.add('hidden');
 }
@@ -2103,7 +2214,7 @@ function stepDone(i) { stepSeen.add(i); if (stepWait[i]) { stepWait[i](); delete
 
 let lastPlayers = null;
 function initView(state) {
-  endCeremony(); closeModal(); lastBanner = '';
+  endCeremony(); closeModal(); lastBanner = ''; CER.remote = 0;
   $('#resBtn').classList.toggle('hidden', state.phase !== 'end');
   S = state; disp = {}; S.players.forEach(p => disp[p.id] = p.pos);
   show('game'); drawBoard(); drawWheel(); drawBigWheel(); render(); scrollTo(B.start);
@@ -2196,7 +2307,7 @@ async function act(a) {
 let GEN = 0; // cambia al salir: las animaciones de una partida abandonada se cortan
 async function playState(next) {
   busy = true; const gen = GEN;
-  const prev = S; S = next; VIEW = { base: prev, ds: [], jefe: (prev.ev && prev.ev.jefe) || 'Silva' };
+  const prev = S; S = next; VIEW = { base: prev, ds: [], jefe: (prev.ev && prev.ev.jefe) || 'Silva', acts: new Set(Object.keys((prev.ev && prev.ev.act) || {})) };
   const actor = prev.players[prev.turn];
   opts.fastNow = !NET.on && opts.fast && actor.bot;
   try { for (const f of next.fx) { if (gen !== GEN) return; if (f.deltas && f.kind !== 'card' && f.kind !== 'event') VIEW.ds.push(...f.deltas); await playFx(f, actor); } }
@@ -2243,9 +2354,11 @@ async function playFx(f, actor) {
     if (f.key === 'cambioJefe') await jefeAnim(VIEW ? VIEW.jefe : 'Silva', f.host || hostName());
     else await eventIntro(f);
     if (VIEW && f.host) VIEW.jefe = f.host;
-    if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas); await showCard(f, p, actor); render();
+    if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas);
+    OUTFIT_NOW = f.key; await showCard(f, p, actor); OUTFIT_NOW = null;
+    if (VIEW && S.ev && S.ev.act && S.ev.act[f.key]) VIEW.acts.add(f.key); render();
   }
-  else if (f.kind === 'card' || f.kind === 'event') { if (VIEW && f.host && f.key !== 'cambioJefe') VIEW.jefe = f.host; if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas); await showCard(f, p, actor); render(); }
+  else if (f.kind === 'card' || f.kind === 'event') { if (f.kind === 'event' && f.ended && VIEW) VIEW.acts.delete(f.key); if (VIEW && f.host && f.key !== 'cambioJefe') VIEW.jefe = f.host; if (VIEW && f.deltas) VIEW.ds.push(...f.deltas); render(); floatDeltas(f.deltas); await showCard(f, p, actor); render(); }
 }
 let lastBanner = '', looping = false;
 async function loop() {
@@ -2395,7 +2508,7 @@ async function eventIntro(f) {
 }
 // Cambio de jefe: el anterior se va, una ruleta de caras y aparece el nuevo
 async function jefeAnim(from, to) {
-  const L = document.createElement('div'); L.className = 'spinLayer'; L.style.zIndex = 29; L.innerHTML = '<div class="spinBox"></div>'; document.body.appendChild(L); const box = L.firstChild;
+  const L = document.createElement('div'); L.className = 'spinLayer jefeLayer'; L.style.zIndex = 29; L.innerHTML = '<div class="spinBox"></div>'; document.body.appendChild(L); const box = L.firstChild;
   box.innerHTML = `<h3>📢 Cambio de jefe de carrera</h3><div class="jefeRow"><div class="slot" id="jOld">${hostSvg(from, 110, 'sad')}</div><div style="font-size:34px">➜</div><div class="slot" id="jNew"><span style="font-size:70px">❓</span></div></div><div class="waitmsg" id="jMsg">${esc(from)} deja la jefatura…</div>`;
   SND.play('event');
   const fast = opts.fastNow;
@@ -2412,22 +2525,34 @@ async function jefeAnim(from, to) {
 function isMine(p) { return NET.on ? p.id === NET.me : !p.bot; }
 function hatSvg(p, w) { return `<svg width="${w || 30}" height="${w || 30}" viewBox="0 -12 64 66" style="vertical-align:middle">${tokenPath(p.token, p.color, p.crown)}</svg>`; }
 // ================= Ceremonia final =================
-const CER = { gid: null, run: 0, next: null, skip: false };
+const CER = { gid: null, run: 0, next: null, skip: false, step: 0, remote: 0, waitIdx: 0 };
+const cerLead = () => !NET.on || NET.host; // online: el anfitrión marca el ritmo para todos
 function endCeremony() { if (CER.run && !$('#cer').classList.contains('hidden')) SND.mode('normal'); CER.run++; CER.skip = false; $('#cer').classList.add('hidden'); $('#confetti').innerHTML = ''; }
 // La ceremonia avanza solo cuando alguien presiona el botón (nada automático)
-function cerWait(label) { return new Promise(res => { if (CER.skip) return res(); $('#cerNext').textContent = label || 'Siguiente ▶'; $('#cerNext').focus(); CER.next = () => { CER.next = null; res(); }; }); }
+function cerWait(label) {
+  return new Promise(res => {
+    if (CER.skip) return res();
+    const idx = ++CER.step, lead = cerLead();
+    $('#cerNext').textContent = lead ? (label || 'Siguiente ▶') : '⏳ El anfitrión avanza…'; $('#cerNext').disabled = !lead;
+    $('#cerSkip').classList.toggle('hidden', !lead);
+    const go = () => { CER.next = null; CER.waitIdx = 0; res(); };
+    if (!lead && CER.remote >= idx) return go();
+    CER.next = go; CER.waitIdx = idx; if (lead) $('#cerNext').focus();
+  });
+}
+function cerRemote(m) { if (m.skip) { CER.skip = true; if (CER.next) CER.next(); return; } CER.remote = Math.max(CER.remote, m.i || 0); if (CER.next && CER.waitIdx && CER.waitIdx <= CER.remote) CER.next(); }
 const cerSleep = ms => CER.skip ? Promise.resolve() : sleep(ms);
 function cerSay(text, expr, raw) { $('#cerHost').innerHTML = hostBlock(raw ? text : persona().say(text), expr); if (!CER.skip) talk($('#cerHost')); else $('#cerHost .say').textContent = $('#cerHost .say').dataset.t; }
 function confetti() {
   const C = ['#e8442e', '#2f7de1', '#f2b705', '#24a35a', '#9b4dca', '#ef7d1a'];
   $('#confetti').innerHTML = Array.from({ length: 70 }, (_, i) => `<i style="left:${Math.random() * 100}%;background:${C[i % 6]};animation-duration:${2.2 + Math.random() * 2}s;animation-delay:${Math.random() * 1.2}s"></i>`).join('');
 }
-$('#cerNext').addEventListener('click', () => { SND.unlock(); if (CER.next) CER.next(); });
-$('#cerSkip').addEventListener('click', () => { CER.skip = true; if (CER.next) CER.next(); });
+$('#cerNext').addEventListener('click', () => { SND.unlock(); if (!cerLead() || !CER.next) return; if (NET.on) send({ t: 'cer', i: CER.step }); CER.next(); });
+$('#cerSkip').addEventListener('click', () => { if (!cerLead()) return; if (NET.on) send({ t: 'cer', skip: true }); CER.skip = true; if (CER.next) CER.next(); });
 $('#resBtn').addEventListener('click', () => { if (S && S.phase === 'end') { CER.gid = null; CER.skip = true; showResults(); } });
 async function showResults() {
   if (CER.gid === S.gid) return;
-  CER.gid = S.gid; const run = ++CER.run; const alive = () => run === CER.run;
+  CER.gid = S.gid; const run = ++CER.run; const alive = () => run === CER.run; CER.step = 0; CER.remote = CER.remote || 0;
   clearTimer(); closeModal(); $('#resBtn').classList.remove('hidden');
   const r = S.results, byId = Object.fromEntries(r.map(x => [x.id, x])), order = S.players.map(q => byId[q.id]);
   const L = S.leaders || {};
@@ -2500,7 +2625,7 @@ function exitGame() {
   GEN++; busy = false; $('#exitLayer') && $('#exitLayer').remove();
   endCeremony(); closeModal(); clearTimer(); queue.length = 0;
   ['#spinLayer', '#duelLayer', '#banner'].forEach(q => $(q) && $(q).classList.add('hidden'));
-  document.querySelectorAll('.evBanner, body > .spinLayer:not(#spinLayer)').forEach(x => x.remove()); if ($('#fxRain')) $('#fxRain').innerHTML = '';
+  document.querySelectorAll('.evBanner, .jefeLayer').forEach(x => x.remove()); if ($('#fxRain')) $('#fxRain').innerHTML = '';
   const wasEnd = S && S.phase === 'end'; S = null; VIEW = null; $('#resBtn').classList.add('hidden');
   if (NET.on) { send({ t: 'leave' }); NET.code = null; store.del('vic-session'); }
   show('lobby');
@@ -2523,7 +2648,7 @@ $('#rulesBtn').addEventListener('click', () => { if (busy) return toast('Espera 
   <div style="display:grid;gap:6px;font-size:14px">
   <div><b>Orden y número de la suerte:</b> al inicio cada uno gira; el más alto parte. Cada vez que otro saque tu número, ganas ${G.fmt(G.CFG.suerte)}. Si sacas 10 eres Mechón de Oro.</div>
   <div><b>Financiamiento:</b> trabajando cobras más y ganas el ${Math.round(G.CFG.sueldoRonda * 100)}% de tu pago en cada ronda (con beca también, mientras no la pierdas), pero los filtros te cuestan +1. La beca se gana girando ${G.CFG.becaMin}+, hay ${G.CFG.becaCupos} cupos y se pierde con ${G.CFG.becaPierde.mismo} reprobaciones del mismo ramo o ${G.CFG.becaPierde.total} en total.</div>
-  <div><b>★ Ramo filtro:</b> parada obligatoria. Apruebas con el umbral (fácil 3, media 5, alta 7) menos 1 por cada 4 de Conocimiento (máx. −3). Si repruebas 2 veces el mismo ramo, cada intento requiere carta. Si apruebas al llegar, sigues avanzando.</div>
+  <div><b>★ Ramo filtro:</b> parada obligatoria. Apruebas con el umbral (fácil 3, media 5, alta 7) menos 1 por cada 4 de Conocimiento (máx. −3) y menos 1 por cada ${G.CFG.bonoVSCada} de Vida Social (máx. −${G.CFG.bonoVSMax}, tu grupo de estudio). Si repruebas, hay 50% de que cambie el profe o la malla: el ramo puede quedar más fácil o más difícil. Si repruebas 2 veces el mismo ramo, cada intento requiere carta. Si apruebas al llegar, sigues avanzando.</div>
   <div><b>$ Pagos:</b> solo cobras si caes en la casilla. Con pega, además ganas el ${Math.round(G.CFG.sueldoRonda * 100)}% de tu sueldo en cada ronda.</div>
   <div><b>⇄ Dilemas</b> con dos opciones y <b>⚔ duelos</b> contra otro jugador.</div>
   <div><b>Profe guía:</b> de tu mención. Silva, Cendoya y los part-time no guían magíster.</div>
@@ -2559,6 +2684,49 @@ function addChat(m, quiet) {
 }
 function placeChat(where) { const box = $('#chatBox'); (where === 'game' ? $('#chatSlot') : $('#roomChatSlot')).appendChild(box); $('#chatTab').classList.toggle('hidden', !NET.on); }
 
+// El botón Salir flota sobre todo: se reserva su ancho real en la barra para que no tape nada
+function fitExit() { const b = $('#exitBtn'); if (b && b.offsetWidth) document.documentElement.style.setProperty('--exitW', b.offsetWidth + 'px'); }
+window.addEventListener('resize', fitExit); new ResizeObserver(fitExit).observe($('#exitBtn'));
+const VERSION = 'v0.8.6';
+$('#verTag').textContent = 'La vida de un Ing. Civil · ' + VERSION;
+// ===== El jefe de carrera se pasea por el mapa cuando no está hablando =====
+const WANDER = {
+  Silva: ['Pa-paseando por el campus…', '¿Y-ya giraron?', 'E-este ramo me trae recuerdos.', 'Sa-saludos, cabros.', 'O-ojo con los filtros.'],
+  Cendoya: ['Mmm.', 'Estoy revisando sus mallas.', 'No corran por el pasillo.', 'Esto no converge.', 'Sigan, sigan.'],
+  Merino: ['Este campus lo diseñé yo. Casi.', 'Miren cómo camino.', 'Saludos de su jefe favorito.', 'Innovación, cabros.', 'Pasaba a que me vieran.'],
+};
+const MJ = { shown: false, until: 0, next: Date.now() + 6000, say: 0 };
+function mjBusy() {
+  return !S || S.phase === 'end' || $('#game').classList.contains('hidden') || !!document.querySelector('#overlay:not(.hidden), #spinLayer:not(.hidden), #duelLayer:not(.hidden), #banner:not(.hidden), #cer:not(.hidden), .evBanner, #exitLayer, .jefeLayer, #tkClose');
+}
+// El jefe se asoma desde la esquina de la interfaz (no en el mapa) cuando no está hablando
+function mjHide(quick) {
+  const el = $('#uiJefe'); MJ.shown = false; MJ.next = Date.now() + (quick ? 2500 + Math.random() * 5000 : 6000 + Math.random() * 9000);
+  if (!el) return; if (quick) { el.innerHTML = ''; return; }
+  el.classList.add('out'); setTimeout(() => { if (!MJ.shown) { el.innerHTML = ''; el.classList.remove('out'); } }, 380);
+}
+function mjSay(force) {
+  const el = $('#uiJefe'); if (!el || !MJ.shown) return;
+  const n = hostName(), list = WANDER[n] || WANDER.Silva, t = list[Math.floor(Math.random() * list.length)];
+  const b = el.querySelector('.ujsay'); b.textContent = t; b.classList.remove('hidden'); b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+  el.querySelector('.ujfig').classList.add('talk');
+  const P = PERSON[n] || PERSON.Silva; if (force) for (let i = 0; i < Math.min(6, t.length / 3); i++) setTimeout(() => SND.blip(P.pitch), i * 70);
+  clearTimeout(MJ.say); MJ.say = setTimeout(() => { b.classList.add('hidden'); const f = el.querySelector('.ujfig'); if (f) f.classList.remove('talk'); }, 2800);
+}
+function mjShow() {
+  const el = $('#uiJefe'); if (!el) return;
+  const ex = ['neutral', 'happy', 'smug', 'surprised', 'neutral'][Math.floor(Math.random() * 5)];
+  el.innerHTML = `<div class="ujsay hidden" role="status"></div><button type="button" class="ujfig" aria-label="Jefe de carrera ${esc(hostName())}: tócalo para que hable">${hostSvg(hostName(), 66, ex)}</button>`;
+  el.querySelector('.ujfig').addEventListener('click', () => { SND.unlock(); mjSay(true); });
+  MJ.shown = true; MJ.until = Date.now() + 6000 + Math.random() * 6000;
+  if (Math.random() < 0.4) setTimeout(() => mjSay(false), 800);
+}
+setInterval(() => {
+  if (mjBusy()) { if (MJ.shown) mjHide(true); return; }
+  const now = Date.now();
+  if (MJ.shown && now > MJ.until) mjHide();
+  else if (!MJ.shown && now > MJ.next) mjShow();
+}, 400);
 let ONLINE_OK = false;
 // Sonido en todos los botones (inicio y juego)
 document.addEventListener('pointerdown', e => {
@@ -2605,7 +2773,7 @@ renderLobby();
   const sess = store.get('vic-session');
   if (sess && sess.code) { NET.code = sess.code; NET.token = sess.token; try { await wsConnect(); send({ t: 'rejoin', code: sess.code, token: sess.token }); } catch (e) {} }
 })();
-if (location.hash === '#test') window.__t = { initView, showCard, closeModal, loop, jefeAnim, eventIntro, showChoice, playState, get S() { return S; } };
+if (location.hash === '#test') window.__t = { hostSvg, initView, showCard, closeModal, loop, jefeAnim, eventIntro, showChoice, playState, cerRemote, NET, get S() { return S; } };
 })();
 </script>
 </body>
